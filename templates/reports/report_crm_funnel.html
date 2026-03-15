@@ -1,4 +1,5 @@
 {% extends 'reports/_report_base.html' %}
+{% load utils_tags %}
 
 {% block title %}Funil CRM{% endblock %}
 {% block page_title %}Funil CRM{% endblock %}
@@ -56,7 +57,7 @@
                             <tr>
                                 <td>{{ row.stage__name }}</td>
                                 <td class="text-center">{{ row.count }}</td>
-                                <td class="text-end">R$ {{ row.total_value|floatformat:2 }}</td>
+                                <td class="text-end">{{ row.total_value|brl }}</td>
                                 <td>
                                     {% if results.total > 0 %}
                                     <div class="d-flex align-items-center gap-2">

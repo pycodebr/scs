@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load utils_tags %}
 
 {% block title %}Dashboard{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
@@ -10,6 +11,24 @@
 <style>
 .kpi-card .card-body { padding: 1.25rem; }
 .kpi-value { font-size: 1.5rem; font-weight: 700; }
+.shortcuts-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.shortcut-card { transition: all 0.2s; border: 1px solid transparent; cursor: pointer; flex: 1 1 0; min-width: 140px; max-width: 200px; }
+.shortcut-card:hover { border-color: #3454d1; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.shortcut-card .shortcut-icon { width: 36px; height: 36px; min-width: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+.shortcut-card .card-body { padding: 0.65rem 0.75rem !important; }
+.shortcut-card .shortcut-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+.commercial-stat { border-left: 3px solid; padding-left: 1rem; }
+/* Funnel Chart */
+.funnel-chart { position: relative; padding: 0 20px; }
+.funnel-row { display: flex; align-items: center; margin-bottom: 4px; }
+.funnel-bar-wrap { flex: 1; display: flex; justify-content: center; }
+.funnel-bar { position: relative; height: 44px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; color: #fff; transition: opacity 0.2s; min-width: 80px; }
+.funnel-bar:hover { opacity: 0.88; }
+.funnel-bar .funnel-name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.funnel-bar .funnel-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: 12px; }
+.funnel-bar .funnel-meta .badge { background: rgba(255,255,255,0.22); font-size: 11px; }
+.funnel-bar .funnel-meta .funnel-amount { font-size: 12px; white-space: nowrap; }
+.funnel-connector { position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; }
 </style>
 {% endblock %}
 
@@ -33,7 +52,7 @@
                 <div class="pt-2">
                     <div class="d-flex align-items-center justify-content-between">
                         <span class="fs-12 text-muted">Prêmio Total em Carteira</span>
-                        <span class="fs-12 text-dark fw-semibold">R$ {{ total_premium|floatformat:2 }}</span>
+                        <span class="fs-12 text-dark fw-semibold">{{ total_premium|brl }}</span>
                     </div>
                     <div class="progress mt-2 ht-3">
                         <div class="progress-bar bg-primary" role="progressbar" style="width: 100%"></div>
@@ -51,7 +70,7 @@
                             <i class="feather-dollar-sign"></i>
                         </div>
                         <div>
-                            <div class="kpi-value text-dark">R$ {{ total_commission|floatformat:0 }}</div>
+                            <div class="kpi-value text-dark">{{ total_commission|brl }}</div>
                             <h3 class="fs-13 fw-semibold text-truncate-1-line">Comissões em Carteira</h3>
                         </div>
                     </div>
@@ -122,6 +141,195 @@
     </div>
 </div>
 
+<!-- Quick Shortcuts -->
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Atalhos Rápidos</h5>
+            </div>
+            <div class="card-body py-3">
+                <div class="shortcuts-row">
+                    <a href="{% url 'clients:client_create' %}" class="card shortcut-card mb-0 text-decoration-none">
+                        <div class="card-body d-flex align-items-center gap-2">
+                            <div class="shortcut-icon bg-soft-primary text-primary">
+                                <i class="feather-user-plus"></i>
+                            </div>
+                            <div class="shortcut-label fw-semibold text-dark">Novo Cliente</div>
+                        </div>
+                    </a>
+                    <a href="{% url 'policies:proposal_create' %}" class="card shortcut-card mb-0 text-decoration-none">
+                        <div class="card-body d-flex align-items-center gap-2">
+                            <div class="shortcut-icon bg-soft-info text-info">
+                                <i class="feather-file-plus"></i>
+                            </div>
+                            <div class="shortcut-label fw-semibold text-dark">Nova Proposta</div>
+                        </div>
+                    </a>
+                    <a href="{% url 'policies:policy_create' %}" class="card shortcut-card mb-0 text-decoration-none">
+                        <div class="card-body d-flex align-items-center gap-2">
+                            <div class="shortcut-icon bg-soft-success text-success">
+                                <i class="feather-file-text"></i>
+                            </div>
+                            <div class="shortcut-label fw-semibold text-dark">Nova Apólice</div>
+                        </div>
+                    </a>
+                    <a href="{% url 'crm:deal_create' %}" class="card shortcut-card mb-0 text-decoration-none">
+                        <div class="card-body d-flex align-items-center gap-2">
+                            <div class="shortcut-icon bg-soft-warning text-warning">
+                                <i class="feather-target"></i>
+                            </div>
+                            <div class="shortcut-label fw-semibold text-dark">Nova Negociação</div>
+                        </div>
+                    </a>
+                    <a href="{% url 'claims:claim_create' %}" class="card shortcut-card mb-0 text-decoration-none">
+                        <div class="card-body d-flex align-items-center gap-2">
+                            <div class="shortcut-icon bg-soft-danger text-danger">
+                                <i class="feather-alert-circle"></i>
+                            </div>
+                            <div class="shortcut-label fw-semibold text-dark">Novo Sinistro</div>
+                        </div>
+                    </a>
+                    {% if user.role != 'broker' %}
+                    <a href="{% url 'reports:report_index' %}" class="card shortcut-card mb-0 text-decoration-none">
+                        <div class="card-body d-flex align-items-center gap-2">
+                            <div class="shortcut-icon bg-soft-dark text-dark">
+                                <i class="feather-bar-chart-2"></i>
+                            </div>
+                            <div class="shortcut-label fw-semibold text-dark">Relatórios</div>
+                        </div>
+                    </a>
+                    {% endif %}
+                    {% if user.can_manage_users %}
+                    <a href="{% url 'accounts:user_create' %}" class="card shortcut-card mb-0 text-decoration-none">
+                        <div class="card-body d-flex align-items-center gap-2">
+                            <div class="shortcut-icon bg-soft-secondary text-secondary">
+                                <i class="feather-user-plus"></i>
+                            </div>
+                            <div class="shortcut-label fw-semibold text-dark">Novo Usuário</div>
+                        </div>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Commercial Sector Overview -->
+<div class="row">
+    <div class="col-xxl-3 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-primary text-primary">
+                        <i class="feather-briefcase"></i>
+                    </div>
+                    <div>
+                        <div class="fs-11 text-muted">Oportunidades Abertas</div>
+                        <div class="fs-4 fw-bold text-dark">{{ open_opportunities }}</div>
+                    </div>
+                </div>
+                <div class="commercial-stat" style="border-color: #3454d1">
+                    <div class="fs-12 text-muted">Dinheiro na Mesa</div>
+                    <div class="fs-13 fw-bold text-dark">{{ money_on_table|brl }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-success text-success">
+                        <i class="feather-check-circle"></i>
+                    </div>
+                    <div>
+                        <div class="fs-11 text-muted">Negociações Ganhas</div>
+                        <div class="fs-4 fw-bold text-dark">{{ won_deals_count }}</div>
+                    </div>
+                </div>
+                <div class="commercial-stat" style="border-color: #28a745">
+                    <div class="fs-12 text-muted">Valor Convertido</div>
+                    <div class="fs-13 fw-bold text-success">{{ won_deals_value|brl }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-danger text-danger">
+                        <i class="feather-x-circle"></i>
+                    </div>
+                    <div>
+                        <div class="fs-11 text-muted">Negociações Perdidas</div>
+                        <div class="fs-4 fw-bold text-dark">{{ lost_deals_count }}</div>
+                    </div>
+                </div>
+                <div class="commercial-stat" style="border-color: #dc3545">
+                    <div class="fs-12 text-muted">Valor Perdido</div>
+                    <div class="fs-13 fw-bold text-danger">{{ lost_deals_value|brl }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-warning text-warning">
+                        <i class="feather-trending-up"></i>
+                    </div>
+                    <div>
+                        <div class="fs-11 text-muted">Taxa de Conversão</div>
+                        <div class="fs-4 fw-bold text-dark">{{ conversion_rate }}%</div>
+                    </div>
+                </div>
+                <div class="commercial-stat" style="border-color: #ffc107">
+                    <div class="fs-12 text-muted">Renovações Pendentes</div>
+                    <div class="fs-13 fw-bold text-dark">{{ pending_renewals }} nos próximos 30 dias</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CRM Funnel + Priority -->
+<div class="row">
+    <div class="col-xxl-6 col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Funil de Vendas{% if funnel_pipeline_name %} — {{ funnel_pipeline_name }}{% endif %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="funnelContainer" class="funnel-chart"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Negociações por Prioridade</h5>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <canvas id="chartPriority" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Origem das Negociações</h5>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <canvas id="chartSource" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Charts Row 1 -->
 <div class="row">
     <div class="col-xxl-8 col-12">
@@ -137,7 +345,7 @@
     <div class="col-xxl-4 col-12">
         <div class="card stretch stretch-full">
             <div class="card-header">
-                <h5 class="card-title">Distribuição por Tipo de Seguro</h5>
+                <h5 class="card-title">Distribuição por Ramo</h5>
             </div>
             <div class="card-body d-flex align-items-center justify-content-center">
                 <canvas id="chartInsuranceType" height="250"></canvas>
@@ -158,13 +366,23 @@
             </div>
         </div>
     </div>
-    <div class="col-xxl-8 col-12">
+    <div class="col-xxl-4 col-12">
         <div class="card stretch stretch-full">
             <div class="card-header">
                 <h5 class="card-title">Evolução de Sinistros</h5>
             </div>
             <div class="card-body">
                 <canvas id="chartClaims" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-4 col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Renovações — Próximos 3 Meses</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="chartRenewals" height="300"></canvas>
             </div>
         </div>
     </div>
@@ -268,7 +486,7 @@
 </div>
 
 <div class="row">
-    <div class="col-12">
+    <div class="col-xxl-6 col-12">
         <div class="card stretch stretch-full">
             <div class="card-header">
                 <h5 class="card-title">Sinistros Recentes</h5>
@@ -281,7 +499,6 @@
                                 <th>Sinistro</th>
                                 <th>Cliente</th>
                                 <th>Apólice</th>
-                                <th>Data Ocorrência</th>
                                 <th>Valor Reclamado</th>
                                 <th>Status</th>
                             </tr>
@@ -294,8 +511,7 @@
                                 </td>
                                 <td>{{ c.client.name }}</td>
                                 <td>{{ c.policy.policy_number }}</td>
-                                <td>{{ c.occurrence_date|date:'d/m/Y' }}</td>
-                                <td>R$ {{ c.claimed_amount|floatformat:2 }}</td>
+                                <td>{{ c.claimed_amount|brl }}</td>
                                 <td>
                                     {% if c.status == 'open' %}
                                     <span class="badge bg-soft-info text-info">Aberto</span>
@@ -308,7 +524,46 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center py-3 text-muted">Nenhum sinistro aberto.</td>
+                                <td colspan="5" class="text-center py-3 text-muted">Nenhum sinistro aberto.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-6 col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Deals Recentes do CRM</h5>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Negociação</th>
+                                <th>Cliente</th>
+                                <th>Etapa</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in recent_deals %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'crm:deal_detail' d.pk %}">{{ d.title }}</a>
+                                </td>
+                                <td>{{ d.client.name }}</td>
+                                <td>
+                                    <span class="badge" style="background-color: {{ d.stage.color }}20; color: {{ d.stage.color }}">{{ d.stage.name }}</span>
+                                </td>
+                                <td class="fw-semibold">{{ d.expected_value|brl }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3 text-muted">Nenhuma negociação em andamento.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -326,7 +581,109 @@
 document.addEventListener('DOMContentLoaded', function() {
     const COLORS = ['#3454d1','#28a745','#ffc107','#dc3545','#17a2b8','#6f42c1','#fd7e14','#20c997'];
 
-    // Production Chart (Bar)
+    function formatCurrency(value) {
+        return 'R$ ' + Number(value).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    // ── CRM Funnel (true funnel shape via SVG) ──
+    const funnelContainer = document.getElementById('funnelContainer');
+    const funnelLabels = {{ funnel_labels|safe }};
+    const funnelValues = {{ funnel_values|safe }};
+    const funnelAmounts = {{ funnel_amounts|safe }};
+    const funnelColors = {{ funnel_colors|safe }};
+
+    if (funnelContainer && funnelLabels.length > 0) {
+        const n = funnelLabels.length;
+        const rowH = 46;
+        const gap = 4;
+        const totalH = n * rowH + (n - 1) * gap;
+        const svgW = funnelContainer.clientWidth || 500;
+        const padX = 10;
+        const usableW = svgW - padX * 2;
+
+        // Each stage narrows linearly from 100% to a minimum width
+        const minPct = 0.30;
+        const widths = [];
+        for (let i = 0; i < n; i++) {
+            const pct = n > 1 ? 1 - (1 - minPct) * (i / (n - 1)) : 1;
+            widths.push(pct);
+        }
+
+        let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="' + totalH + '" viewBox="0 0 ' + svgW + ' ' + totalH + '" preserveAspectRatio="xMidYMid meet">';
+
+        for (let i = 0; i < n; i++) {
+            const y = i * (rowH + gap);
+            const w1 = usableW * widths[i];
+            const w2 = (i < n - 1) ? usableW * widths[i + 1] : w1 * 0.85;
+            const x1L = (svgW - w1) / 2;
+            const x1R = x1L + w1;
+            const x2L = (svgW - w2) / 2;
+            const x2R = x2L + w2;
+
+            // Trapezoid path
+            const path = 'M' + x1L + ',' + y + ' L' + x1R + ',' + y + ' L' + x2R + ',' + (y + rowH) + ' L' + x2L + ',' + (y + rowH) + ' Z';
+            svg += '<path d="' + path + '" fill="' + funnelColors[i] + '" rx="3" opacity="0.92"/>';
+
+            // Calculate the actual left/right edges at the vertical midpoint of the trapezoid
+            var midLeftX = x1L + (x2L - x1L) / 2;
+            var midRightX = x1R + (x2R - x1R) / 2;
+            var textY = y + rowH / 2 + 5;
+
+            // Label text (left side) — padded from the mid-height edge
+            svg += '<text x="' + (midLeftX + 14) + '" y="' + textY + '" fill="#fff" font-size="13" font-weight="600">' + funnelLabels[i] + '</text>';
+
+            // Metrics text (right side) — padded from the mid-height edge
+            var metaText = funnelValues[i] + (funnelValues[i] !== 1 ? ' deals' : ' deal') + '  ·  ' + formatCurrency(funnelAmounts[i]);
+            svg += '<text x="' + (midRightX - 14) + '" y="' + textY + '" fill="rgba(255,255,255,0.9)" font-size="11" font-weight="400" text-anchor="end">' + metaText + '</text>';
+        }
+
+        svg += '</svg>';
+        funnelContainer.innerHTML = svg;
+    } else if (funnelContainer) {
+        funnelContainer.innerHTML = '<div class="text-center py-4 text-muted">Nenhum pipeline configurado.</div>';
+    }
+
+    // ── Priority Donut ──
+    const priorityCtx = document.getElementById('chartPriority');
+    if (priorityCtx) {
+        new Chart(priorityCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ chart_priority_labels|safe }},
+                datasets: [{
+                    data: {{ chart_priority_values|safe }},
+                    backgroundColor: {{ chart_priority_colors|safe }},
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }
+            }
+        });
+    }
+
+    // ── Source Donut ──
+    const sourceCtx = document.getElementById('chartSource');
+    if (sourceCtx) {
+        new Chart(sourceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ chart_source_labels|safe }},
+                datasets: [{
+                    data: {{ chart_source_values|safe }},
+                    backgroundColor: COLORS,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }
+            }
+        });
+    }
+
+    // ── Production Chart (Bar) ──
     const prodCtx = document.getElementById('chartProduction');
     if (prodCtx) {
         new Chart(prodCtx, {
@@ -357,7 +714,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Insurance Type Donut
+    // ── Insurance Type Donut ──
     const typeCtx = document.getElementById('chartInsuranceType');
     if (typeCtx) {
         new Chart(typeCtx, {
@@ -377,7 +734,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Insurer Donut
+    // ── Insurer Donut ──
     const insCtx = document.getElementById('chartInsurer');
     if (insCtx) {
         new Chart(insCtx, {
@@ -397,7 +754,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Claims Line Chart
+    // ── Claims Line Chart ──
     const claimCtx = document.getElementById('chartClaims');
     if (claimCtx) {
         new Chart(claimCtx, {
@@ -417,6 +774,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { position: 'top' } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    }
+
+    // ── Renewals Bar Chart (Next 3 Months) ──
+    const renewCtx = document.getElementById('chartRenewals');
+    if (renewCtx) {
+        new Chart(renewCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ chart_renewal_months|safe }},
+                datasets: [{
+                    label: 'Renovações Pendentes',
+                    data: {{ chart_renewal_values|safe }},
+                    backgroundColor: ['rgba(52, 84, 209, 0.7)', 'rgba(253, 126, 20, 0.7)', 'rgba(220, 53, 69, 0.7)'],
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
                 scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
             }
         });

@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
-{% block title %}{% if object %}Editar Tipo de Seguro{% else %}Novo Tipo de Seguro{% endif %}{% endblock %}
-{% block page_title %}{% if object %}Editar Tipo de Seguro{% else %}Novo Tipo de Seguro{% endif %}{% endblock %}
+{% block title %}{% if object %}Editar Ramo{% else %}Novo Ramo{% endif %}{% endblock %}
+{% block page_title %}{% if object %}Editar Ramo{% else %}Novo Ramo{% endif %}{% endblock %}
 {% block breadcrumb %}
-<li class="breadcrumb-item"><a href="{% url 'coverages:type_list' %}">Tipos de Seguro</a></li>
+<li class="breadcrumb-item"><a href="{% url 'coverages:type_list' %}">Ramos</a></li>
 <li class="breadcrumb-item">{% if object %}Editar{% else %}Novo{% endif %}</li>
 {% endblock %}
 
@@ -12,7 +12,7 @@
     <div class="col-lg-6">
         <div class="card stretch stretch-full">
             <div class="card-header">
-                <h5 class="card-title">{% if object %}Editar Tipo de Seguro{% else %}Novo Tipo de Seguro{% endif %}</h5>
+                <h5 class="card-title">{% if object %}Editar Ramo{% else %}Novo Ramo{% endif %}</h5>
             </div>
             <div class="card-body">
                 <form method="post">

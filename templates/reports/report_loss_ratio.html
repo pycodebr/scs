@@ -1,4 +1,5 @@
 {% extends 'reports/_report_base.html' %}
+{% load utils_tags %}
 
 {% block title %}Sinistralidade{% endblock %}
 {% block page_title %}Sinistralidade{% endblock %}
@@ -42,8 +43,8 @@
                             {% for row in results.data %}
                             <tr>
                                 <td>{{ row.insurer }}</td>
-                                <td class="text-end">R$ {{ row.premium|floatformat:2 }}</td>
-                                <td class="text-end">R$ {{ row.claims|floatformat:2 }}</td>
+                                <td class="text-end">{{ row.premium|brl }}</td>
+                                <td class="text-end">{{ row.claims|brl }}</td>
                                 <td class="text-end fw-bold">{{ row.ratio }}%</td>
                                 <td>
                                     <div class="progress ht-5" style="width:100px">

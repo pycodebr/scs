@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load utils_tags %}
 
 {% block title %}{% if converting %}Converter Proposta em Apolice{% elif object %}Editar Apolice{% else %}Nova Apolice{% endif %}{% endblock %}
 {% block page_title %}{% if converting %}Converter Proposta em Apolice{% elif object %}Editar Apolice{% else %}Nova Apolice{% endif %}{% endblock %}
@@ -61,7 +62,7 @@
                             {% endif %}
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Tipo de Seguro <span class="text-danger">*</span></label>
+                            <label class="form-label">Ramo <span class="text-danger">*</span></label>
                             {{ form.insurance_type }}
                             {% if form.insurance_type.errors %}
                             <div class="fs-11 text-danger mt-1">{{ form.insurance_type.errors.0 }}</div>
@@ -131,9 +132,9 @@
                                 {% for pc in coverages %}
                                 <tr>
                                     <td>{{ pc.coverage.name }}</td>
-                                    <td>R$ {{ pc.insured_amount|floatformat:2 }}</td>
-                                    <td>R$ {{ pc.deductible|floatformat:2 }}</td>
-                                    <td>R$ {{ pc.premium_amount|floatformat:2 }}</td>
+                                    <td>{{ pc.insured_amount|brl }}</td>
+                                    <td>{{ pc.deductible|brl }}</td>
+                                    <td>{{ pc.premium_amount|brl }}</td>
                                     <td class="text-end">
                                         <form method="post" action="{% url 'policies:policy_coverage_delete' pc.pk %}" class="d-inline">
                                             {% csrf_token %}

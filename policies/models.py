@@ -48,7 +48,7 @@ class Proposal(TimeStampedModel):
     )
     insurance_type = models.ForeignKey(
         'coverages.InsuranceType', on_delete=models.PROTECT,
-        related_name='proposals', verbose_name='Tipo de Seguro',
+        related_name='proposals', verbose_name='Ramo',
     )
     broker = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
@@ -92,7 +92,7 @@ class Policy(TimeStampedModel):
     )
     insurance_type = models.ForeignKey(
         'coverages.InsuranceType', on_delete=models.PROTECT,
-        related_name='policies', verbose_name='Tipo de Seguro',
+        related_name='policies', verbose_name='Ramo',
     )
     broker = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT,

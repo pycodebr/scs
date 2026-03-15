@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load utils_tags %}
 
 {% block title %}Apolice {{ policy.policy_number }}{% endblock %}
 {% block page_title %}Detalhes da Apolice{% endblock %}
@@ -60,11 +61,11 @@
                 <div class="row g-3">
                     <div class="col-12">
                         <div class="fs-12 text-muted mb-1">Valor do Premio</div>
-                        <div class="fw-semibold fs-16">R$ {{ policy.premium_amount|floatformat:2 }}</div>
+                        <div class="fw-semibold fs-16">{{ policy.premium_amount|brl }}</div>
                     </div>
                     <div class="col-12">
                         <div class="fs-12 text-muted mb-1">Importancia Segurada</div>
-                        <div class="fw-semibold">R$ {{ policy.insured_amount|floatformat:2 }}</div>
+                        <div class="fw-semibold">{{ policy.insured_amount|brl }}</div>
                     </div>
                     <div class="col-6">
                         <div class="fs-12 text-muted mb-1">Comissao</div>
@@ -72,7 +73,7 @@
                     </div>
                     <div class="col-6">
                         <div class="fs-12 text-muted mb-1">Valor Comissao</div>
-                        <div class="fw-semibold">R$ {{ policy.commission_amount|floatformat:2 }}</div>
+                        <div class="fw-semibold">{{ policy.commission_amount|brl }}</div>
                     </div>
                     <div class="col-6">
                         <div class="fs-12 text-muted mb-1">Parcelas</div>
@@ -107,7 +108,7 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="fs-12 text-muted mb-1">Tipo de Seguro</div>
+                        <div class="fs-12 text-muted mb-1">Ramo</div>
                         <div class="fw-semibold">{{ policy.insurance_type.name }}</div>
                     </div>
                     <div class="col-md-3">
@@ -148,9 +149,9 @@
                             {% for pc in coverages %}
                             <tr>
                                 <td>{{ pc.coverage.name }}</td>
-                                <td>R$ {{ pc.insured_amount|floatformat:2 }}</td>
-                                <td>R$ {{ pc.deductible|floatformat:2 }}</td>
-                                <td>R$ {{ pc.premium_amount|floatformat:2 }}</td>
+                                <td>{{ pc.insured_amount|brl }}</td>
+                                <td>{{ pc.deductible|brl }}</td>
+                                <td>{{ pc.premium_amount|brl }}</td>
                                 <td class="text-end">
                                     <form method="post" action="{% url 'policies:policy_coverage_delete' pc.pk %}" class="d-inline">
                                         {% csrf_token %}

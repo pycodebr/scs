@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load utils_tags %}
 
 {% block title %}Proposta {{ proposal.proposal_number }}{% endblock %}
 {% block page_title %}Detalhes da Proposta{% endblock %}
@@ -65,12 +66,12 @@
                         <div class="fw-semibold">{{ proposal.insurer.name }}</div>
                     </div>
                     <div class="col-md-6">
-                        <div class="fs-12 text-muted mb-1">Tipo de Seguro</div>
+                        <div class="fs-12 text-muted mb-1">Ramo</div>
                         <div class="fw-semibold">{{ proposal.insurance_type.name }}</div>
                     </div>
                     <div class="col-md-6">
                         <div class="fs-12 text-muted mb-1">Valor do Premio</div>
-                        <div class="fw-semibold">R$ {{ proposal.premium_amount|floatformat:2 }}</div>
+                        <div class="fw-semibold">{{ proposal.premium_amount|brl }}</div>
                     </div>
                     <div class="col-md-6">
                         <div class="fs-12 text-muted mb-1">Data de Envio</div>

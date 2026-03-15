@@ -269,7 +269,7 @@ class InsuranceTypePortfolioReportView(BaseReportView):
     template_name = 'reports/report_type_portfolio.html'
     form_class = InsuranceTypePortfolioFilterForm
     export_filename = 'carteira_tipo_seguro.csv'
-    pdf_title = 'Carteira por Tipo de Seguro'
+    pdf_title = 'Carteira por Ramo'
 
     def get_report_data(self, filters):
         from policies.models import Policy
@@ -290,15 +290,15 @@ class InsuranceTypePortfolioReportView(BaseReportView):
         return {'data': data}
 
     def write_csv(self, writer, results, filters):
-        writer.writerow(['Tipo de Seguro', 'Apólices', 'Prêmio Total'])
+        writer.writerow(['Ramo', 'Apólices', 'Prêmio Total'])
         for row in results['data']:
             writer.writerow([row['insurance_type__name'], row['count'], row['total_premium']])
 
     def get_pdf_data(self, results, filters):
         return {
-            'title': 'Carteira por Tipo de Seguro',
+            'title': 'Carteira por Ramo',
             'headers': [
-                {'label': 'Tipo de Seguro'}, {'label': 'Apólices', 'align': 'text-center'},
+                {'label': 'Ramo'}, {'label': 'Apólices', 'align': 'text-center'},
                 {'label': 'Prêmio Total', 'align': 'text-end'},
             ],
             'rows': [

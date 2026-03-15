@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load utils_tags %}
 
 {% block title %}{{ deal.title }}{% endblock %}
 {% block page_title %}Detalhes da Negociação{% endblock %}
@@ -52,7 +53,7 @@
                 <div class="row g-3">
                     <div class="col-12">
                         <div class="fs-12 text-muted mb-1">Valor Esperado</div>
-                        <div class="fw-semibold fs-16">R$ {{ deal.expected_value|floatformat:2 }}</div>
+                        <div class="fw-semibold fs-16">{{ deal.expected_value|brl }}</div>
                     </div>
                     {% if deal.expected_close_date %}
                     <div class="col-12">
@@ -88,7 +89,7 @@
                     </div>
                     {% if deal.insurance_type %}
                     <div class="col-md-6">
-                        <div class="fs-12 text-muted mb-1">Tipo de Seguro</div>
+                        <div class="fs-12 text-muted mb-1">Ramo</div>
                         <div class="fw-semibold">{{ deal.insurance_type.name }}</div>
                     </div>
                     {% endif %}

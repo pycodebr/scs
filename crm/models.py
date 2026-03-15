@@ -81,7 +81,7 @@ class Deal(TimeStampedModel):
     insurance_type = models.ForeignKey(
         'coverages.InsuranceType', on_delete=models.SET_NULL,
         blank=True, null=True, related_name='deals',
-        verbose_name='Tipo de Seguro',
+        verbose_name='Ramo',
     )
     insurer = models.ForeignKey(
         'insurers.Insurer', on_delete=models.SET_NULL,

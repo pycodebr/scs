@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load utils_tags %}
 
 {% block title %}Sinistros{% endblock %}
 {% block page_title %}Sinistros{% endblock %}
@@ -66,7 +67,7 @@
                                 <td>{{ claim.client.name }}</td>
                                 <td>{{ claim.policy.policy_number }}</td>
                                 <td>{{ claim.occurrence_date|date:'d/m/Y' }}</td>
-                                <td>R$ {{ claim.claimed_amount|floatformat:2 }}</td>
+                                <td>{{ claim.claimed_amount|brl }}</td>
                                 <td>
                                     {% if claim.status == 'open' %}
                                     <span class="badge bg-soft-info text-info">Aberto</span>

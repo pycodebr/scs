@@ -11,8 +11,8 @@ class InsuranceType(TimeStampedModel):
     is_active = models.BooleanField('Ativo', default=True)
 
     class Meta:
-        verbose_name = 'Tipo de Seguro'
-        verbose_name_plural = 'Tipos de Seguro'
+        verbose_name = 'Ramo'
+        verbose_name_plural = 'Ramos'
         ordering = ['name']
 
     def __str__(self):
@@ -29,7 +29,7 @@ class Coverage(TimeStampedModel):
         InsuranceType,
         on_delete=models.CASCADE,
         related_name='coverages',
-        verbose_name='Tipo de Seguro',
+        verbose_name='Ramo',
     )
     name = models.CharField('Nome', max_length=200)
     description = models.TextField('Descricao', blank=True)

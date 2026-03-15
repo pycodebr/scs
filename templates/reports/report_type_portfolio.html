@@ -1,7 +1,8 @@
 {% extends 'reports/_report_base.html' %}
+{% load utils_tags %}
 
-{% block title %}Carteira por Tipo de Seguro{% endblock %}
-{% block page_title %}Carteira por Tipo de Seguro{% endblock %}
+{% block title %}Carteira por Ramo{% endblock %}
+{% block page_title %}Carteira por Ramo{% endblock %}
 {% block report_name %}Carteira por Tipo{% endblock %}
 
 {% block filter_fields %}
@@ -24,14 +25,14 @@
     <div class="col-12">
         <div class="card stretch stretch-full">
             <div class="card-header">
-                <h5 class="card-title">Distribuição por Tipo de Seguro</h5>
+                <h5 class="card-title">Distribuição por Ramo</h5>
             </div>
             <div class="card-body custom-card-action p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr class="border-b">
-                                <th>Tipo de Seguro</th>
+                                <th>Ramo</th>
                                 <th class="text-center">Apólices</th>
                                 <th class="text-end">Prêmio Total</th>
                             </tr>
@@ -41,7 +42,7 @@
                             <tr>
                                 <td>{{ row.insurance_type__name }}</td>
                                 <td class="text-center">{{ row.count }}</td>
-                                <td class="text-end">R$ {{ row.total_premium|floatformat:2 }}</td>
+                                <td class="text-end">{{ row.total_premium|brl }}</td>
                             </tr>
                             {% empty %}
                             <tr><td colspan="3" class="text-center py-3 text-muted">Nenhum registro encontrado.</td></tr>

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load utils_tags %}
 
 {% block title %}Apolices{% endblock %}
 {% block page_title %}Apolices{% endblock %}
@@ -67,7 +68,7 @@
                                 <td>{{ policy.client.name }}</td>
                                 <td>{{ policy.insurer.name }}</td>
                                 <td>{{ policy.start_date|date:'d/m/Y' }} a {{ policy.end_date|date:'d/m/Y' }}</td>
-                                <td>R$ {{ policy.premium_amount|floatformat:2 }}</td>
+                                <td>{{ policy.premium_amount|brl }}</td>
                                 <td>
                                     {% if policy.status == 'active' %}
                                     <span class="badge bg-soft-success text-success">Ativa</span>

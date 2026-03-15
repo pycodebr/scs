@@ -30,7 +30,7 @@ class InsuranceTypeCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('coverages:type_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Tipo de seguro criado com sucesso.')
+        messages.success(self.request, 'Ramo criado com sucesso.')
         return super().form_valid(form)
 
 
@@ -41,7 +41,7 @@ class InsuranceTypeUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('coverages:type_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Tipo de seguro atualizado com sucesso.')
+        messages.success(self.request, 'Ramo atualizado com sucesso.')
         return super().form_valid(form)
 
 

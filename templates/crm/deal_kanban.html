@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load utils_tags %}
 
 {% block title %}CRM - Kanban{% endblock %}
 {% block page_title %}Pipeline de Negociações{% endblock %}
@@ -187,7 +188,7 @@
                     <span class="fw-semibold fs-12">{{ sd.stage.name }}</span>
                     <span class="count">{{ sd.count }}</span>
                 </div>
-                <div class="kanban-column-total">R$ {{ sd.total|floatformat:2 }}</div>
+                <div class="kanban-column-total">{{ sd.total|brl }}</div>
             </div>
             {% if sd.stage.is_won %}
             <i class="feather-award"></i>
@@ -212,7 +213,7 @@
                         {{ deal.client.name }}
                     </div>
                     <div class="d-flex align-items-center justify-content-between">
-                        <span class="kanban-card-value">R$ {{ deal.expected_value|floatformat:2 }}</span>
+                        <span class="kanban-card-value">{{ deal.expected_value|brl }}</span>
                         <span>{{ deal.broker.first_name }}</span>
                     </div>
                 </div>

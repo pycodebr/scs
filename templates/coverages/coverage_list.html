@@ -3,15 +3,10 @@
 {% block title %}Coberturas{% endblock %}
 {% block page_title %}Coberturas{% endblock %}
 {% block breadcrumb %}
-<li class="breadcrumb-item"><a href="{% url 'coverages:type_list' %}">Tipos de Seguro</a></li>
 <li class="breadcrumb-item">Coberturas</li>
 {% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'coverages:type_list' %}" class="btn btn-light-brand">
-    <i class="feather-list me-2"></i>
-    <span>Tipos de Seguro</span>
-</a>
 <a href="{% url 'coverages:coverage_create' %}" class="btn btn-primary">
     <i class="feather-plus me-2"></i>
     <span>Nova Cobertura</span>
@@ -27,7 +22,7 @@
                 <div class="card-header-action">
                     <form method="get" class="d-flex gap-2">
                         <select name="type" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
-                            <option value="">Todos os tipos</option>
+                            <option value="">Todos os ramos</option>
                             {% for t in insurance_types %}
                             <option value="{{ t.pk }}" {% if request.GET.type == t.pk|stringformat:'d' %}selected{% endif %}>{{ t.name }}</option>
                             {% endfor %}
@@ -47,7 +42,7 @@
                         <thead>
                             <tr class="border-b">
                                 <th>Cobertura</th>
-                                <th>Tipo de Seguro</th>
+                                <th>Ramo</th>
                                 <th>Itens</th>
                                 <th>Status</th>
                                 <th class="text-end">Acoes</th>

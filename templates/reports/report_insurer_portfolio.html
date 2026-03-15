@@ -1,4 +1,5 @@
 {% extends 'reports/_report_base.html' %}
+{% load utils_tags %}
 
 {% block title %}Carteira por Seguradora{% endblock %}
 {% block page_title %}Carteira por Seguradora{% endblock %}
@@ -42,8 +43,8 @@
                             <tr>
                                 <td>{{ row.insurer__name }}</td>
                                 <td class="text-center">{{ row.count }}</td>
-                                <td class="text-end">R$ {{ row.total_premium|floatformat:2 }}</td>
-                                <td class="text-end">R$ {{ row.total_insured|floatformat:2 }}</td>
+                                <td class="text-end">{{ row.total_premium|brl }}</td>
+                                <td class="text-end">{{ row.total_insured|brl }}</td>
                             </tr>
                             {% empty %}
                             <tr><td colspan="4" class="text-center py-3 text-muted">Nenhum registro encontrado.</td></tr>

@@ -35,8 +35,14 @@
                         <span class="nxl-mtext">Seguradoras</span>
                     </a>
                 </li>
-                <li class="nxl-item {% active_url_startswith request '/coverages/' %}">
+                <li class="nxl-item {% active_url_startswith request '/coverages/types' %}">
                     <a href="{% url 'coverages:type_list' %}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-grid"></i></span>
+                        <span class="nxl-mtext">Ramos</span>
+                    </a>
+                </li>
+                <li class="nxl-item {% active_url_startswith request '/coverages/' %}" id="nav-coverages">
+                    <a href="{% url 'coverages:coverage_list' %}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-layers"></i></span>
                         <span class="nxl-mtext">Coberturas</span>
                     </a>
@@ -120,3 +126,12 @@
         </div>
     </div>
 </nav>
+<script>
+// Fix active state: when on /coverages/types*, deactivate the coverages nav item
+(function() {
+    if (window.location.pathname.startsWith('/coverages/types')) {
+        var el = document.getElementById('nav-coverages');
+        if (el) el.classList.remove('active');
+    }
+})();
+</script>

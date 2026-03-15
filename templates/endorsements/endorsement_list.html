@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load utils_tags %}
 
 {% block title %}Endossos{% endblock %}
 {% block page_title %}Endossos{% endblock %}
@@ -76,7 +77,7 @@
                                     <span class="badge bg-gray-200 text-dark">{{ endorsement.get_endorsement_type_display }}</span>
                                 </td>
                                 <td>{{ endorsement.request_date|date:'d/m/Y' }}</td>
-                                <td>R$ {{ endorsement.premium_difference|floatformat:2 }}</td>
+                                <td>{{ endorsement.premium_difference|brl }}</td>
                                 <td>
                                     {% if endorsement.status == 'draft' %}
                                     <span class="badge bg-soft-secondary text-secondary">Rascunho</span>

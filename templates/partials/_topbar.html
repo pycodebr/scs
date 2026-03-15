@@ -17,9 +17,23 @@
                     <i class="feather-arrow-right"></i>
                 </a>
             </div>
+            <!-- Global Search -->
+            <div class="d-none d-md-flex position-relative" id="globalSearchWrapper" style="min-width:320px;">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-transparent border-end-0"><i class="feather-search fs-13 text-muted"></i></span>
+                    <input type="text" id="globalSearchInput" class="form-control border-start-0 ps-0" placeholder="Buscar clientes, apólices, propostas, sinistros..." autocomplete="off">
+                </div>
+                <div id="globalSearchResults" class="position-absolute top-100 start-0 w-100 mt-1 bg-white rounded shadow-lg border d-none" style="z-index:1060; max-height:400px; overflow-y:auto;"></div>
+            </div>
         </div>
         <div class="header-right ms-auto">
             <div class="d-flex align-items-center">
+                <!-- Mobile Search Toggle -->
+                <div class="nxl-h-item d-flex d-md-none">
+                    <a href="javascript:void(0);" class="nxl-head-link me-0" id="mobileSearchToggle">
+                        <i class="feather-search"></i>
+                    </a>
+                </div>
                 <div class="nxl-h-item d-none d-sm-flex">
                     <div class="full-screen-switcher">
                         <a href="javascript:void(0);" class="nxl-head-link me-0" onclick="$('body').fullScreenHelper('toggle');">
@@ -86,4 +100,114 @@
             </div>
         </div>
     </div>
+    <!-- Mobile Search Bar (hidden by default) -->
+    <div id="mobileSearchBar" class="d-none px-3 pb-2 position-relative">
+        <div class="input-group input-group-sm">
+            <span class="input-group-text bg-transparent border-end-0"><i class="feather-search fs-13 text-muted"></i></span>
+            <input type="text" class="form-control border-start-0 ps-0 global-search-mobile" placeholder="Buscar..." autocomplete="off">
+        </div>
+        <div class="global-search-mobile-results position-absolute start-0 end-0 mx-3 mt-1 bg-white rounded shadow-lg border d-none" style="z-index:1060; max-height:350px; overflow-y:auto;"></div>
+    </div>
 </header>
+<script>
+(function() {
+    var debounceTimer;
+    var searchUrl = '{% url "dashboard:global_search" %}';
+
+    function renderResults(data, container) {
+        if (!data.results || data.results.length === 0) {
+            container.innerHTML = '<div class="p-3 text-center text-muted fs-12">Nenhum resultado encontrado.</div>';
+            container.classList.remove('d-none');
+            return;
+        }
+        var html = '';
+        var currentType = '';
+        for (var i = 0; i < data.results.length; i++) {
+            var r = data.results[i];
+            if (r.type !== currentType) {
+                currentType = r.type;
+                html += '<div class="px-3 py-1 bg-gray-200 fs-11 fw-bold text-uppercase text-muted">' + r.type + '</div>';
+            }
+            html += '<a href="' + r.url + '" class="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none border-bottom search-result-item" style="transition:background .15s;">';
+            html += '<i class="' + r.icon + ' text-muted"></i>';
+            html += '<div style="min-width:0;flex:1;">';
+            html += '<div class="fw-semibold text-dark fs-13 text-truncate">' + r.label + '</div>';
+            html += '<div class="fs-11 text-muted text-truncate">' + r.detail + '</div>';
+            html += '</div>';
+            html += '</a>';
+        }
+        container.innerHTML = html;
+        container.classList.remove('d-none');
+        container.querySelectorAll('.search-result-item').forEach(function(el) {
+            el.addEventListener('mouseenter', function() { this.style.backgroundColor = '#f8f9fa'; });
+            el.addEventListener('mouseleave', function() { this.style.backgroundColor = ''; });
+        });
+    }
+
+    function doSearch(query, container) {
+        if (query.length < 3) {
+            container.classList.add('d-none');
+            return;
+        }
+        fetch(searchUrl + '?q=' + encodeURIComponent(query), {
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(function(resp) { return resp.json(); })
+        .then(function(data) { renderResults(data, container); })
+        .catch(function() { container.classList.add('d-none'); });
+    }
+
+    function bindSearch(input, resultsContainer) {
+        input.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            var q = this.value.trim();
+            debounceTimer = setTimeout(function() { doSearch(q, resultsContainer); }, 250);
+        });
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                resultsContainer.classList.add('d-none');
+                this.blur();
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Desktop search
+        var desktopInput = document.getElementById('globalSearchInput');
+        var desktopResults = document.getElementById('globalSearchResults');
+        if (desktopInput && desktopResults) {
+            bindSearch(desktopInput, desktopResults);
+        }
+
+        // Mobile search
+        var mobileToggle = document.getElementById('mobileSearchToggle');
+        var mobileBar = document.getElementById('mobileSearchBar');
+        if (mobileToggle && mobileBar) {
+            mobileToggle.addEventListener('click', function() {
+                mobileBar.classList.toggle('d-none');
+                var input = mobileBar.querySelector('.global-search-mobile');
+                if (input) input.focus();
+            });
+            var mobileInput = mobileBar.querySelector('.global-search-mobile');
+            var mobileResults = mobileBar.querySelector('.global-search-mobile-results');
+            if (mobileInput && mobileResults) {
+                bindSearch(mobileInput, mobileResults);
+            }
+        }
+
+        // Close results on click outside
+        document.addEventListener('click', function(e) {
+            if (desktopResults && !desktopResults.contains(e.target) && e.target !== desktopInput) {
+                desktopResults.classList.add('d-none');
+            }
+            if (mobileBar) {
+                var mobileResults = mobileBar.querySelector('.global-search-mobile-results');
+                var mobileInput = mobileBar.querySelector('.global-search-mobile');
+                if (mobileResults && !mobileResults.contains(e.target) && e.target !== mobileInput) {
+                    mobileResults.classList.add('d-none');
+                }
+            }
+        });
+    });
+})();
+</script>
