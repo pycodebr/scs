@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Seguradoras{% endblock %}
+{% block page_title %}Seguradoras{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item">Seguradoras</li>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'insurers:insurer_create' %}" class="btn btn-primary">
+    <i class="feather-plus me-2"></i>
+    <span>Nova Seguradora</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Lista de Seguradoras</h5>
+                <div class="card-header-action">
+                    <form method="get" class="d-flex gap-2">
+                        <select name="status" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                            <option value="">Todos os status</option>
+                            <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Ativa</option>
+                            <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inativa</option>
+                        </select>
+                        <div class="input-group input-group-sm" style="width:250px">
+                            <input type="text" name="q" class="form-control" placeholder="Buscar..." value="{{ request.GET.q|default:'' }}">
+                            <button type="submit" class="btn btn-light-brand">
+                                <i class="feather-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Seguradora</th>
+                                <th>CNPJ</th>
+                                <th>Telefone</th>
+                                <th>Ramos</th>
+                                <th>Status</th>
+                                <th class="text-end">Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for insurer in insurers %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        {% if insurer.logo %}
+                                        <div class="avatar-image">
+                                            <img src="{{ insurer.logo.url }}" alt="" class="img-fluid">
+                                        </div>
+                                        {% else %}
+                                        <div class="avatar-text">
+                                            {{ insurer.get_initials }}
+                                        </div>
+                                        {% endif %}
+                                        <a href="{% url 'insurers:insurer_detail' insurer.pk %}">
+                                            <span class="d-block">{{ insurer.name }}</span>
+                                            <span class="fs-12 d-block fw-normal text-muted">{{ insurer.email }}</span>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>{{ insurer.cnpj }}</td>
+                                <td>{{ insurer.phone|default:'-' }}</td>
+                                <td>
+                                    <span class="badge bg-gray-200 text-dark">{{ insurer.branches.count }}</span>
+                                </td>
+                                <td>
+                                    {% if insurer.is_active %}
+                                    <span class="badge bg-soft-success text-success">Ativa</span>
+                                    {% else %}
+                                    <span class="badge bg-soft-danger text-danger">Inativa</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="hstack gap-2 justify-content-end">
+                                        <a href="{% url 'insurers:insurer_detail' insurer.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Ver">
+                                            <i class="feather-eye"></i>
+                                        </a>
+                                        <a href="{% url 'insurers:insurer_update' insurer.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Editar">
+                                            <i class="feather-edit"></i>
+                                        </a>
+                                        <a href="{% url 'insurers:insurer_delete' insurer.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Excluir">
+                                            <i class="feather-trash-2"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <i class="feather-shield fs-1 mb-3 d-block"></i>
+                                    Nenhuma seguradora encontrada.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if page_obj.has_other_pages %}
+            <div class="card-footer">
+                {% include 'partials/_pagination.html' %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

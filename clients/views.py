@@ -1,0 +1,120 @@
+import csv
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.db.models import Q
+from django.http import HttpResponse
+from django.urls import reverse_lazy
+from django.views import View
+from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
+
+from utils.mixins import BrokerFilterMixin
+
+from .forms import ClientForm
+from .models import Client
+
+
+class ClientListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
+    model = Client
+    template_name = 'clients/client_list.html'
+    context_object_name = 'clients'
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        search = self.request.GET.get('q', '').strip()
+        if search:
+            qs = qs.filter(
+                Q(name__icontains=search) |
+                Q(cpf_cnpj__icontains=search) |
+                Q(email__icontains=search)
+            )
+        client_type = self.request.GET.get('type')
+        if client_type:
+            qs = qs.filter(client_type=client_type)
+        status = self.request.GET.get('status')
+        if status == 'active':
+            qs = qs.filter(is_active=True)
+        elif status == 'inactive':
+            qs = qs.filter(is_active=False)
+        broker = self.request.GET.get('broker')
+        if broker:
+            qs = qs.filter(broker_id=broker)
+        return qs
+
+
+class ClientCreateView(LoginRequiredMixin, CreateView):
+    model = Client
+    form_class = ClientForm
+    template_name = 'clients/client_form.html'
+    success_url = reverse_lazy('clients:client_list')
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        if self.request.user.role == 'broker':
+            form.fields['broker'].initial = self.request.user
+            form.fields['broker'].widget = form.fields['broker'].hidden_widget()
+        return form
+
+    def form_valid(self, form):
+        if self.request.user.role == 'broker':
+            form.instance.broker = self.request.user
+        messages.success(self.request, 'Cliente criado com sucesso.')
+        return super().form_valid(form)
+
+
+class ClientUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
+    model = Client
+    form_class = ClientForm
+    template_name = 'clients/client_form.html'
+    success_url = reverse_lazy('clients:client_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Cliente atualizado com sucesso.')
+        return super().form_valid(form)
+
+
+class ClientDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
+    model = Client
+    template_name = 'clients/client_detail.html'
+    context_object_name = 'client'
+
+
+class ClientDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
+    model = Client
+    template_name = 'partials/_confirm_delete.html'
+    success_url = reverse_lazy('clients:client_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Cliente excluido com sucesso.')
+        return super().form_valid(form)
+
+
+class ClientExportView(LoginRequiredMixin, View):
+    def get(self, request):
+        qs = Client.objects.all()
+        if request.user.role == 'broker':
+            qs = qs.filter(broker=request.user)
+        qs = qs.select_related('broker').order_by('name')
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="clientes.csv"'
+        response.write('\ufeff')
+        writer = csv.writer(response)
+        writer.writerow([
+            'Nome', 'Tipo', 'CPF/CNPJ', 'Email', 'Telefone',
+            'Cidade', 'UF', 'Corretor', 'Status',
+        ])
+        for client in qs:
+            writer.writerow([
+                client.name,
+                client.get_client_type_display(),
+                client.cpf_cnpj,
+                client.email,
+                client.phone,
+                client.city,
+                client.state,
+                client.broker.get_full_name(),
+                'Ativo' if client.is_active else 'Inativo',
+            ])
+        return response

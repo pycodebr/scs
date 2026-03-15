@@ -24,19 +24,19 @@
                     <label>Cadastros</label>
                 </li>
                 <li class="nxl-item">
-                    <a href="/clients/" class="nxl-link">
+                    <a href="{% url 'clients:client_list' %}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-users"></i></span>
                         <span class="nxl-mtext">Clientes</span>
                     </a>
                 </li>
                 <li class="nxl-item">
-                    <a href="/insurers/" class="nxl-link">
+                    <a href="{% url 'insurers:insurer_list' %}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-shield"></i></span>
                         <span class="nxl-mtext">Seguradoras</span>
                     </a>
                 </li>
                 <li class="nxl-item">
-                    <a href="/coverages/types/" class="nxl-link">
+                    <a href="{% url 'coverages:type_list' %}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-layers"></i></span>
                         <span class="nxl-mtext">Coberturas</span>
                     </a>

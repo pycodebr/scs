@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar Cliente{% else %}Novo Cliente{% endif %}{% endblock %}
+{% block page_title %}{% if object %}Editar Cliente{% else %}Novo Cliente{% endif %}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'clients:client_list' %}">Clientes</a></li>
+<li class="breadcrumb-item">{% if object %}Editar{% else %}Novo{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Dados Pessoais</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Tipo <span class="text-danger">*</span></label>
+                            {{ form.client_type }}
+                            {% if form.client_type.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.client_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Nome / Razao Social <span class="text-danger">*</span></label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">CPF / CNPJ <span class="text-danger">*</span></label>
+                            {{ form.cpf_cnpj }}
+                            {% if form.cpf_cnpj.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.cpf_cnpj.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">RG / IE</label>
+                            {{ form.rg_ie }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Data de Nascimento</label>
+                            {{ form.birth_date }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Genero</label>
+                            {{ form.gender }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Estado Civil</label>
+                            {{ form.marital_status }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Profissao</label>
+                            {{ form.occupation }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Contato</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Telefone <span class="text-danger">*</span></label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.phone.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Telefone Secundario</label>
+                            {{ form.secondary_phone }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Endereco</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">CEP</label>
+                            {{ form.zip_code }}
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label">Logradouro</label>
+                            {{ form.street }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Numero</label>
+                            {{ form.number }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Complemento</label>
+                            {{ form.complement }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Bairro</label>
+                            {{ form.neighborhood }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Cidade</label>
+                            {{ form.city }}
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">UF</label>
+                            {{ form.state }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Configuracoes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% if form.broker.field.widget.input_type != 'hidden' %}
+                        <div class="col-12">
+                            <label class="form-label">Corretor <span class="text-danger">*</span></label>
+                            {{ form.broker }}
+                            {% if form.broker.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.broker.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        {{ form.broker }}
+                        {% endif %}
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="id_is_active">Ativo</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Observacoes</label>
+                            {{ form.notes }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="feather-save me-2"></i>Salvar
+                </button>
+                <a href="{% url 'clients:client_list' %}" class="btn btn-light">Cancelar</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cepField = document.getElementById('id_zip_code');
+    if (cepField) {
+        cepField.addEventListener('blur', function() {
+            const cep = this.value.replace(/\D/g, '');
+            if (cep.length === 8) {
+                fetch('https://viacep.com.br/ws/' + cep + '/json/')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.erro) {
+                            document.getElementById('id_street').value = data.logradouro || '';
+                            document.getElementById('id_neighborhood').value = data.bairro || '';
+                            document.getElementById('id_city').value = data.localidade || '';
+                            const stateSelect = document.getElementById('id_state');
+                            if (stateSelect) {
+                                stateSelect.value = data.uf || '';
+                            }
+                        }
+                    })
+                    .catch(() => {});
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

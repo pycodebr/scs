@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar Tipo de Seguro{% else %}Novo Tipo de Seguro{% endif %}{% endblock %}
+{% block page_title %}{% if object %}Editar Tipo de Seguro{% else %}Novo Tipo de Seguro{% endif %}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'coverages:type_list' %}">Tipos de Seguro</a></li>
+<li class="breadcrumb-item">{% if object %}Editar{% else %}Novo{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">{% if object %}Editar Tipo de Seguro{% else %}Novo Tipo de Seguro{% endif %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Nome <span class="text-danger">*</span></label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Descricao</label>
+                            {{ form.description }}
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="id_is_active">Ativo</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="feather-save me-2"></i>Salvar
+                        </button>
+                        <a href="{% url 'coverages:type_list' %}" class="btn btn-light">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

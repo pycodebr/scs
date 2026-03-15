@@ -1214,9 +1214,9 @@ class BrokerFilterMixin:
 
 ### Fase 2 — Cadastros Base (Semana 3-4)
 
-- [ ] App `clients` (CRUD completo, filtros, busca, integração ViaCEP)
-- [ ] App `insurers` (CRUD completo, ramos)
-- [ ] App `coverages` (tipos de seguro, coberturas, itens)
+- [x] App `clients` (CRUD completo, filtros, busca, integração ViaCEP)
+- [x] App `insurers` (CRUD completo, ramos)
+- [x] App `coverages` (tipos de seguro, coberturas, itens)
 
 ### Fase 3 — Core do Negócio (Semana 5-7)
 

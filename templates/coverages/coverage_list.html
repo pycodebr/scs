@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Coberturas{% endblock %}
+{% block page_title %}Coberturas{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'coverages:type_list' %}">Tipos de Seguro</a></li>
+<li class="breadcrumb-item">Coberturas</li>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'coverages:type_list' %}" class="btn btn-light-brand">
+    <i class="feather-list me-2"></i>
+    <span>Tipos de Seguro</span>
+</a>
+<a href="{% url 'coverages:coverage_create' %}" class="btn btn-primary">
+    <i class="feather-plus me-2"></i>
+    <span>Nova Cobertura</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Lista de Coberturas</h5>
+                <div class="card-header-action">
+                    <form method="get" class="d-flex gap-2">
+                        <select name="type" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                            <option value="">Todos os tipos</option>
+                            {% for t in insurance_types %}
+                            <option value="{{ t.pk }}" {% if request.GET.type == t.pk|stringformat:'d' %}selected{% endif %}>{{ t.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="input-group input-group-sm" style="width:250px">
+                            <input type="text" name="q" class="form-control" placeholder="Buscar..." value="{{ request.GET.q|default:'' }}">
+                            <button type="submit" class="btn btn-light-brand">
+                                <i class="feather-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Cobertura</th>
+                                <th>Tipo de Seguro</th>
+                                <th>Itens</th>
+                                <th>Status</th>
+                                <th class="text-end">Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for coverage in coverages %}
+                            <tr>
+                                <td class="fw-semibold">{{ coverage.name }}</td>
+                                <td>
+                                    <span class="badge bg-gray-200 text-dark">{{ coverage.insurance_type.name }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-gray-200 text-dark">{{ coverage.items.count }}</span>
+                                </td>
+                                <td>
+                                    {% if coverage.is_active %}
+                                    <span class="badge bg-soft-success text-success">Ativa</span>
+                                    {% else %}
+                                    <span class="badge bg-soft-danger text-danger">Inativa</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="hstack gap-2 justify-content-end">
+                                        <a href="{% url 'coverages:coverage_update' coverage.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Editar">
+                                            <i class="feather-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    <i class="feather-layers fs-1 mb-3 d-block"></i>
+                                    Nenhuma cobertura encontrada.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if page_obj.has_other_pages %}
+            <div class="card-footer">
+                {% include 'partials/_pagination.html' %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

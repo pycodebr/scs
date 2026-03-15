@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar Cobertura{% else %}Nova Cobertura{% endif %}{% endblock %}
+{% block page_title %}{% if object %}Editar Cobertura{% else %}Nova Cobertura{% endif %}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'coverages:coverage_list' %}">Coberturas</a></li>
+<li class="breadcrumb-item">{% if object %}Editar{% else %}Nova{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">{% if object %}Editar Cobertura{% else %}Nova Cobertura{% endif %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Tipo de Seguro <span class="text-danger">*</span></label>
+                            {{ form.insurance_type }}
+                            {% if form.insurance_type.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.insurance_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Nome <span class="text-danger">*</span></label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Descricao</label>
+                            {{ form.description }}
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="id_is_active">Ativa</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="feather-save me-2"></i>Salvar
+                        </button>
+                        <a href="{% url 'coverages:coverage_list' %}" class="btn btn-light">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if object %}
+    <div class="col-lg-6">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Itens de Cobertura</h5>
+            </div>
+            <div class="card-body p-0">
+                <form method="post" action="{% url 'coverages:item_create' object.pk %}" class="p-3 border-bottom">
+                    {% csrf_token %}
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-8">
+                            <label class="form-label fs-12">Nome do Item</label>
+                            {{ item_form.name }}
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-sm btn-primary w-100">
+                                <i class="feather-plus me-1"></i>Adicionar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Item</th>
+                                <th>Status</th>
+                                <th class="text-end">Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td class="fw-semibold">{{ item.name }}</td>
+                                <td>
+                                    {% if item.is_active %}
+                                    <span class="badge bg-soft-success text-success">Ativo</span>
+                                    {% else %}
+                                    <span class="badge bg-soft-danger text-danger">Inativo</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'coverages:item_update' item.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Editar">
+                                        <i class="feather-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center py-3 text-muted">
+                                    Nenhum item cadastrado.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

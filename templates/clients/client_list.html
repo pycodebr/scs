@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Clientes{% endblock %}
+{% block page_title %}Clientes{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item">Clientes</li>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'clients:client_export' %}" class="btn btn-light-brand">
+    <i class="feather-download me-2"></i>
+    <span>Exportar CSV</span>
+</a>
+<a href="{% url 'clients:client_create' %}" class="btn btn-primary">
+    <i class="feather-plus me-2"></i>
+    <span>Novo Cliente</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Lista de Clientes</h5>
+                <div class="card-header-action">
+                    <form method="get" class="d-flex gap-2">
+                        <select name="type" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                            <option value="">Todos os tipos</option>
+                            <option value="pf" {% if request.GET.type == 'pf' %}selected{% endif %}>Pessoa Fisica</option>
+                            <option value="pj" {% if request.GET.type == 'pj' %}selected{% endif %}>Pessoa Juridica</option>
+                        </select>
+                        <select name="status" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                            <option value="">Todos os status</option>
+                            <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Ativo</option>
+                            <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inativo</option>
+                        </select>
+                        <div class="input-group input-group-sm" style="width:250px">
+                            <input type="text" name="q" class="form-control" placeholder="Buscar..." value="{{ request.GET.q|default:'' }}">
+                            <button type="submit" class="btn btn-light-brand">
+                                <i class="feather-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Cliente</th>
+                                <th>Tipo</th>
+                                <th>CPF/CNPJ</th>
+                                <th>Telefone</th>
+                                <th>Cidade/UF</th>
+                                <th>Status</th>
+                                <th class="text-end">Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for client in clients %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar-text">
+                                            {{ client.get_initials }}
+                                        </div>
+                                        <a href="{% url 'clients:client_detail' client.pk %}">
+                                            <span class="d-block">{{ client.name }}</span>
+                                            <span class="fs-12 d-block fw-normal text-muted">{{ client.email }}</span>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-gray-200 text-dark">{{ client.get_client_type_display }}</span>
+                                </td>
+                                <td>{{ client.cpf_cnpj }}</td>
+                                <td>{{ client.phone|default:'-' }}</td>
+                                <td>
+                                    {% if client.city %}{{ client.city }}/{{ client.state }}{% else %}-{% endif %}
+                                </td>
+                                <td>
+                                    {% if client.is_active %}
+                                    <span class="badge bg-soft-success text-success">Ativo</span>
+                                    {% else %}
+                                    <span class="badge bg-soft-danger text-danger">Inativo</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="hstack gap-2 justify-content-end">
+                                        <a href="{% url 'clients:client_detail' client.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Ver">
+                                            <i class="feather-eye"></i>
+                                        </a>
+                                        <a href="{% url 'clients:client_update' client.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Editar">
+                                            <i class="feather-edit"></i>
+                                        </a>
+                                        <a href="{% url 'clients:client_delete' client.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Excluir">
+                                            <i class="feather-trash-2"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <i class="feather-users fs-1 mb-3 d-block"></i>
+                                    Nenhum cliente encontrado.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if page_obj.has_other_pages %}
+            <div class="card-footer">
+                {% include 'partials/_pagination.html' %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

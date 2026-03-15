@@ -20,6 +20,9 @@ INSTALLED_APPS = [
     # Local apps
     'utils',
     'accounts',
+    'clients',
+    'insurers',
+    'coverages',
 ]
 
 MIDDLEWARE = [
