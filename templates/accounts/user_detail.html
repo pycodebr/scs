@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user_obj.get_full_name }}{% endblock %}
+{% block page_title %}Detalhes do Usuário{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:user_list' %}">Usuários</a></li>
+<li class="breadcrumb-item">{{ user_obj.get_full_name }}</li>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'accounts:user_update' user_obj.pk %}" class="btn btn-light-brand">
+    <i class="feather-edit me-2"></i>
+    <span>Editar</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card stretch stretch-full">
+            <div class="card-body text-center">
+                {% if user_obj.avatar %}
+                <img src="{{ user_obj.avatar.url }}" alt="" class="rounded-circle mb-3" style="width:80px;height:80px;object-fit:cover;">
+                {% else %}
+                <div class="avatar-text avatar-lg bg-primary text-white mx-auto mb-3" style="width:80px;height:80px;font-size:24px;">
+                    {{ user_obj.get_initials }}
+                </div>
+                {% endif %}
+                <h5 class="fw-bold text-dark">{{ user_obj.get_full_name }}</h5>
+                <span class="badge bg-gray-200 text-dark">{{ user_obj.get_role_display }}</span>
+                {% if user_obj.is_active %}
+                <span class="badge bg-soft-success text-success ms-1">Ativo</span>
+                {% else %}
+                <span class="badge bg-soft-danger text-danger ms-1">Inativo</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Informações</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="fs-12 text-muted mb-1">Email</div>
+                        <div class="fw-semibold">{{ user_obj.email }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="fs-12 text-muted mb-1">Telefone</div>
+                        <div class="fw-semibold">{{ user_obj.phone|default:'-' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="fs-12 text-muted mb-1">CPF</div>
+                        <div class="fw-semibold">{{ user_obj.cpf|default:'-' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="fs-12 text-muted mb-1">Data de Cadastro</div>
+                        <div class="fw-semibold">{{ user_obj.date_joined|date:'d/m/Y H:i' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login | SCS - Sistema de Corretora de Seguros</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/theme.min.css' %}">
+</head>
+<body>
+    <main class="auth-minimal-wrapper">
+        <div class="auth-minimal-inner">
+            <div class="minimal-card-wrapper">
+                <div class="card mb-4 mt-5 mx-4 mx-sm-0 position-relative">
+                    <div class="wd-50 bg-white p-2 rounded-circle shadow-lg position-absolute translate-middle top-0 start-50">
+                        <img src="{% static 'images/logo-abbr.png' %}" alt="SCS" class="img-fluid">
+                    </div>
+                    <div class="card-body p-sm-5">
+                        <h2 class="fs-20 fw-bolder mb-4 text-center">Login</h2>
+                        <h4 class="fs-13 fw-bold mb-2 text-center">Sistema de Corretora de Seguros</h4>
+                        <p class="fs-12 fw-medium text-muted text-center">Entre com suas credenciais para acessar o sistema</p>
+
+                        {% if form.errors %}
+                        <div class="alert alert-soft-danger mb-3">
+                            <i class="feather-alert-circle me-2"></i>
+                            Email ou senha inválidos. Tente novamente.
+                        </div>
+                        {% endif %}
+
+                        <form method="post" class="mt-4">
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <label for="id_username" class="form-label">Email</label>
+                                {{ form.username }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_password" class="form-label">Senha</label>
+                                {{ form.password }}
+                            </div>
+                            <div class="mt-5">
+                                <button type="submit" class="btn btn-lg btn-primary w-100">Entrar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{% static 'js/vendors.min.js' %}"></script>
+</body>
+</html>

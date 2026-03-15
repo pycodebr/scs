@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar Usuário{% else %}Novo Usuário{% endif %}{% endblock %}
+{% block page_title %}{% if object %}Editar Usuário{% else %}Novo Usuário{% endif %}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:user_list' %}">Usuários</a></li>
+<li class="breadcrumb-item">{% if object %}Editar{% else %}Novo{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">{% if object %}Editar Usuário{% else %}Novo Usuário{% endif %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nome <span class="text-danger">*</span></label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.first_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Sobrenome</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.last_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">CPF</label>
+                            {{ form.cpf }}
+                            {% if form.cpf.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.cpf.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Telefone</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Papel <span class="text-danger">*</span></label>
+                            {{ form.role }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            <div class="form-check form-switch mt-2">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="id_is_active">Ativo</label>
+                            </div>
+                        </div>
+
+                        {% if form.password1 %}
+                        <div class="col-md-6">
+                            <label class="form-label">Senha <span class="text-danger">*</span></label>
+                            {{ form.password1 }}
+                            {% if form.password1.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.password1.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Confirmar Senha <span class="text-danger">*</span></label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.password2.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <div class="col-md-6">
+                            <label class="form-label">Avatar</label>
+                            {{ form.avatar }}
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="feather-save me-2"></i>Salvar
+                        </button>
+                        <a href="{% url 'accounts:user_list' %}" class="btn btn-light">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% load static %}
+{% load utils_tags %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}SCS{% endblock %} | Sistema de Corretora de Seguros</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/theme.min.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% include 'partials/_sidebar.html' %}
+    {% include 'partials/_topbar.html' %}
+
+    <main class="nxl-container">
+        <div class="nxl-content">
+            <div class="page-header">
+                <div class="page-header-left d-flex align-items-center">
+                    <div class="page-header-title">
+                        <h5 class="m-b-10">{% block page_title %}Dashboard{% endblock %}</h5>
+                    </div>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        {% block breadcrumb %}{% endblock %}
+                    </ul>
+                </div>
+                <div class="page-header-right ms-auto">
+                    <div class="page-header-right-items">
+                        <div class="d-flex d-md-none">
+                            <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                <i class="feather-arrow-left me-2"></i>
+                                <span>Voltar</span>
+                            </a>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 page-header-right-items-wrapper">
+                            {% block page_actions %}{% endblock %}
+                        </div>
+                    </div>
+                    <div class="d-md-none d-flex align-items-center">
+                        <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                            <i class="feather-align-right fs-20"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                {% include 'partials/_messages.html' %}
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </main>
+
+    <script src="{% static 'js/vendors.min.js' %}"></script>
+    <script src="{% static 'js/common-init.min.js' %}"></script>
+    <script src="{% static 'js/theme-customizer-init.min.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

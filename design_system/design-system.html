@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Duralux Design System</title>
+    <link rel="shortcut icon" type="image/x-icon" href="refs/duralux/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="refs/duralux/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="refs/duralux/css/vendors.min.css">
+    <link rel="stylesheet" type="text/css" href="refs/duralux/css/daterangepicker.min.css">
+    <link rel="stylesheet" type="text/css" href="refs/duralux/css/theme.min.css">
+</head>
+<body>
+    <!-- ============================================================ -->
+    <!-- Design System Navigation (fixed top bar) -->
+    <!-- ============================================================ -->
+    <nav class="nxl-navigation">
+        <div class="navbar-wrapper">
+            <div class="m-header">
+                <a href="#section-0" class="b-brand">
+                    <img src="refs/duralux/images/logo-full.png" alt="" class="logo logo-lg">
+                    <img src="refs/duralux/images/logo-abbr.png" alt="" class="logo logo-sm">
+                </a>
+            </div>
+            <div class="navbar-content">
+                <ul class="nxl-navbar">
+                    <li class="nxl-item nxl-caption">
+                        <label>Design System</label>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="#section-0" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-layout"></i></span>
+                            <span class="nxl-mtext">Application Shell</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="#section-1" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-type"></i></span>
+                            <span class="nxl-mtext">Typography</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="#section-2" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-droplet"></i></span>
+                            <span class="nxl-mtext">Colors &amp; Surfaces</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="#section-3" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-navigation"></i></span>
+                            <span class="nxl-mtext">Navigation</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="#section-4" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-edit-3"></i></span>
+                            <span class="nxl-mtext">Form Components</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="#section-5" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-database"></i></span>
+                            <span class="nxl-mtext">Tables &amp; Data</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="#section-6" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-box"></i></span>
+                            <span class="nxl-mtext">UI Components</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="#section-7" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-grid"></i></span>
+                            <span class="nxl-mtext">Layout &amp; Spacing</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="#section-8" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-zap"></i></span>
+                            <span class="nxl-mtext">Motion</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="#section-9" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-feather"></i></span>
+                            <span class="nxl-mtext">Icons</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- Header -->
+    <!-- ============================================================ -->
+    <header class="nxl-header">
+        <div class="header-wrapper">
+            <div class="header-left d-flex align-items-center gap-4">
+                <a href="javascript:void(0);" class="nxl-head-mobile-toggler" id="mobile-collapse">
+                    <div class="hamburger hamburger--arrowturn">
+                        <div class="hamburger-box">
+                            <div class="hamburger-inner"></div>
+                        </div>
+                    </div>
+                </a>
+                <div class="nxl-navigation-toggle">
+                    <a href="javascript:void(0);" id="menu-mini-button">
+                        <i class="feather-align-left"></i>
+                    </a>
+                    <a href="javascript:void(0);" id="menu-expend-button" style="display: none">
+                        <i class="feather-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="header-right ms-auto">
+                <div class="d-flex align-items-center">
+                    <div class="nxl-h-item d-none d-sm-flex">
+                        <div class="full-screen-switcher">
+                            <a href="javascript:void(0);" class="nxl-head-link me-0" onclick="$('body').fullScreenHelper('toggle');">
+                                <i class="feather-maximize maximize"></i>
+                                <i class="feather-minimize minimize"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="nxl-h-item dark-light-theme">
+                        <a href="javascript:void(0);" class="nxl-head-link me-0 dark-button">
+                            <i class="feather-moon"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="nxl-head-link me-0 light-button" style="display: none">
+                            <i class="feather-sun"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================================ -->
+    <!-- Main Content -->
+    <!-- ============================================================ -->
+    <main class="nxl-container">
+        <div class="nxl-content">
+
+            <!-- ============================================================ -->
+            <!-- Section 0: Application Shell -->
+            <!-- ============================================================ -->
+            <div class="page-header" id="section-0">
+                <div class="page-header-left d-flex align-items-center">
+                    <div class="page-header-title">
+                        <h5 class="m-b-10">Design System</h5>
+                    </div>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#section-0">Home</a></li>
+                        <li class="breadcrumb-item">Design System</li>
+                    </ul>
+                </div>
+                <div class="page-header-right ms-auto">
+                    <div class="page-header-right-items">
+                        <div class="d-flex d-md-none">
+                            <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                <i class="feather-arrow-left me-2"></i>
+                                <span>Back</span>
+                            </a>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 page-header-right-items-wrapper">
+                            <a class="btn btn-light-brand" href="refs/duralux/index.html">
+                                <i class="feather-external-link me-2"></i>
+                                <span>View Original</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="d-md-none d-flex align-items-center">
+                        <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                            <i class="feather-align-right fs-20"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <!-- Application Shell: KPI Cards Row -->
+                <div class="row">
+                    <div class="col-xxl-3 col-md-6">
+                        <div class="card stretch stretch-full">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between mb-4">
+                                    <div class="d-flex gap-4 align-items-center">
+                                        <div class="avatar-text avatar-lg bg-gray-200">
+                                            <i class="feather-dollar-sign"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fs-4 fw-bold text-dark"><span class="counter">45</span>/<span class="counter">76</span></div>
+                                            <h3 class="fs-13 fw-semibold text-truncate-1-line">Invoices Awaiting Payment</h3>
+                                        </div>
+                                    </div>
+                                    <a href="javascript:void(0);" class="">
+                                        <i class="feather-more-vertical"></i>
+                                    </a>
+                                </div>
+                                <div class="pt-4">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <a href="javascript:void(0);" class="fs-12 fw-medium text-muted text-truncate-1-line">Invoices Awaiting </a>
+                                        <div class="w-100 text-end">
+                                            <span class="fs-12 text-dark">$5,569</span>
+                                            <span class="fs-11 text-muted">(56%)</span>
+                                        </div>
+                                    </div>
+                                    <div class="progress mt-2 ht-3">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 56%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-3 col-md-6">
+                        <div class="card stretch stretch-full">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between mb-4">
+                                    <div class="d-flex gap-4 align-items-center">
+                                        <div class="avatar-text avatar-lg bg-gray-200">
+                                            <i class="feather-cast"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fs-4 fw-bold text-dark"><span class="counter">48</span>/<span class="counter">86</span></div>
+                                            <h3 class="fs-13 fw-semibold text-truncate-1-line">Converted Leads</h3>
+                                        </div>
+                                    </div>
+                                    <a href="javascript:void(0);" class="">
+                                        <i class="feather-more-vertical"></i>
+                                    </a>
+                                </div>
+                                <div class="pt-4">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <a href="javascript:void(0);" class="fs-12 fw-medium text-muted text-truncate-1-line">Converted Leads </a>
+                                        <div class="w-100 text-end">
+                                            <span class="fs-12 text-dark">52 Completed</span>
+                                            <span class="fs-11 text-muted">(63%)</span>
+                                        </div>
+                                    </div>
+                                    <div class="progress mt-2 ht-3">
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 63%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-3 col-md-6">
+                        <div class="card stretch stretch-full">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between mb-4">
+                                    <div class="d-flex gap-4 align-items-center">
+                                        <div class="avatar-text avatar-lg bg-gray-200">
+                                            <i class="feather-briefcase"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fs-4 fw-bold text-dark"><span class="counter">16</span>/<span class="counter">20</span></div>
+                                            <h3 class="fs-13 fw-semibold text-truncate-1-line">Projects In Progress</h3>
+                                        </div>
+                                    </div>
+                                    <a href="javascript:void(0);" class="">
+                                        <i class="feather-more-vertical"></i>
+                                    </a>
+                                </div>
+                                <div class="pt-4">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <a href="javascript:void(0);" class="fs-12 fw-medium text-muted text-truncate-1-line">Projects In Progress </a>
+                                        <div class="w-100 text-end">
+                                            <span class="fs-12 text-dark">16 Completed</span>
+                                            <span class="fs-11 text-muted">(78%)</span>
+                                        </div>
+                                    </div>
+                                    <div class="progress mt-2 ht-3">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 78%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-3 col-md-6">
+                        <div class="card stretch stretch-full">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between mb-4">
+                                    <div class="d-flex gap-4 align-items-center">
+                                        <div class="avatar-text avatar-lg bg-gray-200">
+                                            <i class="feather-activity"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fs-4 fw-bold text-dark"><span class="counter">46.59</span>%</div>
+                                            <h3 class="fs-13 fw-semibold text-truncate-1-line">Conversion Rate</h3>
+                                        </div>
+                                    </div>
+                                    <a href="javascript:void(0);" class="">
+                                        <i class="feather-more-vertical"></i>
+                                    </a>
+                                </div>
+                                <div class="pt-4">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <a href="javascript:void(0);" class="fs-12 fw-medium text-muted text-truncate-1-line">Conversion Rate </a>
+                                        <div class="w-100 text-end">
+                                            <span class="fs-12 text-dark">$2,254</span>
+                                            <span class="fs-11 text-muted">(46%)</span>
+                                        </div>
+                                    </div>
+                                    <div class="progress mt-2 ht-3">
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 46%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- Section 1: Typography -->
+                <!-- ============================================================ -->
+                <div class="row" id="section-1">
+                    <div class="col-12">
+                        <div class="card stretch stretch-full">
+                            <div class="card-header">
+                                <h5 class="card-title">Typography</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr class="border-b">
+                                                <th>Style Name</th>
+                                                <th>Preview</th>
+                                                <th class="text-end">Size / Line-height</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Page Title</td>
+                                                <td><h5 class="m-b-10">Dashboard Overview</h5></td>
+                                                <td class="text-end fs-12 text-muted">h5 / .m-b-10</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Card Title</td>
+                                                <td><h5 class="card-title mb-0">Payment Record</h5></td>
+                                                <td class="text-end fs-12 text-muted">.card-title</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Section Heading (h6 bold)</td>
+                                                <td><h6 class="fw-bold text-dark mb-0">Notifications</h6></td>
+                                                <td class="text-end fs-12 text-muted">h6 / .fw-bold .text-dark</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Large Number (fs-4)</td>
+                                                <td><div class="fs-4 fw-bold text-dark">45/76</div></td>
+                                                <td class="text-end fs-12 text-muted">.fs-4 / .fw-bold</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Subtitle / Semibold</td>
+                                                <td><div class="fw-semibold text-dark">Tasks Completed</div></td>
+                                                <td class="text-end fs-12 text-muted">.fw-semibold .text-dark</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">KPI Label (fs-13)</td>
+                                                <td><h3 class="fs-13 fw-semibold text-truncate-1-line mb-0">Invoices Awaiting Payment</h3></td>
+                                                <td class="text-end fs-12 text-muted">.fs-13 / .fw-semibold</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Body Text (fs-12)</td>
+                                                <td><span class="fs-12 text-muted">22/35 completed</span></td>
+                                                <td class="text-end fs-12 text-muted">.fs-12 / .text-muted</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Body Text Dark</td>
+                                                <td><span class="fs-12 text-dark">$5,569</span></td>
+                                                <td class="text-end fs-12 text-muted">.fs-12 / .text-dark</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Caption / Helper (fs-11)</td>
+                                                <td><span class="fs-11 text-muted">(56%)</span></td>
+                                                <td class="text-end fs-12 text-muted">.fs-11 / .text-muted</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Small Uppercase (fs-10)</td>
+                                                <td><span class="fs-10 fw-bold text-uppercase">Load More</span></td>
+                                                <td class="text-end fs-12 text-muted">.fs-10 / .fw-bold .text-uppercase</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Small Label (fs-9)</td>
+                                                <td><span class="fs-9 fw-bold text-dark text-uppercase text-spacing-1">Inter</span></td>
+                                                <td class="text-end fs-12 text-muted">.fs-9 / .text-spacing-1</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Link Text (Primary)</td>
+                                                <td><a href="javascript:void(0);" class="fs-13 fw-bold text-primary">Get Started →</a></td>
+                                                <td class="text-end fs-12 text-muted">.fs-13 / .fw-bold .text-primary</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Truncate 1 Line</td>
+                                                <td><div class="text-truncate-1-line" style="max-width:200px">This is a very long text that should be truncated after one line to demonstrate text overflow behavior</div></td>
+                                                <td class="text-end fs-12 text-muted">.text-truncate-1-line</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Truncate 2 Lines</td>
+                                                <td><div class="text-truncate-2-line" style="max-width:250px">This is a very long text that should be truncated after two lines to demonstrate the text overflow behavior for multi-line content.</div></td>
+                                                <td class="text-end fs-12 text-muted">.text-truncate-2-line</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fs-12 text-muted">Breadcrumb</td>
+                                                <td>
+                                                    <ul class="breadcrumb mb-0">
+                                                        <li class="breadcrumb-item"><a href="javascript:void(0);">Home</a></li>
+                                                        <li class="breadcrumb-item">Dashboard</li>
+                                                    </ul>
+                                                </td>
+                                                <td class="text-end fs-12 text-muted">.breadcrumb</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- Section 2: Colors, Surfaces & Semantic States -->
+                <!-- ============================================================ -->
+                <div class="row" id="section-2">
+                    <div class="col-12">
+                        <div class="card stretch stretch-full">
+                            <div class="card-header">
+                                <h5 class="card-title">Colors, Surfaces &amp; Semantic States</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- 2.1 Interface Colors -->
+                                <h6 class="fw-bold text-dark mb-3">2.1 — Interface Colors</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-primary rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-primary</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-success rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-success</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-warning rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-warning</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-danger rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-danger</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-info rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-info</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-dark rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-dark</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Soft Colors -->
+                                <h6 class="fw-bold text-dark mb-3">Soft Color Variants</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-soft-primary rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-soft-primary</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-soft-success rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-soft-success</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-soft-warning rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-soft-warning</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-soft-danger rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-soft-danger</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-soft-info rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-soft-info</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-soft-dark rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-soft-dark</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Gray Scale -->
+                                <h6 class="fw-bold text-dark mb-3">Gray Scale</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-gray-200 rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-gray-200</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-gray-300 rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-gray-300</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6">
+                                        <div class="card border mb-0">
+                                            <div class="bg-gray-500 rounded-top" style="height:60px"></div>
+                                            <div class="p-2 text-center">
+                                                <span class="fs-11 fw-semibold">.bg-gray-500</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 2.2 Semantic State Badges -->
+                                <h6 class="fw-bold text-dark mb-3">2.2 — Semantic State Badges</h6>
+                                <div class="d-flex flex-wrap gap-3 mb-4">
+                                    <span class="badge bg-soft-success text-success">Completed</span>
+                                    <span class="badge bg-soft-primary text-primary">In Progress</span>
+                                    <span class="badge bg-soft-warning text-warning">Not Interested</span>
+                                    <span class="badge bg-soft-danger text-danger">Rejected</span>
+                                    <span class="badge bg-soft-info text-info">Informational</span>
+                                    <span class="badge bg-gray-200 text-dark">Sent</span>
+                                    <span class="badge bg-gray-200 text-dark">New</span>
+                                    <span class="badge bg-gray-200 text-dark">Returning</span>
+                                    <span class="badge bg-soft-success text-success ms-1">PRO</span>
+                                    <span class="badge bg-success nxl-h-badge">3</span>
+                                    <span class="badge bg-danger nxl-h-badge">2</span>
+                                    <span class="badge bg-light text-primary text-dark">12%</span>
+                                    <span class="badge small bg-gray-200 rounded ms-1 text-dark">5</span>
+                                    <span class="badge border rounded text-dark">/<i class="feather-command ms-1 fs-10"></i></span>
+                                </div>
+
+                                <!-- Status Indicators (dot-based) -->
+                                <h6 class="fw-bold text-dark mb-3">Status Indicators</h6>
+                                <div class="d-flex flex-wrap gap-4 mb-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="wd-10 ht-10 border border-2 border-gray-1 bg-success rounded-circle"></i>
+                                        <span class="fs-12">Active</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="wd-10 ht-10 border border-2 border-gray-1 bg-warning rounded-circle"></i>
+                                        <span class="fs-12">Always</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="wd-10 ht-10 border border-2 border-gray-1 bg-danger rounded-circle"></i>
+                                        <span class="fs-12">Busy</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="wd-10 ht-10 border border-2 border-gray-1 bg-info rounded-circle"></i>
+                                        <span class="fs-12">Inactive</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="wd-10 ht-10 border border-2 border-gray-1 bg-dark rounded-circle"></i>
+                                        <span class="fs-12">Disabled</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="wd-10 ht-10 border border-2 border-gray-1 bg-primary rounded-circle"></i>
+                                        <span class="fs-12">Custom</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2.3 Surfaces & Effects -->
+                                <h6 class="fw-bold text-dark mb-3">2.3 — Surfaces &amp; Effects</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-3">
+                                        <div class="p-3 border rounded">
+                                            <span class="fs-12 fw-semibold">.border (solid)</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="p-3 border border-dashed rounded">
+                                            <span class="fs-12 fw-semibold">.border-dashed</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="p-3 border-top-dashed border rounded">
+                                            <span class="fs-12 fw-semibold">.border-top-dashed</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card shadow-sm mb-0">
+                                            <div class="card-body p-3">
+                                                <span class="fs-12 fw-semibold">Card Shadow</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-4">
+                                        <div class="p-3 border border-dashed border-gray-5 rounded">
+                                            <span class="fs-12 fw-semibold">.border-dashed .border-gray-5</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <hr class="border-dashed">
+                                        <span class="fs-12 fw-semibold">hr.border-dashed</span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="dropdown-divider"></div>
+                                        <span class="fs-12 fw-semibold">.dropdown-divider</span>
+                                    </div>
+                                </div>
+
+                                <!-- Extended Colors (used in mega menu) -->
+                                <h6 class="fw-bold text-dark mb-3">Extended Semantic Colors</h6>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-auto">
+                                        <div class="avatar-text avatar-lg bg-soft-primary text-primary border-soft-primary rounded">
+                                            <i class="feather-airplay mx-auto"></i>
+                                        </div>
+                                        <div class="fs-11 text-center mt-1">primary</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="avatar-text avatar-lg bg-soft-danger text-danger border-soft-danger rounded">
+                                            <i class="feather-bar-chart-2 mx-auto"></i>
+                                        </div>
+                                        <div class="fs-11 text-center mt-1">danger</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="avatar-text avatar-lg bg-soft-success text-success border-soft-success rounded">
+                                            <i class="feather-link-2 mx-auto"></i>
+                                        </div>
+                                        <div class="fs-11 text-center mt-1">success</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="avatar-text avatar-lg bg-soft-warning text-warning border-soft-warning rounded">
+                                            <i class="feather-shield mx-auto"></i>
+                                        </div>
+                                        <div class="fs-11 text-center mt-1">warning</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="avatar-text avatar-lg bg-soft-indigo text-indigo border-soft-indigo rounded">
+                                            <i class="feather-book mx-auto"></i>
+                                        </div>
+                                        <div class="fs-11 text-center mt-1">indigo</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="avatar-text avatar-lg bg-soft-teal text-teal border-soft-teal rounded">
+                                            <i class="feather-life-buoy mx-auto"></i>
+                                        </div>
+                                        <div class="fs-11 text-center mt-1">teal</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- Section 3: Navigation & Structure -->
+                <!-- ============================================================ -->
+                <div class="row" id="section-3">
+                    <div class="col-12">
+                        <div class="card stretch stretch-full">
+                            <div class="card-header">
+                                <h5 class="card-title">Navigation &amp; Structure</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- 3.1 Sidebar Menu Items -->
+                                <h6 class="fw-bold text-dark mb-3">3.1 — Sidebar Menu Items</h6>
+                                <p class="fs-12 text-muted mb-3">The sidebar uses <code>.nxl-navigation</code> with <code>.nxl-navbar</code> list items. See the live sidebar on the left.</p>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded">
+                                            <h6 class="fw-semibold text-dark mb-2 fs-12">Caption Label</h6>
+                                            <label class="fs-11 text-muted text-uppercase">Navigation</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded">
+                                            <h6 class="fw-semibold text-dark mb-2 fs-12">Menu Item Structure</h6>
+                                            <div class="d-flex align-items-center gap-2 p-2 rounded bg-gray-200">
+                                                <span class="nxl-micon"><i class="feather-airplay"></i></span>
+                                                <span>Dashboards</span>
+                                                <i class="feather-chevron-right ms-auto"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 3.2 Header Elements -->
+                                <h6 class="fw-bold text-dark mb-3">3.2 — Header Elements</h6>
+                                <div class="d-flex flex-wrap gap-3 mb-4">
+                                    <a href="javascript:void(0);" class="nxl-head-link me-0"><i class="feather-search"></i></a>
+                                    <a href="javascript:void(0);" class="nxl-head-link me-0"><i class="feather-maximize"></i></a>
+                                    <a href="javascript:void(0);" class="nxl-head-link me-0"><i class="feather-moon"></i></a>
+                                    <a href="javascript:void(0);" class="nxl-head-link me-0"><i class="feather-clock"></i></a>
+                                    <a href="javascript:void(0);" class="nxl-head-link me-0"><i class="feather-bell"></i></a>
+                                    <img src="refs/duralux/images/1.png" alt="user-image" class="img-fluid user-avtar me-0">
+                                </div>
+
+                                <!-- 3.3 Breadcrumbs -->
+                                <h6 class="fw-bold text-dark mb-3">3.3 — Breadcrumbs</h6>
+                                <ul class="breadcrumb mb-4">
+                                    <li class="breadcrumb-item"><a href="javascript:void(0);">Home</a></li>
+                                    <li class="breadcrumb-item"><a href="javascript:void(0);">Reports</a></li>
+                                    <li class="breadcrumb-item">Sales Report</li>
+                                </ul>
+
+                                <!-- 3.4 Pagination -->
+                                <h6 class="fw-bold text-dark mb-3">3.4 — Pagination</h6>
+                                <ul class="list-unstyled d-flex align-items-center gap-2 mb-0 pagination-common-style">
+                                    <li>
+                                        <a href="javascript:void(0);"><i class="bi bi-arrow-left"></i></a>
+                                    </li>
+                                    <li><a href="javascript:void(0);" class="active">1</a></li>
+                                    <li><a href="javascript:void(0);">2</a></li>
+                                    <li>
+                                        <a href="javascript:void(0);"><i class="bi bi-dot"></i></a>
+                                    </li>
+                                    <li><a href="javascript:void(0);">8</a></li>
+                                    <li><a href="javascript:void(0);">9</a></li>
+                                    <li>
+                                        <a href="javascript:void(0);"><i class="bi bi-arrow-right"></i></a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- Section 4: Form Components -->
+                <!-- ============================================================ -->
+                <div class="row" id="section-4">
+                    <div class="col-12">
+                        <div class="card stretch stretch-full">
+                            <div class="card-header">
+                                <h5 class="card-title">Form Components</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- 4.1 Text Inputs -->
+                                <h6 class="fw-bold text-dark mb-3">4.1 — Text Inputs</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Default</label>
+                                        <input type="text" class="form-control" placeholder="Enter value...">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Filled</label>
+                                        <input type="text" class="form-control" value="John Doe">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Disabled</label>
+                                        <input type="text" class="form-control" placeholder="Disabled" disabled>
+                                    </div>
+                                </div>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Read-only</label>
+                                        <input type="text" class="form-control" value="Read only value" readonly>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">With Input Group</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="feather-search fs-6 text-muted"></i></span>
+                                            <input type="text" class="form-control" placeholder="Search....">
+                                            <span class="input-group-text"><button type="button" class="btn-close"></button></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Search Tags</label>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <a href="javascript:void(0);" class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Projects</a>
+                                            <a href="javascript:void(0);" class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Leads</a>
+                                            <a href="javascript:void(0);" class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Contacts</a>
+                                            <a href="javascript:void(0);" class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Inbox</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 4.2 Select / Dropdown -->
+                                <h6 class="fw-bold text-dark mb-3">4.2 — Select</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Default Select</label>
+                                        <select class="form-select">
+                                            <option selected>Choose option...</option>
+                                            <option value="1">Option 1</option>
+                                            <option value="2">Option 2</option>
+                                            <option value="3">Option 3</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Disabled Select</label>
+                                        <select class="form-select" disabled>
+                                            <option selected>Disabled</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- 4.3 Checkbox and Radio -->
+                                <h6 class="fw-bold text-dark mb-3">4.3 — Checkbox &amp; Radio</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <div class="d-flex flex-wrap gap-4">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="ds-check1" checked="checked">
+                                                <label class="custom-control-label c-pointer" for="ds-check1">Checked</label>
+                                            </div>
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="ds-check2">
+                                                <label class="custom-control-label c-pointer" for="ds-check2">Unchecked</label>
+                                            </div>
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="ds-check3" disabled>
+                                                <label class="custom-control-label c-pointer" for="ds-check3">Disabled</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex flex-wrap gap-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="ds-radio" id="ds-radio1" checked>
+                                                <label class="form-check-label" for="ds-radio1">Selected</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="ds-radio" id="ds-radio2">
+                                                <label class="form-check-label" for="ds-radio2">Default</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="ds-radio-dis" id="ds-radio3" disabled>
+                                                <label class="form-check-label" for="ds-radio3">Disabled</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 4.4 Toggle / Switch -->
+                                <h6 class="fw-bold text-dark mb-3">4.4 — Toggle / Switch</h6>
+                                <div class="d-flex flex-wrap gap-4 mb-4">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="ds-switch1" checked>
+                                        <label class="form-check-label" for="ds-switch1">On</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="ds-switch2">
+                                        <label class="form-check-label" for="ds-switch2">Off</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="ds-switch3" disabled>
+                                        <label class="form-check-label" for="ds-switch3">Disabled</label>
+                                    </div>
+                                </div>
+
+                                <!-- 4.5 Textarea -->
+                                <h6 class="fw-bold text-dark mb-3">4.5 — Textarea</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Default</label>
+                                        <textarea class="form-control" rows="3" placeholder="Enter description..."></textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Disabled</label>
+                                        <textarea class="form-control" rows="3" disabled placeholder="Disabled textarea"></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- 4.7 Form Composition -->
+                                <h6 class="fw-bold text-dark mb-3">4.7 — Form Composition (Filter Dropdown Pattern)</h6>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded">
+                                            <h6 class="fw-semibold text-dark mb-3 fs-13">Filter Options</h6>
+                                            <div class="mb-2">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="ds-f-role" checked="checked">
+                                                    <label class="custom-control-label c-pointer" for="ds-f-role">Role</label>
+                                                </div>
+                                            </div>
+                                            <div class="mb-2">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="ds-f-team" checked="checked">
+                                                    <label class="custom-control-label c-pointer" for="ds-f-team">Team</label>
+                                                </div>
+                                            </div>
+                                            <div class="mb-2">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="ds-f-email" checked="checked">
+                                                    <label class="custom-control-label c-pointer" for="ds-f-email">Email</label>
+                                                </div>
+                                            </div>
+                                            <div class="mb-2">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="ds-f-member" checked="checked">
+                                                    <label class="custom-control-label c-pointer" for="ds-f-member">Member</label>
+                                                </div>
+                                            </div>
+                                            <div class="dropdown-divider"></div>
+                                            <a href="javascript:void(0);" class="d-flex align-items-center gap-2 py-1">
+                                                <i class="feather-plus"></i>
+                                                <span>Create New</span>
+                                            </a>
+                                            <a href="javascript:void(0);" class="d-flex align-items-center gap-2 py-1">
+                                                <i class="feather-filter"></i>
+                                                <span>Manage Filter</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- Section 5: Tables & Data Display -->
+                <!-- ============================================================ -->
+                <div class="row" id="section-5">
+                    <div class="col-12">
+                        <div class="card stretch stretch-full">
+                            <div class="card-header">
+                                <h5 class="card-title">Tables &amp; Data Display</h5>
+                                <div class="card-header-action">
+                                    <div class="card-header-btn">
+                                        <div data-bs-toggle="tooltip" title="Delete">
+                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger" data-bs-toggle="remove"> </a>
+                                        </div>
+                                        <div data-bs-toggle="tooltip" title="Refresh">
+                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning" data-bs-toggle="refresh"> </a>
+                                        </div>
+                                        <div data-bs-toggle="tooltip" title="Maximize/Minimize">
+                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success" data-bs-toggle="expand"> </a>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown" data-bs-offset="25, 25">
+                                            <div data-bs-toggle="tooltip" title="Options">
+                                                <i class="feather-more-vertical"></i>
+                                            </div>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-end">
+                                            <a href="javascript:void(0);" class="dropdown-item"><i class="feather-at-sign"></i>New</a>
+                                            <a href="javascript:void(0);" class="dropdown-item"><i class="feather-calendar"></i>Event</a>
+                                            <a href="javascript:void(0);" class="dropdown-item"><i class="feather-bell"></i>Snoozed</a>
+                                            <a href="javascript:void(0);" class="dropdown-item"><i class="feather-trash-2"></i>Deleted</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a href="javascript:void(0);" class="dropdown-item"><i class="feather-settings"></i>Settings</a>
+                                            <a href="javascript:void(0);" class="dropdown-item"><i class="feather-life-buoy"></i>Tips &amp; Tricks</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body custom-card-action p-0">
+                                <!-- 5.1 Data Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr class="border-b">
+                                                <th scope="row">Users</th>
+                                                <th>Proposal</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
+                                                <th class="text-end">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="avatar-image">
+                                                            <img src="refs/duralux/images/2.png" alt="" class="img-fluid">
+                                                        </div>
+                                                        <a href="javascript:void(0);">
+                                                            <span class="d-block">Archie Cantones</span>
+                                                            <span class="fs-12 d-block fw-normal text-muted">archie@example.com</span>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td><span class="badge bg-gray-200 text-dark">Sent</span></td>
+                                                <td>11/06/2023 10:53</td>
+                                                <td><span class="badge bg-soft-success text-success">Completed</span></td>
+                                                <td class="text-end">
+                                                    <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="avatar-image">
+                                                            <img src="refs/duralux/images/3.png" alt="" class="img-fluid">
+                                                        </div>
+                                                        <a href="javascript:void(0);">
+                                                            <span class="d-block">Holmes Cherryman</span>
+                                                            <span class="fs-12 d-block fw-normal text-muted">holmes@example.com</span>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td><span class="badge bg-gray-200 text-dark">New</span></td>
+                                                <td>11/06/2023 10:53</td>
+                                                <td><span class="badge bg-soft-primary text-primary">In Progress</span></td>
+                                                <td class="text-end">
+                                                    <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="avatar-image">
+                                                            <img src="refs/duralux/images/4.png" alt="" class="img-fluid">
+                                                        </div>
+                                                        <a href="javascript:void(0);">
+                                                            <span class="d-block">Malanie Hanvey</span>
+                                                            <span class="fs-12 d-block fw-normal text-muted">malanie@example.com</span>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td><span class="badge bg-gray-200 text-dark">Sent</span></td>
+                                                <td>11/06/2023 10:53</td>
+                                                <td><span class="badge bg-soft-success text-success">Completed</span></td>
+                                                <td class="text-end">
+                                                    <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="avatar-image">
+                                                            <img src="refs/duralux/images/5.png" alt="" class="img-fluid">
+                                                        </div>
+                                                        <a href="javascript:void(0);">
+                                                            <span class="d-block">Kenneth Hune</span>
+                                                            <span class="fs-12 d-block fw-normal text-muted">kenneth@example.com</span>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td><span class="badge bg-gray-200 text-dark">Returning</span></td>
+                                                <td>11/06/2023 10:53</td>
+                                                <td><span class="badge bg-soft-warning text-warning">Not Interested</span></td>
+                                                <td class="text-end">
+                                                    <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="avatar-image">
+                                                            <img src="refs/duralux/images/6.png" alt="" class="img-fluid">
+                                                        </div>
+                                                        <a href="javascript:void(0);">
+                                                            <span class="d-block">Valentine Maton</span>
+                                                            <span class="fs-12 d-block fw-normal text-muted">valentine@example.com</span>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td><span class="badge bg-gray-200 text-dark">Sent</span></td>
+                                                <td>11/06/2023 10:53</td>
+                                                <td><span class="badge bg-soft-success text-success">Completed</span></td>
+                                                <td class="text-end">
+                                                    <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <ul class="list-unstyled d-flex align-items-center gap-2 mb-0 pagination-common-style">
+                                    <li><a href="javascript:void(0);"><i class="bi bi-arrow-left"></i></a></li>
+                                    <li><a href="javascript:void(0);" class="active">1</a></li>
+                                    <li><a href="javascript:void(0);">2</a></li>
+                                    <li><a href="javascript:void(0);"><i class="bi bi-dot"></i></a></li>
+                                    <li><a href="javascript:void(0);">8</a></li>
+                                    <li><a href="javascript:void(0);">9</a></li>
+                                    <li><a href="javascript:void(0);"><i class="bi bi-arrow-right"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5.3 Metrics / KPIs -->
+                    <div class="col-12">
+                        <div class="card stretch stretch-full">
+                            <div class="card-header">
+                                <h5 class="card-title">Metrics / KPIs (Footer Stats Pattern)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-4">
+                                    <div class="col-lg-3">
+                                        <div class="p-3 border border-dashed rounded">
+                                            <div class="fs-12 text-muted mb-1">Awaiting</div>
+                                            <h6 class="fw-bold text-dark">$5,486</h6>
+                                            <div class="progress mt-2 ht-3">
+                                                <div class="progress-bar bg-primary" role="progressbar" style="width: 81%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="p-3 border border-dashed rounded">
+                                            <div class="fs-12 text-muted mb-1">Completed</div>
+                                            <h6 class="fw-bold text-dark">$9,275</h6>
+                                            <div class="progress mt-2 ht-3">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 82%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="p-3 border border-dashed rounded">
+                                            <div class="fs-12 text-muted mb-1">Rejected</div>
+                                            <h6 class="fw-bold text-dark">$3,868</h6>
+                                            <div class="progress mt-2 ht-3">
+                                                <div class="progress-bar bg-danger" role="progressbar" style="width: 68%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="p-3 border border-dashed rounded">
+                                            <div class="fs-12 text-muted mb-1">Revenue</div>
+                                            <h6 class="fw-bold text-dark">$50,668</h6>
+                                            <div class="progress mt-2 ht-3">
+                                                <div class="progress-bar bg-dark" role="progressbar" style="width: 75%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5.4 Charts -->
+                    <div class="col-12">
+                        <div class="card stretch stretch-full">
+                            <div class="card-header">
+                                <h5 class="card-title">Charts (ApexCharts)</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="fs-12 text-muted">The application uses <strong>ApexCharts</strong> (apexcharts.min.js). Chart containers use simple div IDs:</p>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="p-3 border border-dashed rounded text-center">
+                                            <code class="fs-11">#payment-records-chart</code>
+                                            <div class="fs-12 text-muted mt-1">Area/Bar chart</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 border border-dashed rounded text-center">
+                                            <code class="fs-11">#leads-overview-donut</code>
+                                            <div class="fs-12 text-muted mt-1">Donut chart</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 border border-dashed rounded text-center">
+                                            <code class="fs-11">#total-sales-color-graph</code>
+                                            <div class="fs-12 text-muted mt-1">Area sparkline</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- Section 6: UI Components -->
+                <!-- ============================================================ -->
+                <div class="row" id="section-6">
+                    <!-- 6.1 Buttons -->
+                    <div class="col-12">
+                        <div class="card stretch stretch-full">
+                            <div class="card-header">
+                                <h5 class="card-title">UI Components</h5>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="fw-bold text-dark mb-3">6.1 — Buttons</h6>
+                                <div class="d-flex flex-wrap gap-3 mb-3">
+                                    <a href="javascript:void(0);" class="btn btn-primary">Primary</a>
+                                    <a href="javascript:void(0);" class="btn btn-danger">Danger</a>
+                                    <a href="javascript:void(0);" class="btn btn-success">Success</a>
+                                    <a href="javascript:void(0);" class="btn btn-warning">Warning</a>
+                                    <a href="javascript:void(0);" class="btn btn-info">Info</a>
+                                    <a href="javascript:void(0);" class="btn btn-dark">Dark</a>
+                                    <a href="javascript:void(0);" class="btn btn-light">Light</a>
+                                </div>
+                                <div class="d-flex flex-wrap gap-3 mb-3">
+                                    <a href="javascript:void(0);" class="btn btn-light-brand">Light Brand</a>
+                                    <a href="javascript:void(0);" class="btn btn-outline-primary">Outline Primary</a>
+                                    <a href="javascript:void(0);" class="btn btn-outline-danger">Outline Danger</a>
+                                </div>
+                                <div class="d-flex flex-wrap gap-3 mb-3">
+                                    <a href="javascript:void(0);" class="btn btn-primary btn-sm">Small</a>
+                                    <a href="javascript:void(0);" class="btn btn-primary">Default</a>
+                                    <a href="javascript:void(0);" class="btn btn-primary btn-md">Medium</a>
+                                    <a href="javascript:void(0);" class="btn btn-primary btn-lg">Large</a>
+                                </div>
+                                <div class="d-flex flex-wrap gap-3 mb-4">
+                                    <a href="javascript:void(0);" class="btn btn-primary disabled">Disabled</a>
+                                    <a href="javascript:void(0);" class="btn btn-primary">
+                                        <i class="feather-filter me-2"></i><span>With Icon</span>
+                                    </a>
+                                    <a href="javascript:void(0);" class="btn btn-light-brand">
+                                        <i class="feather-external-link me-2"></i><span>Light Brand + Icon</span>
+                                    </a>
+                                </div>
+
+                                <!-- 6.2 Badges / Tags -->
+                                <h6 class="fw-bold text-dark mb-3">6.2 — Badges / Tags / Status Pills</h6>
+                                <div class="d-flex flex-wrap gap-3 mb-4">
+                                    <span class="badge bg-primary">Primary</span>
+                                    <span class="badge bg-success">Success</span>
+                                    <span class="badge bg-warning">Warning</span>
+                                    <span class="badge bg-danger">Danger</span>
+                                    <span class="badge bg-info">Info</span>
+                                    <span class="badge bg-dark">Dark</span>
+                                    <span class="badge bg-soft-success text-success">Soft Success</span>
+                                    <span class="badge bg-soft-primary text-primary">Soft Primary</span>
+                                    <span class="badge bg-soft-warning text-warning">Soft Warning</span>
+                                    <span class="badge bg-soft-danger text-danger">Soft Danger</span>
+                                    <span class="badge bg-gray-200 text-dark">Gray Tag</span>
+                                    <span class="badge small bg-gray-200 rounded text-dark">Count 5</span>
+                                </div>
+
+                                <!-- 6.3 Dropdown Menu -->
+                                <h6 class="fw-bold text-dark mb-3">6.3 — Dropdown Menu</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-4">
+                                        <div class="dropdown">
+                                            <a href="javascript:void(0);" class="btn btn-light-brand" data-bs-toggle="dropdown">
+                                                <i class="feather-more-vertical me-1"></i> Options Menu
+                                            </a>
+                                            <div class="dropdown-menu">
+                                                <a href="javascript:void(0);" class="dropdown-item"><i class="feather-at-sign"></i>New</a>
+                                                <a href="javascript:void(0);" class="dropdown-item"><i class="feather-calendar"></i>Event</a>
+                                                <a href="javascript:void(0);" class="dropdown-item"><i class="feather-bell"></i>Snoozed</a>
+                                                <a href="javascript:void(0);" class="dropdown-item"><i class="feather-trash-2"></i>Deleted</a>
+                                                <div class="dropdown-divider"></div>
+                                                <a href="javascript:void(0);" class="dropdown-item"><i class="feather-settings"></i>Settings</a>
+                                                <a href="javascript:void(0);" class="dropdown-item"><i class="feather-life-buoy"></i>Tips &amp; Tricks</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 6.4 Notifications -->
+                                <h6 class="fw-bold text-dark mb-3">6.4 — Notification Items</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-8">
+                                        <div class="border rounded p-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="fw-bold text-dark mb-0">Notifications</h6>
+                                                <a href="javascript:void(0);" class="fs-11 text-success text-end ms-auto">
+                                                    <i class="feather-check"></i>
+                                                    <span>Make as Read</span>
+                                                </a>
+                                            </div>
+                                            <div class="notifications-item d-flex align-items-start gap-3 mb-3">
+                                                <img src="refs/duralux/images/2.png" alt="" class="rounded border" style="width:40px;height:40px">
+                                                <div class="notifications-desc">
+                                                    <a href="javascript:void(0);" class="font-body text-truncate-2-line"> <span class="fw-semibold text-dark">Malanie Hanvey</span> We should talk about that at lunch!</a>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="notifications-date text-muted border-bottom border-bottom-dashed fs-12">2 minutes ago</div>
+                                                        <div class="d-flex align-items-center float-end gap-2">
+                                                            <a href="javascript:void(0);" class="d-block wd-8 ht-8 rounded-circle bg-gray-300"></a>
+                                                            <a href="javascript:void(0);" class="text-danger"><i class="feather-x fs-12"></i></a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="notifications-item d-flex align-items-start gap-3">
+                                                <img src="refs/duralux/images/3.png" alt="" class="rounded border" style="width:40px;height:40px">
+                                                <div class="notifications-desc">
+                                                    <a href="javascript:void(0);" class="font-body text-truncate-2-line"> <span class="fw-semibold text-dark">Valentine Maton</span> You can download the latest invoices now.</a>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="notifications-date text-muted border-bottom border-bottom-dashed fs-12">36 minutes ago</div>
+                                                        <div class="d-flex align-items-center float-end gap-2">
+                                                            <a href="javascript:void(0);" class="d-block wd-8 ht-8 rounded-circle bg-gray-300"></a>
+                                                            <a href="javascript:void(0);" class="text-danger"><i class="feather-x fs-12"></i></a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 6.5 Avatars -->
+                                <h6 class="fw-bold text-dark mb-3">6.5 — Avatars</h6>
+                                <div class="d-flex flex-wrap align-items-end gap-3 mb-3">
+                                    <div class="text-center">
+                                        <div class="avatar-image avatar-sm">
+                                            <img src="refs/duralux/images/1.png" alt="" class="img-fluid">
+                                        </div>
+                                        <div class="fs-11 text-muted mt-1">sm</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-image">
+                                            <img src="refs/duralux/images/1.png" alt="" class="img-fluid">
+                                        </div>
+                                        <div class="fs-11 text-muted mt-1">default</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-image avatar-lg">
+                                            <img src="refs/duralux/images/1.png" alt="" class="img-fluid">
+                                        </div>
+                                        <div class="fs-11 text-muted mt-1">lg</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap align-items-end gap-3 mb-3">
+                                    <div class="text-center">
+                                        <div class="avatar-text avatar-xs bg-danger"> </div>
+                                        <div class="fs-11 text-muted mt-1">xs</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text avatar-sm">
+                                            <i class="feather-star"></i>
+                                        </div>
+                                        <div class="fs-11 text-muted mt-1">sm</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text">
+                                            <i class="feather-star"></i>
+                                        </div>
+                                        <div class="fs-11 text-muted mt-1">default</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text avatar-md">
+                                            <i class="feather-chevron-right"></i>
+                                        </div>
+                                        <div class="fs-11 text-muted mt-1">md</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text avatar-lg bg-gray-200">
+                                            <i class="feather-dollar-sign"></i>
+                                        </div>
+                                        <div class="fs-11 text-muted mt-1">lg</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text avatar-md bg-primary text-white">
+                                            <i class="feather-plus"></i>
+                                        </div>
+                                        <div class="fs-11 text-muted mt-1">primary</div>
+                                    </div>
+                                </div>
+
+                                <!-- 6.6 Card Header Controls -->
+                                <h6 class="fw-bold text-dark mb-3">6.6 — Card Header Controls</h6>
+                                <div class="d-flex align-items-center gap-3 mb-4">
+                                    <div class="card-header-btn d-flex gap-2">
+                                        <div data-bs-toggle="tooltip" title="Delete">
+                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"> </a>
+                                        </div>
+                                        <div data-bs-toggle="tooltip" title="Refresh">
+                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"> </a>
+                                        </div>
+                                        <div data-bs-toggle="tooltip" title="Maximize/Minimize">
+                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"> </a>
+                                        </div>
+                                    </div>
+                                    <span class="fs-12 text-muted">macOS-style card controls (.avatar-text .avatar-xs .bg-danger/warning/success)</span>
+                                </div>
+
+                                <!-- 6.7 Progress Bars -->
+                                <h6 class="fw-bold text-dark mb-3">6.7 — Progress Bars</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <div class="fs-12 text-muted mb-1">Primary (56%)</div>
+                                        <div class="progress ht-3">
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: 56%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="fs-12 text-muted mb-1">Warning (63%)</div>
+                                        <div class="progress ht-3">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 63%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="fs-12 text-muted mb-1">Success (78%)</div>
+                                        <div class="progress ht-3">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 78%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="fs-12 text-muted mb-1">Danger (46%)</div>
+                                        <div class="progress ht-3">
+                                            <div class="progress-bar bg-danger" role="progressbar" style="width: 46%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="fs-12 text-muted mb-1">Dark (75%)</div>
+                                        <div class="progress ht-3">
+                                            <div class="progress-bar bg-dark" role="progressbar" style="width: 75%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 6.8 Upcoming Schedule Pattern -->
+                                <h6 class="fw-bold text-dark mb-3">6.8 — Schedule / Event Items</h6>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <div class="p-3 border border-dashed rounded-3 mb-3">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="wd-7 ht-40 rounded-pill bg-primary"></div>
+                                                    <div>
+                                                        <p class="fw-bold mb-1 text-truncate-1-line">Meeting with Client</p>
+                                                        <p class="fs-12 text-muted mb-0">10:00am - 11:30am</p>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 border border-dashed rounded-3 mb-3">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="wd-7 ht-40 rounded-pill bg-warning"></div>
+                                                    <div>
+                                                        <p class="fw-bold mb-1 text-truncate-1-line">Team Standup</p>
+                                                        <p class="fs-12 text-muted mb-0">02:00pm - 02:30pm</p>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 border border-dashed rounded-3">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="wd-7 ht-40 rounded-pill bg-success"></div>
+                                                    <div>
+                                                        <p class="fw-bold mb-1 text-truncate-1-line">Sprint Review</p>
+                                                        <p class="fs-12 text-muted mb-0">04:00pm - 05:00pm</p>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- Section 7: Layout & Spacing -->
+                <!-- ============================================================ -->
+                <div class="row" id="section-7">
+                    <div class="col-12">
+                        <div class="card stretch stretch-full">
+                            <div class="card-header">
+                                <h5 class="card-title">Layout &amp; Spacing</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Shell Structure -->
+                                <h6 class="fw-bold text-dark mb-3">Application Shell Structure</h6>
+                                <div class="p-3 border border-dashed rounded mb-4">
+                                    <div class="d-flex gap-3">
+                                        <div class="p-2 bg-gray-200 rounded text-center" style="width:200px">
+                                            <span class="fs-11 fw-semibold">nav.nxl-navigation</span>
+                                            <div class="fs-10 text-muted">Sidebar (fixed left)</div>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <div class="p-2 bg-gray-200 rounded text-center mb-2">
+                                                <span class="fs-11 fw-semibold">header.nxl-header</span>
+                                                <div class="fs-10 text-muted">Fixed top bar</div>
+                                            </div>
+                                            <div class="p-2 bg-gray-200 rounded text-center">
+                                                <span class="fs-11 fw-semibold">main.nxl-container > .nxl-content</span>
+                                                <div class="fs-10 text-muted">Page header + .main-content</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Layout Pattern: Dashboard -->
+                                <h6 class="fw-bold text-dark mb-3">Layout Pattern: Dashboard KPI Row</h6>
+                                <div class="p-3 border border-dashed rounded mb-4">
+                                    <div class="row g-2">
+                                        <div class="col-3"><div class="p-2 bg-gray-200 rounded text-center fs-11">.col-xxl-3 .col-md-6</div></div>
+                                        <div class="col-3"><div class="p-2 bg-gray-200 rounded text-center fs-11">.col-xxl-3 .col-md-6</div></div>
+                                        <div class="col-3"><div class="p-2 bg-gray-200 rounded text-center fs-11">.col-xxl-3 .col-md-6</div></div>
+                                        <div class="col-3"><div class="p-2 bg-gray-200 rounded text-center fs-11">.col-xxl-3 .col-md-6</div></div>
+                                    </div>
+                                </div>
+
+                                <!-- Layout Pattern: Content + Sidebar -->
+                                <h6 class="fw-bold text-dark mb-3">Layout Pattern: Main + Sidebar (8+4)</h6>
+                                <div class="p-3 border border-dashed rounded mb-4">
+                                    <div class="row g-2">
+                                        <div class="col-8"><div class="p-3 bg-gray-200 rounded text-center fs-11">.col-xxl-8 (Table / Chart)</div></div>
+                                        <div class="col-4"><div class="p-3 bg-gray-200 rounded text-center fs-11">.col-xxl-4 (Sidebar card)</div></div>
+                                    </div>
+                                </div>
+
+                                <!-- Layout Pattern: Thirds -->
+                                <h6 class="fw-bold text-dark mb-3">Layout Pattern: Three Columns (Mini Cards)</h6>
+                                <div class="p-3 border border-dashed rounded mb-4">
+                                    <div class="row g-2">
+                                        <div class="col-4"><div class="p-2 bg-gray-200 rounded text-center fs-11">.col-lg-4</div></div>
+                                        <div class="col-4"><div class="p-2 bg-gray-200 rounded text-center fs-11">.col-lg-4</div></div>
+                                        <div class="col-4"><div class="p-2 bg-gray-200 rounded text-center fs-11">.col-lg-4</div></div>
+                                    </div>
+                                </div>
+
+                                <!-- Card Patterns -->
+                                <h6 class="fw-bold text-dark mb-3">Card Structure</h6>
+                                <div class="p-3 border border-dashed rounded mb-3">
+                                    <code class="fs-11">.card .stretch .stretch-full</code>
+                                    <div class="fs-10 text-muted mt-1">Cards use <code>.stretch</code> and <code>.stretch-full</code> to fill their column height. Card sections: <code>.card-header</code>, <code>.card-body</code>, <code>.card-footer</code>. Action area: <code>.card-header-action</code> with <code>.card-header-btn</code>.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- Section 8: Motion & Interaction -->
+                <!-- ============================================================ -->
+                <div class="row" id="section-8">
+                    <div class="col-12">
+                        <div class="card stretch stretch-full">
+                            <div class="card-header">
+                                <h5 class="card-title">Motion &amp; Interaction</h5>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="fw-bold text-dark mb-3">Sidebar Transitions</h6>
+                                <p class="fs-12 text-muted mb-3">The sidebar supports collapsed/expanded states via <code>#menu-mini-button</code> / <code>#menu-expend-button</code>. Toggling adds/removes a class on the body, and the sidebar transitions width with CSS.</p>
+
+                                <h6 class="fw-bold text-dark mb-3">Hover Transitions</h6>
+                                <div class="d-flex flex-wrap gap-3 mb-4">
+                                    <a href="javascript:void(0);" class="btn btn-primary">Hover this button</a>
+                                    <a href="javascript:void(0);" class="btn btn-light-brand">Hover light brand</a>
+                                    <div class="avatar-text avatar-md">
+                                        <i class="feather-chevron-right"></i>
+                                    </div>
+                                </div>
+
+                                <h6 class="fw-bold text-dark mb-3">Table Row Hover</h6>
+                                <div class="table-responsive mb-4">
+                                    <table class="table table-hover mb-0">
+                                        <tbody>
+                                            <tr><td class="fs-12">Hover over this row to see the highlight transition</td><td class="fs-12 text-muted">Uses .table-hover</td></tr>
+                                            <tr><td class="fs-12">Another row for comparison</td><td class="fs-12 text-muted">Smooth background transition</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <h6 class="fw-bold text-dark mb-3">Dropdown Animation</h6>
+                                <p class="fs-12 text-muted mb-3">Dropdowns use Bootstrap's built-in transitions. The theme applies smooth opacity/transform transitions on <code>.dropdown-menu</code>.</p>
+
+                                <h6 class="fw-bold text-dark mb-3">Dark/Light Theme Toggle</h6>
+                                <p class="fs-12 text-muted mb-3">Use the <i class="feather-moon"></i> / <i class="feather-sun"></i> toggle in the header to switch themes. All colors, backgrounds and borders transition smoothly between modes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- Section 9: Icons -->
+                <!-- ============================================================ -->
+                <div class="row" id="section-9">
+                    <div class="col-12">
+                        <div class="card stretch stretch-full">
+                            <div class="card-header">
+                                <h5 class="card-title">Icons (Feather Icons)</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="fs-12 text-muted mb-3">The application uses <strong>Feather Icons</strong> via CSS classes (<code>.feather-*</code>). Below are all icons found in the application, organized by context.</p>
+
+                                <!-- Navigation Icons -->
+                                <h6 class="fw-bold text-dark mb-3">Navigation</h6>
+                                <div class="d-flex flex-wrap gap-4 mb-4">
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-airplay"></i></div>
+                                        <div class="fs-10 text-muted mt-1">airplay</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-cast"></i></div>
+                                        <div class="fs-10 text-muted mt-1">cast</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-send"></i></div>
+                                        <div class="fs-10 text-muted mt-1">send</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-at-sign"></i></div>
+                                        <div class="fs-10 text-muted mt-1">at-sign</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-dollar-sign"></i></div>
+                                        <div class="fs-10 text-muted mt-1">dollar-sign</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-users"></i></div>
+                                        <div class="fs-10 text-muted mt-1">users</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-alert-circle"></i></div>
+                                        <div class="fs-10 text-muted mt-1">alert-circle</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-briefcase"></i></div>
+                                        <div class="fs-10 text-muted mt-1">briefcase</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-layout"></i></div>
+                                        <div class="fs-10 text-muted mt-1">layout</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-settings"></i></div>
+                                        <div class="fs-10 text-muted mt-1">settings</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-power"></i></div>
+                                        <div class="fs-10 text-muted mt-1">power</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-life-buoy"></i></div>
+                                        <div class="fs-10 text-muted mt-1">life-buoy</div>
+                                    </div>
+                                </div>
+
+                                <!-- Header / Action Icons -->
+                                <h6 class="fw-bold text-dark mb-3">Header &amp; Actions</h6>
+                                <div class="d-flex flex-wrap gap-4 mb-4">
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-search"></i></div>
+                                        <div class="fs-10 text-muted mt-1">search</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-bell"></i></div>
+                                        <div class="fs-10 text-muted mt-1">bell</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-clock"></i></div>
+                                        <div class="fs-10 text-muted mt-1">clock</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-moon"></i></div>
+                                        <div class="fs-10 text-muted mt-1">moon</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-sun"></i></div>
+                                        <div class="fs-10 text-muted mt-1">sun</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-maximize"></i></div>
+                                        <div class="fs-10 text-muted mt-1">maximize</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-minimize"></i></div>
+                                        <div class="fs-10 text-muted mt-1">minimize</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-align-left"></i></div>
+                                        <div class="fs-10 text-muted mt-1">align-left</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-align-right"></i></div>
+                                        <div class="fs-10 text-muted mt-1">align-right</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-plus"></i></div>
+                                        <div class="fs-10 text-muted mt-1">plus</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-filter"></i></div>
+                                        <div class="fs-10 text-muted mt-1">filter</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-more-vertical"></i></div>
+                                        <div class="fs-10 text-muted mt-1">more-vertical</div>
+                                    </div>
+                                </div>
+
+                                <!-- Status / Data Icons -->
+                                <h6 class="fw-bold text-dark mb-3">Status &amp; Data</h6>
+                                <div class="d-flex flex-wrap gap-4 mb-4">
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-activity"></i></div>
+                                        <div class="fs-10 text-muted mt-1">activity</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-star"></i></div>
+                                        <div class="fs-10 text-muted mt-1">star</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-file-text"></i></div>
+                                        <div class="fs-10 text-muted mt-1">file-text</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-file-plus"></i></div>
+                                        <div class="fs-10 text-muted mt-1">file-plus</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-user"></i></div>
+                                        <div class="fs-10 text-muted mt-1">user</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-user-plus"></i></div>
+                                        <div class="fs-10 text-muted mt-1">user-plus</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-check"></i></div>
+                                        <div class="fs-10 text-muted mt-1">check</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-x"></i></div>
+                                        <div class="fs-10 text-muted mt-1">x</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-download"></i></div>
+                                        <div class="fs-10 text-muted mt-1">download</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-external-link"></i></div>
+                                        <div class="fs-10 text-muted mt-1">external-link</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-trash-2"></i></div>
+                                        <div class="fs-10 text-muted mt-1">trash-2</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-calendar"></i></div>
+                                        <div class="fs-10 text-muted mt-1">calendar</div>
+                                    </div>
+                                </div>
+
+                                <!-- Directional Icons -->
+                                <h6 class="fw-bold text-dark mb-3">Directional</h6>
+                                <div class="d-flex flex-wrap gap-4 mb-4">
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-chevron-right"></i></div>
+                                        <div class="fs-10 text-muted mt-1">chevron-right</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-arrow-left"></i></div>
+                                        <div class="fs-10 text-muted mt-1">arrow-left</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-arrow-right"></i></div>
+                                        <div class="fs-10 text-muted mt-1">arrow-right</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-log-out"></i></div>
+                                        <div class="fs-10 text-muted mt-1">log-out</div>
+                                    </div>
+                                </div>
+
+                                <!-- Misc Icons from mega menu -->
+                                <h6 class="fw-bold text-dark mb-3">Miscellaneous</h6>
+                                <div class="d-flex flex-wrap gap-4 mb-3">
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-sunrise"></i></div>
+                                        <div class="fs-10 text-muted mt-1">sunrise</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-layers"></i></div>
+                                        <div class="fs-10 text-muted mt-1">layers</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-link-2"></i></div>
+                                        <div class="fs-10 text-muted mt-1">link-2</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-cpu"></i></div>
+                                        <div class="fs-10 text-muted mt-1">cpu</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-bluetooth"></i></div>
+                                        <div class="fs-10 text-muted mt-1">bluetooth</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-bar-chart-2"></i></div>
+                                        <div class="fs-10 text-muted mt-1">bar-chart-2</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-shield"></i></div>
+                                        <div class="fs-10 text-muted mt-1">shield</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-book"></i></div>
+                                        <div class="fs-10 text-muted mt-1">book</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-command"></i></div>
+                                        <div class="fs-10 text-muted mt-1">command</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="avatar-text"><i class="feather-feather"></i></div>
+                                        <div class="fs-10 text-muted mt-1">feather</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- [ Main Content ] end -->
+        </div>
+    </main>
+
+    <!-- ============================================================ -->
+    <!-- Scripts -->
+    <!-- ============================================================ -->
+    <script src="refs/duralux/js/vendors.min.js"></script>
+    <script src="refs/duralux/js/common-init.min.js"></script>
+    <script src="refs/duralux/js/theme-customizer-init.min.js"></script>
+</body>
+</html>

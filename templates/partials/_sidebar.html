@@ -1,0 +1,118 @@
+{% load static %}
+{% load utils_tags %}
+<nav class="nxl-navigation">
+    <div class="navbar-wrapper">
+        <div class="m-header">
+            <a href="/" class="b-brand">
+                <img src="{% static 'images/logo-full.png' %}" alt="SCS" class="logo logo-lg">
+                <img src="{% static 'images/logo-abbr.png' %}" alt="SCS" class="logo logo-sm">
+            </a>
+        </div>
+        <div class="navbar-content">
+            <ul class="nxl-navbar">
+                <li class="nxl-item nxl-caption">
+                    <label>Principal</label>
+                </li>
+                <li class="nxl-item">
+                    <a href="/dashboard/" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-airplay"></i></span>
+                        <span class="nxl-mtext">Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="nxl-item nxl-caption">
+                    <label>Cadastros</label>
+                </li>
+                <li class="nxl-item">
+                    <a href="/clients/" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-users"></i></span>
+                        <span class="nxl-mtext">Clientes</span>
+                    </a>
+                </li>
+                <li class="nxl-item">
+                    <a href="/insurers/" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-shield"></i></span>
+                        <span class="nxl-mtext">Seguradoras</span>
+                    </a>
+                </li>
+                <li class="nxl-item">
+                    <a href="/coverages/types/" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-layers"></i></span>
+                        <span class="nxl-mtext">Coberturas</span>
+                    </a>
+                </li>
+
+                <li class="nxl-item nxl-caption">
+                    <label>Operações</label>
+                </li>
+                <li class="nxl-item nxl-hasmenu">
+                    <a href="javascript:void(0);" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-file-text"></i></span>
+                        <span class="nxl-mtext">Apólices</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                    </a>
+                    <ul class="nxl-submenu">
+                        <li class="nxl-item"><a class="nxl-link" href="/policies/proposals/">Propostas</a></li>
+                        <li class="nxl-item"><a class="nxl-link" href="/policies/">Apólices</a></li>
+                    </ul>
+                </li>
+                <li class="nxl-item">
+                    <a href="/claims/" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-alert-circle"></i></span>
+                        <span class="nxl-mtext">Sinistros</span>
+                    </a>
+                </li>
+                <li class="nxl-item">
+                    <a href="/endorsements/" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-edit-3"></i></span>
+                        <span class="nxl-mtext">Endossos</span>
+                    </a>
+                </li>
+                <li class="nxl-item">
+                    <a href="/renewals/" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-refresh-cw"></i></span>
+                        <span class="nxl-mtext">Renovações</span>
+                    </a>
+                </li>
+
+                <li class="nxl-item nxl-caption">
+                    <label>Comercial</label>
+                </li>
+                <li class="nxl-item nxl-hasmenu">
+                    <a href="javascript:void(0);" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-target"></i></span>
+                        <span class="nxl-mtext">CRM</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                    </a>
+                    <ul class="nxl-submenu">
+                        <li class="nxl-item"><a class="nxl-link" href="/crm/kanban/">Kanban</a></li>
+                        <li class="nxl-item"><a class="nxl-link" href="/crm/deals/">Negociações</a></li>
+                        <li class="nxl-item"><a class="nxl-link" href="/crm/pipelines/">Pipelines</a></li>
+                    </ul>
+                </li>
+
+                <li class="nxl-item nxl-caption">
+                    <label>Análise</label>
+                </li>
+                <li class="nxl-item">
+                    <a href="/reports/" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-bar-chart-2"></i></span>
+                        <span class="nxl-mtext">Relatórios</span>
+                    </a>
+                </li>
+
+                {% if user.can_manage_users %}
+                <li class="nxl-item nxl-caption">
+                    <label>Administração</label>
+                </li>
+                <li class="nxl-item">
+                    <a href="{% url 'accounts:user_list' %}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-settings"></i></span>
+                        <span class="nxl-mtext">Usuários</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

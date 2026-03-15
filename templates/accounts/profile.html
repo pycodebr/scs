@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Meu Perfil{% endblock %}
+{% block page_title %}Meu Perfil{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item">Perfil</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Dados Pessoais</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nome <span class="text-danger">*</span></label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Sobrenome</label>
+                            {{ form.last_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Telefone</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Avatar</label>
+                            {{ form.avatar }}
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="feather-save me-2"></i>Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card stretch stretch-full">
+            <div class="card-body text-center">
+                {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" alt="" class="rounded-circle mb-3" style="width:80px;height:80px;object-fit:cover;">
+                {% else %}
+                <div class="avatar-text avatar-lg bg-primary text-white mx-auto mb-3" style="width:80px;height:80px;font-size:24px;">
+                    {{ user.get_initials }}
+                </div>
+                {% endif %}
+                <h5 class="fw-bold text-dark">{{ user.get_full_name }}</h5>
+                <p class="fs-12 text-muted">{{ user.email }}</p>
+                <span class="badge bg-gray-200 text-dark">{{ user.get_role_display }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

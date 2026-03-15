@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Confirmar Exclusão</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-soft-danger">
+                    <i class="feather-alert-triangle me-2"></i>
+                    Tem certeza que deseja excluir <strong>{{ object }}</strong>? Esta ação não pode ser desfeita.
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="feather-trash-2 me-2"></i>Confirmar Exclusão
+                        </button>
+                        <a href="javascript:history.back()" class="btn btn-light">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

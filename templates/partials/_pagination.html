@@ -1,0 +1,31 @@
+{% if page_obj.has_other_pages %}
+<ul class="list-unstyled d-flex align-items-center gap-2 mb-0 pagination-common-style">
+    {% if page_obj.has_previous %}
+    <li>
+        <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+    </li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <li><a href="javascript:void(0);" class="active">{{ num }}</a></li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <li>
+            <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+        </li>
+        {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+        <li><a href="javascript:void(0);"><i class="bi bi-dot"></i></a></li>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <li>
+        <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+            <i class="bi bi-arrow-right"></i>
+        </a>
+    </li>
+    {% endif %}
+</ul>
+{% endif %}
