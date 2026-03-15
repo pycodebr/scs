@@ -1238,10 +1238,10 @@ class BrokerFilterMixin:
 
 ### Fase 6 — Polish e Refinamento (Semana 12)
 
-- [ ] Revisão geral de UI/UX conforme design system
-- [ ] Ajustes de responsividade
-- [ ] Seed data para demonstração
-- [ ] Validações finais de permissões
+- [x] Revisão geral de UI/UX conforme design system
+- [x] Ajustes de responsividade
+- [x] Seed data para demonstração
+- [x] Validações finais de permissões
 
 ---
 
