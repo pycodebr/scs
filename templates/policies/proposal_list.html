@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Propostas{% endblock %}
+{% block page_title %}Propostas{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item">Propostas</li>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'policies:proposal_create' %}" class="btn btn-primary">
+    <i class="feather-plus me-2"></i>
+    <span>Nova Proposta</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Lista de Propostas</h5>
+                <div class="card-header-action">
+                    <form method="get" class="d-flex gap-2">
+                        <select name="status" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                            <option value="">Todos os status</option>
+                            <option value="draft" {% if request.GET.status == 'draft' %}selected{% endif %}>Rascunho</option>
+                            <option value="submitted" {% if request.GET.status == 'submitted' %}selected{% endif %}>Enviada</option>
+                            <option value="under_analysis" {% if request.GET.status == 'under_analysis' %}selected{% endif %}>Em Analise</option>
+                            <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Aprovada</option>
+                            <option value="rejected" {% if request.GET.status == 'rejected' %}selected{% endif %}>Recusada</option>
+                            <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelada</option>
+                        </select>
+                        <div class="input-group input-group-sm" style="width:250px">
+                            <input type="text" name="q" class="form-control" placeholder="Buscar..." value="{{ request.GET.q|default:'' }}">
+                            <button type="submit" class="btn btn-light-brand">
+                                <i class="feather-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Proposta</th>
+                                <th>Cliente</th>
+                                <th>Seguradora</th>
+                                <th>Tipo</th>
+                                <th>Data Envio</th>
+                                <th>Premio</th>
+                                <th>Status</th>
+                                <th class="text-end">Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for proposal in proposals %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'policies:proposal_detail' proposal.pk %}">
+                                        {{ proposal.proposal_number }}
+                                    </a>
+                                </td>
+                                <td>{{ proposal.client.name }}</td>
+                                <td>{{ proposal.insurer.name }}</td>
+                                <td>{{ proposal.insurance_type.name }}</td>
+                                <td>{{ proposal.submission_date|date:'d/m/Y' }}</td>
+                                <td>R$ {{ proposal.premium_amount|floatformat:2 }}</td>
+                                <td>
+                                    {% if proposal.status == 'draft' %}
+                                    <span class="badge bg-soft-secondary text-secondary">Rascunho</span>
+                                    {% elif proposal.status == 'submitted' %}
+                                    <span class="badge bg-soft-info text-info">Enviada</span>
+                                    {% elif proposal.status == 'under_analysis' %}
+                                    <span class="badge bg-soft-warning text-warning">Em Analise</span>
+                                    {% elif proposal.status == 'approved' %}
+                                    <span class="badge bg-soft-success text-success">Aprovada</span>
+                                    {% elif proposal.status == 'rejected' %}
+                                    <span class="badge bg-soft-danger text-danger">Recusada</span>
+                                    {% elif proposal.status == 'cancelled' %}
+                                    <span class="badge bg-soft-dark text-dark">Cancelada</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="hstack gap-2 justify-content-end">
+                                        <a href="{% url 'policies:proposal_detail' proposal.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Ver">
+                                            <i class="feather-eye"></i>
+                                        </a>
+                                        <a href="{% url 'policies:proposal_update' proposal.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Editar">
+                                            <i class="feather-edit"></i>
+                                        </a>
+                                        {% if proposal.status == 'approved' %}
+                                        <a href="{% url 'policies:proposal_convert' proposal.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Converter em Apolice">
+                                            <i class="feather-arrow-right-circle"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    <i class="feather-file-text fs-1 mb-3 d-block"></i>
+                                    Nenhuma proposta encontrada.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if page_obj.has_other_pages %}
+            <div class="card-footer">
+                {% include 'partials/_pagination.html' %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

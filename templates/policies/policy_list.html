@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Apolices{% endblock %}
+{% block page_title %}Apolices{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item">Apolices</li>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'policies:policy_export' %}" class="btn btn-light-brand">
+    <i class="feather-download me-2"></i>
+    <span>Exportar CSV</span>
+</a>
+<a href="{% url 'policies:policy_create' %}" class="btn btn-primary">
+    <i class="feather-plus me-2"></i>
+    <span>Nova Apolice</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Lista de Apolices</h5>
+                <div class="card-header-action">
+                    <form method="get" class="d-flex gap-2">
+                        <select name="status" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                            <option value="">Todos os status</option>
+                            <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Ativa</option>
+                            <option value="expired" {% if request.GET.status == 'expired' %}selected{% endif %}>Vencida</option>
+                            <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelada</option>
+                            <option value="suspended" {% if request.GET.status == 'suspended' %}selected{% endif %}>Suspensa</option>
+                            <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pendente</option>
+                        </select>
+                        <div class="input-group input-group-sm" style="width:250px">
+                            <input type="text" name="q" class="form-control" placeholder="Buscar..." value="{{ request.GET.q|default:'' }}">
+                            <button type="submit" class="btn btn-light-brand">
+                                <i class="feather-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Apolice</th>
+                                <th>Cliente</th>
+                                <th>Seguradora</th>
+                                <th>Vigencia</th>
+                                <th>Premio</th>
+                                <th>Status</th>
+                                <th class="text-end">Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for policy in policies %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'policies:policy_detail' policy.pk %}">
+                                        {{ policy.policy_number }}
+                                    </a>
+                                </td>
+                                <td>{{ policy.client.name }}</td>
+                                <td>{{ policy.insurer.name }}</td>
+                                <td>{{ policy.start_date|date:'d/m/Y' }} a {{ policy.end_date|date:'d/m/Y' }}</td>
+                                <td>R$ {{ policy.premium_amount|floatformat:2 }}</td>
+                                <td>
+                                    {% if policy.status == 'active' %}
+                                    <span class="badge bg-soft-success text-success">Ativa</span>
+                                    {% elif policy.status == 'expired' %}
+                                    <span class="badge bg-soft-warning text-warning">Vencida</span>
+                                    {% elif policy.status == 'cancelled' %}
+                                    <span class="badge bg-soft-danger text-danger">Cancelada</span>
+                                    {% elif policy.status == 'suspended' %}
+                                    <span class="badge bg-soft-dark text-dark">Suspensa</span>
+                                    {% elif policy.status == 'pending' %}
+                                    <span class="badge bg-soft-info text-info">Pendente</span>
+                                    {% endif %}
+                                    {% if policy.is_expiring_soon %}
+                                    <span class="badge bg-soft-warning text-warning ms-1">Vence em breve</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="hstack gap-2 justify-content-end">
+                                        <a href="{% url 'policies:policy_detail' policy.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Ver">
+                                            <i class="feather-eye"></i>
+                                        </a>
+                                        <a href="{% url 'policies:policy_update' policy.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Editar">
+                                            <i class="feather-edit"></i>
+                                        </a>
+                                        <a href="{% url 'policies:policy_delete' policy.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Excluir">
+                                            <i class="feather-trash-2"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <i class="feather-file-text fs-1 mb-3 d-block"></i>
+                                    Nenhuma apolice encontrada.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if page_obj.has_other_pages %}
+            <div class="card-footer">
+                {% include 'partials/_pagination.html' %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

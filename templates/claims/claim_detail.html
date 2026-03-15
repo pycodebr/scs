@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}Sinistro {{ claim.claim_number }}{% endblock %}
+{% block page_title %}Detalhes do Sinistro{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'claims:claim_list' %}">Sinistros</a></li>
+<li class="breadcrumb-item">{{ claim.claim_number }}</li>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'claims:claim_update' claim.pk %}" class="btn btn-light-brand">
+    <i class="feather-edit me-2"></i>
+    <span>Editar</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card stretch stretch-full">
+            <div class="card-body text-center">
+                <div class="avatar-text avatar-lg bg-danger text-white mx-auto mb-3" style="width:80px;height:80px;font-size:24px;">
+                    <i class="feather-alert-circle"></i>
+                </div>
+                <h5 class="fw-bold text-dark">{{ claim.claim_number }}</h5>
+                {% if claim.status == 'open' %}
+                <span class="badge bg-soft-info text-info">Aberto</span>
+                {% elif claim.status == 'under_analysis' %}
+                <span class="badge bg-soft-warning text-warning">Em Analise</span>
+                {% elif claim.status == 'documentation_pending' %}
+                <span class="badge bg-soft-secondary text-secondary">Pendente Doc.</span>
+                {% elif claim.status == 'approved' %}
+                <span class="badge bg-soft-success text-success">Aprovado</span>
+                {% elif claim.status == 'partially_approved' %}
+                <span class="badge bg-soft-primary text-primary">Parc. Aprovado</span>
+                {% elif claim.status == 'denied' %}
+                <span class="badge bg-soft-danger text-danger">Negado</span>
+                {% elif claim.status == 'paid' %}
+                <span class="badge bg-soft-success text-success">Pago</span>
+                {% elif claim.status == 'closed' %}
+                <span class="badge bg-soft-dark text-dark">Encerrado</span>
+                {% endif %}
+                <div class="mt-3">
+                    <div class="fs-12 text-muted">Corretor</div>
+                    <div class="fw-semibold">{{ claim.broker.get_full_name }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Valores</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="fs-12 text-muted mb-1">Valor Reclamado</div>
+                        <div class="fw-semibold fs-16">R$ {{ claim.claimed_amount|floatformat:2 }}</div>
+                    </div>
+                    {% if claim.approved_amount is not None %}
+                    <div class="col-12">
+                        <div class="fs-12 text-muted mb-1">Valor Aprovado</div>
+                        <div class="fw-semibold fs-16 text-success">R$ {{ claim.approved_amount|floatformat:2 }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Informacoes</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="fs-12 text-muted mb-1">Cliente</div>
+                        <div class="fw-semibold">
+                            <a href="{% url 'clients:client_detail' claim.client.pk %}">{{ claim.client.name }}</a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="fs-12 text-muted mb-1">Apolice</div>
+                        <div class="fw-semibold">
+                            <a href="{% url 'policies:policy_detail' claim.policy.pk %}">{{ claim.policy.policy_number }}</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="fs-12 text-muted mb-1">Data da Ocorrencia</div>
+                        <div class="fw-semibold">{{ claim.occurrence_date|date:'d/m/Y' }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="fs-12 text-muted mb-1">Data da Notificacao</div>
+                        <div class="fw-semibold">{{ claim.notification_date|date:'d/m/Y' }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="fs-12 text-muted mb-1">Data de Resolucao</div>
+                        <div class="fw-semibold">{{ claim.resolution_date|date:'d/m/Y'|default:'-' }}</div>
+                    </div>
+                    {% if claim.location %}
+                    <div class="col-md-12">
+                        <div class="fs-12 text-muted mb-1">Local da Ocorrencia</div>
+                        <div class="fw-semibold">{{ claim.location }}</div>
+                    </div>
+                    {% endif %}
+                    <div class="col-md-12">
+                        <div class="fs-12 text-muted mb-1">Descricao</div>
+                        <div class="fw-semibold">{{ claim.description|linebreaksbr }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if claim.resolution_notes %}
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Observacoes da Resolucao</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ claim.resolution_notes|linebreaksbr }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Documentos -->
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Documentos</h5>
+            </div>
+            <div class="card-body">
+                {% if documents %}
+                <div class="table-responsive">
+                    <table class="table table-sm mb-3">
+                        <thead>
+                            <tr>
+                                <th>Titulo</th>
+                                <th>Tipo</th>
+                                <th>Enviado por</th>
+                                <th>Data</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in documents %}
+                            <tr>
+                                <td>
+                                    <a href="{{ doc.file.url }}" target="_blank">
+                                        <i class="feather-paperclip me-1"></i>{{ doc.title }}
+                                    </a>
+                                </td>
+                                <td>{{ doc.get_document_type_display }}</td>
+                                <td>{{ doc.uploaded_by.get_full_name }}</td>
+                                <td>{{ doc.created_at|date:'d/m/Y' }}</td>
+                                <td class="text-end">
+                                    <form method="post" action="{% url 'claims:claim_document_delete' doc.pk %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-light-danger" onclick="return confirm('Remover documento?')">
+                                            <i class="feather-trash-2"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-3">Nenhum documento anexado.</p>
+                {% endif %}
+                <form method="post" action="{% url 'claims:claim_document_create' claim.pk %}" enctype="multipart/form-data" class="row g-2 align-items-end">
+                    {% csrf_token %}
+                    <div class="col-md-4">
+                        <label class="form-label">Titulo</label>
+                        {{ document_form.title }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tipo</label>
+                        {{ document_form.document_type }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Arquivo</label>
+                        {{ document_form.file }}
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="feather-upload me-1"></i>Enviar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Historico</h5>
+            </div>
+            <div class="card-body">
+                {% if timeline %}
+                <div class="timeline-list">
+                    {% for entry in timeline %}
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="avatar-text avatar-sm bg-soft-primary text-primary me-3">
+                            <i class="feather-clock"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">{{ entry.action }}</div>
+                            <div class="fs-12 text-muted">
+                                {{ entry.performed_by.get_full_name }} - {{ entry.created_at|date:'d/m/Y H:i' }}
+                            </div>
+                            {% if entry.notes %}
+                            <div class="fs-12 mt-1">{{ entry.notes }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">Nenhum registro no historico.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

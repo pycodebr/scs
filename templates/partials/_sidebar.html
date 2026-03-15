@@ -52,18 +52,18 @@
                         <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
-                        <li class="nxl-item"><a class="nxl-link" href="/policies/proposals/">Propostas</a></li>
-                        <li class="nxl-item"><a class="nxl-link" href="/policies/">Apólices</a></li>
+                        <li class="nxl-item"><a class="nxl-link" href="{% url 'policies:proposal_list' %}">Propostas</a></li>
+                        <li class="nxl-item"><a class="nxl-link" href="{% url 'policies:policy_list' %}">Apólices</a></li>
                     </ul>
                 </li>
                 <li class="nxl-item">
-                    <a href="/claims/" class="nxl-link">
+                    <a href="{% url 'claims:claim_list' %}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-alert-circle"></i></span>
                         <span class="nxl-mtext">Sinistros</span>
                     </a>
                 </li>
                 <li class="nxl-item">
-                    <a href="/endorsements/" class="nxl-link">
+                    <a href="{% url 'endorsements:endorsement_list' %}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-edit-3"></i></span>
                         <span class="nxl-mtext">Endossos</span>
                     </a>

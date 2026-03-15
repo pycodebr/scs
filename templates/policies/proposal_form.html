@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar Proposta{% else %}Nova Proposta{% endif %}{% endblock %}
+{% block page_title %}{% if object %}Editar Proposta{% else %}Nova Proposta{% endif %}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'policies:proposal_list' %}">Propostas</a></li>
+<li class="breadcrumb-item">{% if object %}Editar{% else %}Nova{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Dados da Proposta</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Numero da Proposta <span class="text-danger">*</span></label>
+                            {{ form.proposal_number }}
+                            {% if form.proposal_number.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.proposal_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Data de Envio <span class="text-danger">*</span></label>
+                            {{ form.submission_date }}
+                            {% if form.submission_date.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.submission_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Data da Resposta</label>
+                            {{ form.response_date }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Cliente <span class="text-danger">*</span></label>
+                            {{ form.client }}
+                            {% if form.client.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.client.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Seguradora <span class="text-danger">*</span></label>
+                            {{ form.insurer }}
+                            {% if form.insurer.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.insurer.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de Seguro <span class="text-danger">*</span></label>
+                            {{ form.insurance_type }}
+                            {% if form.insurance_type.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.insurance_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Valor do Premio</label>
+                            {{ form.premium_amount }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Observacoes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Observacoes</label>
+                            {{ form.notes }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Motivo da Recusa</label>
+                            {{ form.rejection_reason }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Configuracoes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Status</label>
+                            {{ form.status }}
+                        </div>
+                        {% if form.broker.field.widget.input_type != 'hidden' %}
+                        <div class="col-12">
+                            <label class="form-label">Corretor <span class="text-danger">*</span></label>
+                            {{ form.broker }}
+                            {% if form.broker.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.broker.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        {{ form.broker }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="feather-save me-2"></i>Salvar
+                </button>
+                <a href="{% url 'policies:proposal_list' %}" class="btn btn-light">Cancelar</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

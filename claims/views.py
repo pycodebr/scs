@@ -1,0 +1,120 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy, reverse
+from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
+
+from utils.mixins import BrokerFilterMixin
+
+from .forms import ClaimForm, ClaimDocumentForm
+from .models import Claim, ClaimDocument
+
+
+class ClaimListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
+    model = Claim
+    template_name = 'claims/claim_list.html'
+    context_object_name = 'claims'
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = super().get_queryset().select_related('policy', 'client', 'broker')
+        search = self.request.GET.get('q', '').strip()
+        if search:
+            qs = qs.filter(
+                Q(claim_number__icontains=search) |
+                Q(client__name__icontains=search) |
+                Q(policy__policy_number__icontains=search)
+            )
+        status = self.request.GET.get('status')
+        if status:
+            qs = qs.filter(status=status)
+        return qs
+
+
+class ClaimCreateView(LoginRequiredMixin, CreateView):
+    model = Claim
+    form_class = ClaimForm
+    template_name = 'claims/claim_form.html'
+    success_url = reverse_lazy('claims:claim_list')
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        if self.request.user.role == 'broker':
+            form.fields['broker'].initial = self.request.user
+            form.fields['broker'].widget = form.fields['broker'].hidden_widget()
+        return form
+
+    def form_valid(self, form):
+        if self.request.user.role == 'broker':
+            form.instance.broker = self.request.user
+        messages.success(self.request, 'Sinistro criado com sucesso.')
+        return super().form_valid(form)
+
+
+class ClaimUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
+    model = Claim
+    form_class = ClaimForm
+    template_name = 'claims/claim_form.html'
+
+    def get_success_url(self):
+        return reverse('claims:claim_detail', kwargs={'pk': self.object.pk})
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Sinistro atualizado com sucesso.')
+        return super().form_valid(form)
+
+
+class ClaimDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
+    model = Claim
+    template_name = 'claims/claim_detail.html'
+    context_object_name = 'claim'
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('policy', 'client', 'broker')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['documents'] = self.object.documents.select_related('uploaded_by')
+        ctx['timeline'] = self.object.timeline.select_related('performed_by')
+        ctx['document_form'] = ClaimDocumentForm()
+        return ctx
+
+
+class ClaimDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
+    model = Claim
+    template_name = 'partials/_confirm_delete.html'
+    success_url = reverse_lazy('claims:claim_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Sinistro excluido com sucesso.')
+        return super().form_valid(form)
+
+
+# --- Claim Documents ---
+
+class ClaimDocumentCreateView(LoginRequiredMixin, CreateView):
+    model = ClaimDocument
+    form_class = ClaimDocumentForm
+
+    def form_valid(self, form):
+        form.instance.claim = get_object_or_404(Claim, pk=self.kwargs['pk'])
+        form.instance.uploaded_by = self.request.user
+        messages.success(self.request, 'Documento adicionado com sucesso.')
+        form.save()
+        return redirect('claims:claim_detail', pk=self.kwargs['pk'])
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Erro ao adicionar documento.')
+        return redirect('claims:claim_detail', pk=self.kwargs['pk'])
+
+
+class ClaimDocumentDeleteView(LoginRequiredMixin, DeleteView):
+    model = ClaimDocument
+
+    def get_success_url(self):
+        return reverse('claims:claim_detail', kwargs={'pk': self.object.claim_id})
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Documento removido com sucesso.')
+        return super().form_valid(form)

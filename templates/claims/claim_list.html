@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Sinistros{% endblock %}
+{% block page_title %}Sinistros{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item">Sinistros</li>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'claims:claim_create' %}" class="btn btn-primary">
+    <i class="feather-plus me-2"></i>
+    <span>Novo Sinistro</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Lista de Sinistros</h5>
+                <div class="card-header-action">
+                    <form method="get" class="d-flex gap-2">
+                        <select name="status" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                            <option value="">Todos os status</option>
+                            <option value="open" {% if request.GET.status == 'open' %}selected{% endif %}>Aberto</option>
+                            <option value="under_analysis" {% if request.GET.status == 'under_analysis' %}selected{% endif %}>Em Analise</option>
+                            <option value="documentation_pending" {% if request.GET.status == 'documentation_pending' %}selected{% endif %}>Pendente Doc.</option>
+                            <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Aprovado</option>
+                            <option value="partially_approved" {% if request.GET.status == 'partially_approved' %}selected{% endif %}>Parc. Aprovado</option>
+                            <option value="denied" {% if request.GET.status == 'denied' %}selected{% endif %}>Negado</option>
+                            <option value="paid" {% if request.GET.status == 'paid' %}selected{% endif %}>Pago</option>
+                            <option value="closed" {% if request.GET.status == 'closed' %}selected{% endif %}>Encerrado</option>
+                        </select>
+                        <div class="input-group input-group-sm" style="width:250px">
+                            <input type="text" name="q" class="form-control" placeholder="Buscar..." value="{{ request.GET.q|default:'' }}">
+                            <button type="submit" class="btn btn-light-brand">
+                                <i class="feather-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Sinistro</th>
+                                <th>Cliente</th>
+                                <th>Apolice</th>
+                                <th>Data Ocorrencia</th>
+                                <th>Valor Reclamado</th>
+                                <th>Status</th>
+                                <th class="text-end">Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for claim in claims %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'claims:claim_detail' claim.pk %}">
+                                        {{ claim.claim_number }}
+                                    </a>
+                                </td>
+                                <td>{{ claim.client.name }}</td>
+                                <td>{{ claim.policy.policy_number }}</td>
+                                <td>{{ claim.occurrence_date|date:'d/m/Y' }}</td>
+                                <td>R$ {{ claim.claimed_amount|floatformat:2 }}</td>
+                                <td>
+                                    {% if claim.status == 'open' %}
+                                    <span class="badge bg-soft-info text-info">Aberto</span>
+                                    {% elif claim.status == 'under_analysis' %}
+                                    <span class="badge bg-soft-warning text-warning">Em Analise</span>
+                                    {% elif claim.status == 'documentation_pending' %}
+                                    <span class="badge bg-soft-secondary text-secondary">Pendente Doc.</span>
+                                    {% elif claim.status == 'approved' %}
+                                    <span class="badge bg-soft-success text-success">Aprovado</span>
+                                    {% elif claim.status == 'partially_approved' %}
+                                    <span class="badge bg-soft-primary text-primary">Parc. Aprovado</span>
+                                    {% elif claim.status == 'denied' %}
+                                    <span class="badge bg-soft-danger text-danger">Negado</span>
+                                    {% elif claim.status == 'paid' %}
+                                    <span class="badge bg-soft-success text-success">Pago</span>
+                                    {% elif claim.status == 'closed' %}
+                                    <span class="badge bg-soft-dark text-dark">Encerrado</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="hstack gap-2 justify-content-end">
+                                        <a href="{% url 'claims:claim_detail' claim.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Ver">
+                                            <i class="feather-eye"></i>
+                                        </a>
+                                        <a href="{% url 'claims:claim_update' claim.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Editar">
+                                            <i class="feather-edit"></i>
+                                        </a>
+                                        <a href="{% url 'claims:claim_delete' claim.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Excluir">
+                                            <i class="feather-trash-2"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <i class="feather-alert-circle fs-1 mb-3 d-block"></i>
+                                    Nenhum sinistro encontrado.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if page_obj.has_other_pages %}
+            <div class="card-footer">
+                {% include 'partials/_pagination.html' %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

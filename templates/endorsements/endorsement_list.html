@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Endossos{% endblock %}
+{% block page_title %}Endossos{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item">Endossos</li>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'endorsements:endorsement_create' %}" class="btn btn-primary">
+    <i class="feather-plus me-2"></i>
+    <span>Novo Endosso</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Lista de Endossos</h5>
+                <div class="card-header-action">
+                    <form method="get" class="d-flex gap-2">
+                        <select name="type" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                            <option value="">Todos os tipos</option>
+                            <option value="inclusion" {% if request.GET.type == 'inclusion' %}selected{% endif %}>Inclusao</option>
+                            <option value="exclusion" {% if request.GET.type == 'exclusion' %}selected{% endif %}>Exclusao</option>
+                            <option value="modification" {% if request.GET.type == 'modification' %}selected{% endif %}>Alteracao</option>
+                            <option value="cancellation" {% if request.GET.type == 'cancellation' %}selected{% endif %}>Cancelamento</option>
+                            <option value="transfer" {% if request.GET.type == 'transfer' %}selected{% endif %}>Transferencia</option>
+                        </select>
+                        <select name="status" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                            <option value="">Todos os status</option>
+                            <option value="draft" {% if request.GET.status == 'draft' %}selected{% endif %}>Rascunho</option>
+                            <option value="requested" {% if request.GET.status == 'requested' %}selected{% endif %}>Solicitado</option>
+                            <option value="under_analysis" {% if request.GET.status == 'under_analysis' %}selected{% endif %}>Em Analise</option>
+                            <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Aprovado</option>
+                            <option value="rejected" {% if request.GET.status == 'rejected' %}selected{% endif %}>Rejeitado</option>
+                            <option value="applied" {% if request.GET.status == 'applied' %}selected{% endif %}>Aplicado</option>
+                        </select>
+                        <div class="input-group input-group-sm" style="width:250px">
+                            <input type="text" name="q" class="form-control" placeholder="Buscar..." value="{{ request.GET.q|default:'' }}">
+                            <button type="submit" class="btn btn-light-brand">
+                                <i class="feather-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Endosso</th>
+                                <th>Apolice</th>
+                                <th>Cliente</th>
+                                <th>Tipo</th>
+                                <th>Data Solicitacao</th>
+                                <th>Dif. Premio</th>
+                                <th>Status</th>
+                                <th class="text-end">Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for endorsement in endorsements %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'endorsements:endorsement_detail' endorsement.pk %}">
+                                        {{ endorsement.endorsement_number }}
+                                    </a>
+                                </td>
+                                <td>{{ endorsement.policy.policy_number }}</td>
+                                <td>{{ endorsement.policy.client.name }}</td>
+                                <td>
+                                    <span class="badge bg-gray-200 text-dark">{{ endorsement.get_endorsement_type_display }}</span>
+                                </td>
+                                <td>{{ endorsement.request_date|date:'d/m/Y' }}</td>
+                                <td>R$ {{ endorsement.premium_difference|floatformat:2 }}</td>
+                                <td>
+                                    {% if endorsement.status == 'draft' %}
+                                    <span class="badge bg-soft-secondary text-secondary">Rascunho</span>
+                                    {% elif endorsement.status == 'requested' %}
+                                    <span class="badge bg-soft-info text-info">Solicitado</span>
+                                    {% elif endorsement.status == 'under_analysis' %}
+                                    <span class="badge bg-soft-warning text-warning">Em Analise</span>
+                                    {% elif endorsement.status == 'approved' %}
+                                    <span class="badge bg-soft-success text-success">Aprovado</span>
+                                    {% elif endorsement.status == 'rejected' %}
+                                    <span class="badge bg-soft-danger text-danger">Rejeitado</span>
+                                    {% elif endorsement.status == 'applied' %}
+                                    <span class="badge bg-soft-primary text-primary">Aplicado</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="hstack gap-2 justify-content-end">
+                                        <a href="{% url 'endorsements:endorsement_detail' endorsement.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Ver">
+                                            <i class="feather-eye"></i>
+                                        </a>
+                                        <a href="{% url 'endorsements:endorsement_update' endorsement.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Editar">
+                                            <i class="feather-edit"></i>
+                                        </a>
+                                        <a href="{% url 'endorsements:endorsement_delete' endorsement.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Excluir">
+                                            <i class="feather-trash-2"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    <i class="feather-edit-3 fs-1 mb-3 d-block"></i>
+                                    Nenhum endosso encontrado.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if page_obj.has_other_pages %}
+            <div class="card-footer">
+                {% include 'partials/_pagination.html' %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

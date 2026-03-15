@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if converting %}Converter Proposta em Apolice{% elif object %}Editar Apolice{% else %}Nova Apolice{% endif %}{% endblock %}
+{% block page_title %}{% if converting %}Converter Proposta em Apolice{% elif object %}Editar Apolice{% else %}Nova Apolice{% endif %}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'policies:policy_list' %}">Apolices</a></li>
+<li class="breadcrumb-item">{% if converting %}Converter{% elif object %}Editar{% else %}Nova{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-lg-8">
+            {% if converting %}
+            <div class="alert alert-soft-info mb-3">
+                <i class="feather-info me-2"></i>
+                Convertendo proposta <strong>{{ proposal.proposal_number }}</strong> em apolice. Verifique os dados preenchidos.
+            </div>
+            {% endif %}
+
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Dados da Apolice</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Numero da Apolice <span class="text-danger">*</span></label>
+                            {{ form.policy_number }}
+                            {% if form.policy_number.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.policy_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Inicio de Vigencia <span class="text-danger">*</span></label>
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.start_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Fim de Vigencia <span class="text-danger">*</span></label>
+                            {{ form.end_date }}
+                            {% if form.end_date.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.end_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Cliente <span class="text-danger">*</span></label>
+                            {{ form.client }}
+                            {% if form.client.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.client.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Seguradora <span class="text-danger">*</span></label>
+                            {{ form.insurer }}
+                            {% if form.insurer.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.insurer.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de Seguro <span class="text-danger">*</span></label>
+                            {{ form.insurance_type }}
+                            {% if form.insurance_type.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.insurance_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Proposta de Origem</label>
+                            {{ form.proposal }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Valores e Pagamento</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Valor do Premio</label>
+                            {{ form.premium_amount }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Importancia Segurada</label>
+                            {{ form.insured_amount }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Forma de Pagamento</label>
+                            {{ form.payment_method }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Comissao (%)</label>
+                            {{ form.commission_rate }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Valor da Comissao</label>
+                            {{ form.commission_amount }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Parcelas</label>
+                            {{ form.installments }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if object and coverages is not None %}
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Coberturas Contratadas</h5>
+                </div>
+                <div class="card-body">
+                    {% if coverages %}
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-3">
+                            <thead>
+                                <tr>
+                                    <th>Cobertura</th>
+                                    <th>Valor Segurado</th>
+                                    <th>Franquia</th>
+                                    <th>Premio</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pc in coverages %}
+                                <tr>
+                                    <td>{{ pc.coverage.name }}</td>
+                                    <td>R$ {{ pc.insured_amount|floatformat:2 }}</td>
+                                    <td>R$ {{ pc.deductible|floatformat:2 }}</td>
+                                    <td>R$ {{ pc.premium_amount|floatformat:2 }}</td>
+                                    <td class="text-end">
+                                        <form method="post" action="{% url 'policies:policy_coverage_delete' pc.pk %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-light-danger" onclick="return confirm('Remover cobertura?')">
+                                                <i class="feather-trash-2"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                    <form method="post" action="{% url 'policies:policy_coverage_create' object.pk %}" class="row g-2 align-items-end">
+                        {% csrf_token %}
+                        <div class="col-md-3">
+                            <label class="form-label">Cobertura</label>
+                            {{ coverage_form.coverage }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Valor Segurado</label>
+                            {{ coverage_form.insured_amount }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Franquia</label>
+                            {{ coverage_form.deductible }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Premio</label>
+                            {{ coverage_form.premium_amount }}
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="feather-plus me-1"></i>Adicionar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Observacoes</h5>
+                </div>
+                <div class="card-body">
+                    {{ form.notes }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Configuracoes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Status</label>
+                            {{ form.status }}
+                        </div>
+                        {% if form.broker.field.widget.input_type != 'hidden' %}
+                        <div class="col-12">
+                            <label class="form-label">Corretor <span class="text-danger">*</span></label>
+                            {{ form.broker }}
+                            {% if form.broker.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.broker.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        {{ form.broker }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="feather-save me-2"></i>Salvar
+                </button>
+                <a href="{% url 'policies:policy_list' %}" class="btn btn-light">Cancelar</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

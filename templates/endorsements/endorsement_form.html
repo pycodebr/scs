@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar Endosso{% else %}Novo Endosso{% endif %}{% endblock %}
+{% block page_title %}{% if object %}Editar Endosso{% else %}Novo Endosso{% endif %}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'endorsements:endorsement_list' %}">Endossos</a></li>
+<li class="breadcrumb-item">{% if object %}Editar{% else %}Novo{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Dados do Endosso</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Numero do Endosso <span class="text-danger">*</span></label>
+                            {{ form.endorsement_number }}
+                            {% if form.endorsement_number.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.endorsement_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Data da Solicitacao <span class="text-danger">*</span></label>
+                            {{ form.request_date }}
+                            {% if form.request_date.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.request_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Data de Efeito <span class="text-danger">*</span></label>
+                            {{ form.effective_date }}
+                            {% if form.effective_date.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.effective_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Apolice <span class="text-danger">*</span></label>
+                            {{ form.policy }}
+                            {% if form.policy.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.policy.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de Endosso <span class="text-danger">*</span></label>
+                            {{ form.endorsement_type }}
+                            {% if form.endorsement_type.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.endorsement_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Diferenca de Premio</label>
+                            {{ form.premium_difference }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Descricao das Alteracoes <span class="text-danger">*</span></label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.description.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Observacoes</label>
+                            {{ form.notes }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Configuracoes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Status</label>
+                            {{ form.status }}
+                        </div>
+                        {% if form.requested_by.field.widget.input_type != 'hidden' %}
+                        <div class="col-12">
+                            <label class="form-label">Solicitado por <span class="text-danger">*</span></label>
+                            {{ form.requested_by }}
+                            {% if form.requested_by.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.requested_by.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        {{ form.requested_by }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="feather-save me-2"></i>Salvar
+                </button>
+                <a href="{% url 'endorsements:endorsement_list' %}" class="btn btn-light">Cancelar</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

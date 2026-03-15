@@ -1220,10 +1220,10 @@ class BrokerFilterMixin:
 
 ### Fase 3 — Core do Negócio (Semana 5-7)
 
-- [ ] App `policies` (propostas + apólices + coberturas contratadas + documentos)
-- [ ] Conversão de proposta em apólice
-- [ ] App `claims` (sinistros + timeline + documentos)
-- [ ] App `endorsements` (endossos + documentos + aplicação na apólice)
+- [x] App `policies` (propostas + apólices + coberturas contratadas + documentos)
+- [x] Conversão de proposta em apólice
+- [x] App `claims` (sinistros + timeline + documentos)
+- [x] App `endorsements` (endossos + documentos + aplicação na apólice)
 
 ### Fase 4 — Operações Avançadas (Semana 8-9)
 
