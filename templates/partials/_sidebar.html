@@ -14,7 +14,7 @@
                     <label>Principal</label>
                 </li>
                 <li class="nxl-item">
-                    <a href="/dashboard/" class="nxl-link">
+                    <a href="{% url 'dashboard:dashboard' %}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-airplay"></i></span>
                         <span class="nxl-mtext">Dashboard</span>
                     </a>
@@ -95,7 +95,7 @@
                     <label>Análise</label>
                 </li>
                 <li class="nxl-item">
-                    <a href="/reports/" class="nxl-link">
+                    <a href="{% url 'reports:report_index' %}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-bar-chart-2"></i></span>
                         <span class="nxl-mtext">Relatórios</span>
                     </a>

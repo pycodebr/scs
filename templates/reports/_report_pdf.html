@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1.5cm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10px;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            border-bottom: 2px solid #3454d1;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        .header h1 {
+            font-size: 18px;
+            color: #3454d1;
+            margin: 0 0 4px 0;
+        }
+        .header .subtitle {
+            font-size: 10px;
+            color: #888;
+        }
+        .summary-table {
+            margin-bottom: 15px;
+            width: auto;
+        }
+        .summary-table td {
+            padding: 6px 16px 6px 0;
+            vertical-align: top;
+        }
+        .summary-label {
+            font-size: 9px;
+            color: #888;
+            text-transform: uppercase;
+        }
+        .summary-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+        table.data {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table.data th {
+            background-color: #3454d1;
+            color: #fff;
+            padding: 6px 8px;
+            text-align: left;
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+        table.data th.text-end {
+            text-align: right;
+        }
+        table.data th.text-center {
+            text-align: center;
+        }
+        table.data td {
+            padding: 5px 8px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 10px;
+        }
+        table.data td.text-end {
+            text-align: right;
+        }
+        table.data td.text-center {
+            text-align: center;
+        }
+        table.data tr:nth-child(even) td {
+            background-color: #f8f9fa;
+        }
+        .footer {
+            margin-top: 20px;
+            padding-top: 8px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 8px;
+            color: #aaa;
+            text-align: center;
+        }
+        .empty-msg {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ title }}</h1>
+        <span class="subtitle">{{ period }} &mdash; Gerado em {{ generated_at }}</span>
+    </div>
+
+    {% if summary %}
+    <table class="summary-table">
+        <tr>
+            {% for item in summary %}
+            <td>
+                <div class="summary-label">{{ item.label }}</div>
+                <div class="summary-value">{{ item.value }}</div>
+            </td>
+            {% endfor %}
+        </tr>
+    </table>
+    {% endif %}
+
+    {% if headers %}
+    <table class="data">
+        <thead>
+            <tr>
+                {% for h in headers %}
+                <th class="{{ h.align|default:'' }}">{{ h.label }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                {% for cell in row %}
+                <td class="{{ cell.align|default:'' }}">{{ cell.value }}</td>
+                {% endfor %}
+            </tr>
+            {% empty %}
+            <tr><td colspan="{{ headers|length }}" class="empty-msg">Nenhum registro encontrado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <div class="footer">
+        SCS - Sistema de Corretora de Seguros
+    </div>
+</body>
+</html>

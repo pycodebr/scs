@@ -1,0 +1,426 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item">Dashboard</li>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.kpi-card .card-body { padding: 1.25rem; }
+.kpi-value { font-size: 1.5rem; font-weight: 700; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- KPI Cards -->
+<div class="row">
+    <div class="col-xxl-3 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body kpi-card">
+                <div class="d-flex align-items-start justify-content-between mb-4">
+                    <div class="d-flex gap-4 align-items-center">
+                        <div class="avatar-text avatar-lg bg-gray-200">
+                            <i class="feather-file-text"></i>
+                        </div>
+                        <div>
+                            <div class="kpi-value text-dark">{{ total_active_policies }}</div>
+                            <h3 class="fs-13 fw-semibold text-truncate-1-line">Apólices Ativas</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="fs-12 text-muted">Prêmio Total em Carteira</span>
+                        <span class="fs-12 text-dark fw-semibold">R$ {{ total_premium|floatformat:2 }}</span>
+                    </div>
+                    <div class="progress mt-2 ht-3">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body kpi-card">
+                <div class="d-flex align-items-start justify-content-between mb-4">
+                    <div class="d-flex gap-4 align-items-center">
+                        <div class="avatar-text avatar-lg bg-gray-200">
+                            <i class="feather-dollar-sign"></i>
+                        </div>
+                        <div>
+                            <div class="kpi-value text-dark">R$ {{ total_commission|floatformat:0 }}</div>
+                            <h3 class="fs-13 fw-semibold text-truncate-1-line">Comissões em Carteira</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="fs-12 text-muted">Clientes Ativos</span>
+                        <span class="fs-12 text-dark fw-semibold">{{ total_active_clients }}</span>
+                    </div>
+                    <div class="progress mt-2 ht-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body kpi-card">
+                <div class="d-flex align-items-start justify-content-between mb-4">
+                    <div class="d-flex gap-4 align-items-center">
+                        <div class="avatar-text avatar-lg bg-gray-200">
+                            <i class="feather-alert-circle"></i>
+                        </div>
+                        <div>
+                            <div class="kpi-value text-dark">{{ open_claims }}</div>
+                            <h3 class="fs-13 fw-semibold text-truncate-1-line">Sinistros Abertos</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="fs-12 text-muted">Renovações Pendentes (30 dias)</span>
+                        <span class="fs-12 text-dark fw-semibold">{{ pending_renewals }}</span>
+                    </div>
+                    <div class="progress mt-2 ht-3">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: {% widthratio pending_renewals 20 100 %}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body kpi-card">
+                <div class="d-flex align-items-start justify-content-between mb-4">
+                    <div class="d-flex gap-4 align-items-center">
+                        <div class="avatar-text avatar-lg bg-gray-200">
+                            <i class="feather-target"></i>
+                        </div>
+                        <div>
+                            <div class="kpi-value text-dark">{{ active_deals }}</div>
+                            <h3 class="fs-13 fw-semibold text-truncate-1-line">Negociações em Andamento</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="fs-12 text-muted">Taxa de Conversão CRM</span>
+                        <span class="fs-12 text-dark fw-semibold">{{ conversion_rate }}%</span>
+                    </div>
+                    <div class="progress mt-2 ht-3">
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: {{ conversion_rate }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 1 -->
+<div class="row">
+    <div class="col-xxl-8 col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Produção Mensal</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="chartProduction" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-4 col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Distribuição por Tipo de Seguro</h5>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <canvas id="chartInsuranceType" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 2 -->
+<div class="row">
+    <div class="col-xxl-4 col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Distribuição por Seguradora</h5>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <canvas id="chartInsurer" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-8 col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Evolução de Sinistros</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="chartClaims" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Tables -->
+<div class="row">
+    <div class="col-xxl-6 col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Últimas Apólices Emitidas</h5>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Apólice</th>
+                                <th>Cliente</th>
+                                <th>Seguradora</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in recent_policies %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'policies:policy_detail' p.pk %}">{{ p.policy_number }}</a>
+                                </td>
+                                <td>{{ p.client.name }}</td>
+                                <td>{{ p.insurer.name }}</td>
+                                <td>
+                                    {% if p.status == 'active' %}
+                                    <span class="badge bg-soft-success text-success">Ativa</span>
+                                    {% elif p.status == 'pending' %}
+                                    <span class="badge bg-soft-info text-info">Pendente</span>
+                                    {% elif p.status == 'expired' %}
+                                    <span class="badge bg-soft-warning text-warning">Vencida</span>
+                                    {% else %}
+                                    <span class="badge bg-soft-secondary text-secondary">{{ p.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3 text-muted">Nenhuma apólice recente.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-6 col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Próximas Renovações</h5>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Apólice</th>
+                                <th>Cliente</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in upcoming_renewals %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'renewals:renewal_detail' r.pk %}">{{ r.policy.policy_number }}</a>
+                                </td>
+                                <td>{{ r.policy.client.name }}</td>
+                                <td>
+                                    {{ r.due_date|date:'d/m/Y' }}
+                                    {% if r.is_overdue %}
+                                    <span class="badge bg-soft-danger text-danger ms-1">Atrasada</span>
+                                    {% elif r.is_urgent %}
+                                    <span class="badge bg-soft-warning text-warning ms-1">Urgente</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-soft-info text-info">{{ r.get_status_display }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3 text-muted">Nenhuma renovação pendente.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Sinistros Recentes</h5>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Sinistro</th>
+                                <th>Cliente</th>
+                                <th>Apólice</th>
+                                <th>Data Ocorrência</th>
+                                <th>Valor Reclamado</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in recent_claims %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'claims:claim_detail' c.pk %}">{{ c.claim_number }}</a>
+                                </td>
+                                <td>{{ c.client.name }}</td>
+                                <td>{{ c.policy.policy_number }}</td>
+                                <td>{{ c.occurrence_date|date:'d/m/Y' }}</td>
+                                <td>R$ {{ c.claimed_amount|floatformat:2 }}</td>
+                                <td>
+                                    {% if c.status == 'open' %}
+                                    <span class="badge bg-soft-info text-info">Aberto</span>
+                                    {% elif c.status == 'under_analysis' %}
+                                    <span class="badge bg-soft-warning text-warning">Em Análise</span>
+                                    {% else %}
+                                    <span class="badge bg-soft-secondary text-secondary">{{ c.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-3 text-muted">Nenhum sinistro aberto.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const COLORS = ['#3454d1','#28a745','#ffc107','#dc3545','#17a2b8','#6f42c1','#fd7e14','#20c997'];
+
+    // Production Chart (Bar)
+    const prodCtx = document.getElementById('chartProduction');
+    if (prodCtx) {
+        new Chart(prodCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ chart_months|safe }},
+                datasets: [
+                    {
+                        label: 'Prêmio (R$)',
+                        data: {{ chart_premiums|safe }},
+                        backgroundColor: 'rgba(52, 84, 209, 0.7)',
+                        borderRadius: 4,
+                    },
+                    {
+                        label: 'Comissão (R$)',
+                        data: {{ chart_commissions|safe }},
+                        backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                        borderRadius: 4,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    // Insurance Type Donut
+    const typeCtx = document.getElementById('chartInsuranceType');
+    if (typeCtx) {
+        new Chart(typeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ chart_type_labels|safe }},
+                datasets: [{
+                    data: {{ chart_type_values|safe }},
+                    backgroundColor: COLORS,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }
+            }
+        });
+    }
+
+    // Insurer Donut
+    const insCtx = document.getElementById('chartInsurer');
+    if (insCtx) {
+        new Chart(insCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ chart_insurer_labels|safe }},
+                datasets: [{
+                    data: {{ chart_insurer_values|safe }},
+                    backgroundColor: COLORS,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }
+            }
+        });
+    }
+
+    // Claims Line Chart
+    const claimCtx = document.getElementById('chartClaims');
+    if (claimCtx) {
+        new Chart(claimCtx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_claims_labels|safe }},
+                datasets: [{
+                    label: 'Sinistros',
+                    data: {{ chart_claims_values|safe }},
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top' } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

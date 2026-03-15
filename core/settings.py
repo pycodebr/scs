@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     'endorsements',
     'renewals',
     'crm',
+    'dashboard',
+    'reports',
 ]
 
 MIDDLEWARE = [

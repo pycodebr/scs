@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'reports:report_index' %}">Relatórios</a></li>
+<li class="breadcrumb-item">{% block report_name %}Relatório{% endblock %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Filtros</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3 align-items-end">
+                    {% block filter_fields %}{% endblock %}
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="feather-search me-1"></i>Gerar
+                        </button>
+                    </div>
+                    {% if results %}
+                    <div class="col-auto">
+                        <button type="submit" name="export" value="csv" class="btn btn-light-brand">
+                            <i class="feather-download me-1"></i>CSV
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" name="export" value="pdf" class="btn btn-light-brand">
+                            <i class="feather-file-text me-1"></i>PDF
+                        </button>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if results %}
+{% block report_content %}{% endblock %}
+{% endif %}
+{% endblock %}

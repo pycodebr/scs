@@ -131,7 +131,7 @@ class DealCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         if self.request.user.role == 'broker':
             form.instance.broker = self.request.user
-        messages.success(self.request, 'Negociacao criada com sucesso.')
+        messages.success(self.request, 'Negociação criada com sucesso.')
         return super().form_valid(form)
 
 
@@ -144,7 +144,7 @@ class DealUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
         return reverse('crm:deal_detail', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
-        messages.success(self.request, 'Negociacao atualizada com sucesso.')
+        messages.success(self.request, 'Negociação atualizada com sucesso.')
         return super().form_valid(form)
 
 
@@ -172,7 +172,7 @@ class DealDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
     success_url = reverse_lazy('crm:deal_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Negociacao excluida com sucesso.')
+        messages.success(self.request, 'Negociação excluída com sucesso.')
         return super().form_valid(form)
 
 
@@ -186,13 +186,13 @@ class DealMoveStageView(LoginRequiredMixin, View):
             data = json.loads(request.body)
             stage_id = data.get('stage_id')
         except (json.JSONDecodeError, KeyError):
-            return JsonResponse({'error': 'Dados invalidos.'}, status=400)
+            return JsonResponse({'error': 'Dados inválidos.'}, status=400)
 
         deal = get_object_or_404(Deal, pk=pk)
 
         # Broker can only move own deals
         if request.user.role == 'broker' and deal.broker != request.user:
-            return JsonResponse({'error': 'Sem permissao.'}, status=403)
+            return JsonResponse({'error': 'Sem permissão.'}, status=403)
 
         stage = get_object_or_404(PipelineStage, pk=stage_id, pipeline=deal.pipeline)
         old_stage = deal.stage
@@ -258,11 +258,11 @@ class PipelineCreateView(ManagerRequiredMixin, CreateView):
 
         # Create default stages
         default_stages = [
-            ('Prospeccao', 0, '#6c757d', False, False),
+            ('Prospecção', 0, '#6c757d', False, False),
             ('Primeiro Contato', 1, '#0d6efd', False, False),
-            ('Cotacao', 2, '#ffc107', False, False),
+            ('Cotação', 2, '#ffc107', False, False),
             ('Proposta Enviada', 3, '#fd7e14', False, False),
-            ('Negociacao', 4, '#6610f2', False, False),
+            ('Negociação', 4, '#6610f2', False, False),
             ('Fechamento', 5, '#198754', True, False),
             ('Perdido', 6, '#dc3545', False, True),
         ]
@@ -301,8 +301,8 @@ class PipelineStageDeleteView(ManagerRequiredMixin, View):
     def post(self, request, pk):
         stage = get_object_or_404(PipelineStage, pk=pk)
         if stage.deals.exists():
-            messages.error(request, 'Nao e possivel excluir uma etapa com negociacoes vinculadas.')
+            messages.error(request, 'Não é possível excluir uma etapa com negociações vinculadas.')
         else:
             stage.delete()
-            messages.success(request, 'Etapa excluida com sucesso.')
+            messages.success(request, 'Etapa excluída com sucesso.')
         return redirect('crm:pipeline_manage')

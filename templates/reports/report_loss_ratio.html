@@ -1,0 +1,65 @@
+{% extends 'reports/_report_base.html' %}
+
+{% block title %}Sinistralidade{% endblock %}
+{% block page_title %}Sinistralidade{% endblock %}
+{% block report_name %}Sinistralidade{% endblock %}
+
+{% block filter_fields %}
+<div class="col-md-2">
+    <label class="form-label">Data Início</label>
+    {{ form.start_date }}
+</div>
+<div class="col-md-2">
+    <label class="form-label">Data Fim</label>
+    {{ form.end_date }}
+</div>
+<div class="col-md-3">
+    <label class="form-label">Seguradora</label>
+    {{ form.insurer }}
+</div>
+{% endblock %}
+
+{% block report_content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Sinistralidade por Seguradora</h5>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Seguradora</th>
+                                <th class="text-end">Prêmio</th>
+                                <th class="text-end">Sinistros Aprovados</th>
+                                <th class="text-end">Sinistralidade</th>
+                                <th>Indicador</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in results.data %}
+                            <tr>
+                                <td>{{ row.insurer }}</td>
+                                <td class="text-end">R$ {{ row.premium|floatformat:2 }}</td>
+                                <td class="text-end">R$ {{ row.claims|floatformat:2 }}</td>
+                                <td class="text-end fw-bold">{{ row.ratio }}%</td>
+                                <td>
+                                    <div class="progress ht-5" style="width:100px">
+                                        <div class="progress-bar {% if row.ratio > 70 %}bg-danger{% elif row.ratio > 50 %}bg-warning{% else %}bg-success{% endif %}"
+                                             style="width:{% if row.ratio > 100 %}100{% else %}{{ row.ratio }}{% endif %}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center py-3 text-muted">Nenhum registro encontrado.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

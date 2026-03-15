@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatórios{% endblock %}
+{% block page_title %}Relatórios{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item">Relatórios</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-xxl-4 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-primary text-primary">
+                        <i class="feather-bar-chart-2"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Produção por Período</h6>
+                        <span class="fs-12 text-muted">Apólices emitidas, prêmios e comissões</span>
+                    </div>
+                </div>
+                <a href="{% url 'reports:production' %}" class="btn btn-sm btn-light-brand">
+                    <i class="feather-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-4 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-success text-success">
+                        <i class="feather-dollar-sign"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Comissões por Corretor</h6>
+                        <span class="fs-12 text-muted">Detalhamento de comissões</span>
+                    </div>
+                </div>
+                <a href="{% url 'reports:commissions' %}" class="btn btn-sm btn-light-brand">
+                    <i class="feather-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-4 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-info text-info">
+                        <i class="feather-shield"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Carteira por Seguradora</h6>
+                        <span class="fs-12 text-muted">Distribuição de apólices e prêmios</span>
+                    </div>
+                </div>
+                <a href="{% url 'reports:insurer_portfolio' %}" class="btn btn-sm btn-light-brand">
+                    <i class="feather-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-4 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-warning text-warning">
+                        <i class="feather-layers"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Carteira por Tipo de Seguro</h6>
+                        <span class="fs-12 text-muted">Distribuição por ramo</span>
+                    </div>
+                </div>
+                <a href="{% url 'reports:type_portfolio' %}" class="btn btn-sm btn-light-brand">
+                    <i class="feather-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-4 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-danger text-danger">
+                        <i class="feather-alert-circle"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Sinistros por Período</h6>
+                        <span class="fs-12 text-muted">Quantidade e valores de sinistros</span>
+                    </div>
+                </div>
+                <a href="{% url 'reports:claims' %}" class="btn btn-sm btn-light-brand">
+                    <i class="feather-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-4 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-danger text-danger">
+                        <i class="feather-percent"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Sinistralidade</h6>
+                        <span class="fs-12 text-muted">Relação sinistros/prêmios (loss ratio)</span>
+                    </div>
+                </div>
+                <a href="{% url 'reports:loss_ratio' %}" class="btn btn-sm btn-light-brand">
+                    <i class="feather-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-4 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-primary text-primary">
+                        <i class="feather-refresh-cw"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Renovações Pendentes</h6>
+                        <span class="fs-12 text-muted">Apólices a vencer com status</span>
+                    </div>
+                </div>
+                <a href="{% url 'reports:renewals' %}" class="btn btn-sm btn-light-brand">
+                    <i class="feather-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-4 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-success text-success">
+                        <i class="feather-users"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Clientes por Corretor</h6>
+                        <span class="fs-12 text-muted">Distribuição de clientes ativos</span>
+                    </div>
+                </div>
+                <a href="{% url 'reports:clients_by_broker' %}" class="btn btn-sm btn-light-brand">
+                    <i class="feather-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-4 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-info text-info">
+                        <i class="feather-target"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Funil CRM</h6>
+                        <span class="fs-12 text-muted">Análise do pipeline de vendas</span>
+                    </div>
+                </div>
+                <a href="{% url 'reports:crm_funnel' %}" class="btn btn-sm btn-light-brand">
+                    <i class="feather-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-4 col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="avatar-text avatar-lg bg-soft-warning text-warning">
+                        <i class="feather-edit-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Endossos por Período</h6>
+                        <span class="fs-12 text-muted">Endossos realizados por tipo</span>
+                    </div>
+                </div>
+                <a href="{% url 'reports:endorsements' %}" class="btn btn-sm btn-light-brand">
+                    <i class="feather-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -15,6 +15,8 @@ urlpatterns = [
     path('endorsements/', include('endorsements.urls')),
     path('renewals/', include('renewals.urls')),
     path('crm/', include('crm.urls')),
+    path('dashboard/', include('dashboard.urls')),
+    path('reports/', include('reports.urls')),
     path('', RedirectView.as_view(url='/accounts/login/', permanent=False)),
 ]
 

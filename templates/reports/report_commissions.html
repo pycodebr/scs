@@ -1,0 +1,76 @@
+{% extends 'reports/_report_base.html' %}
+
+{% block title %}Comissões por Corretor{% endblock %}
+{% block page_title %}Comissões por Corretor{% endblock %}
+{% block report_name %}Comissões{% endblock %}
+
+{% block filter_fields %}
+<div class="col-md-2">
+    <label class="form-label">Data Início</label>
+    {{ form.start_date }}
+</div>
+<div class="col-md-2">
+    <label class="form-label">Data Fim</label>
+    {{ form.end_date }}
+</div>
+<div class="col-md-3">
+    <label class="form-label">Corretor</label>
+    {{ form.broker }}
+</div>
+{% endblock %}
+
+{% block report_content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body text-center">
+                <div class="fs-12 text-muted">Prêmio Total</div>
+                <div class="fs-4 fw-bold text-primary">R$ {{ results.grand_total.total_premium|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card stretch stretch-full">
+            <div class="card-body text-center">
+                <div class="fs-12 text-muted">Comissão Total</div>
+                <div class="fs-4 fw-bold text-success">R$ {{ results.grand_total.total_commission|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Por Corretor</h5>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Corretor</th>
+                                <th class="text-center">Apólices</th>
+                                <th class="text-end">Prêmio Total</th>
+                                <th class="text-end">Comissão Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in results.data %}
+                            <tr>
+                                <td>{{ row.broker__first_name }} {{ row.broker__last_name }}</td>
+                                <td class="text-center">{{ row.count }}</td>
+                                <td class="text-end">R$ {{ row.total_premium|floatformat:2 }}</td>
+                                <td class="text-end">R$ {{ row.total_commission|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center py-3 text-muted">Nenhum registro encontrado.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

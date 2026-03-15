@@ -1233,8 +1233,8 @@ class BrokerFilterMixin:
 
 ### Fase 5 — Inteligência e Relatórios (Semana 10-11)
 
-- [ ] App `dashboard` (KPIs, gráficos Chart.js, tabelas resumo)
-- [ ] App `reports` (todos os 10 relatórios, filtros, exportação CSV/PDF)
+- [x] App `dashboard` (KPIs, gráficos Chart.js, tabelas resumo)
+- [x] App `reports` (todos os 10 relatórios, filtros, exportação CSV/PDF)
 
 ### Fase 6 — Polish e Refinamento (Semana 12)
 
