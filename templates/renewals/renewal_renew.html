@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Renovar Apólice {{ policy.policy_number }}{% endblock %}
+{% block page_title %}Renovar Apólice{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'renewals:renewal_list' %}">Renovações</a></li>
+<li class="breadcrumb-item">Renovar {{ policy.policy_number }}</li>
+{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Nova Apólice</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Número da Nova Apólice <span class="text-danger">*</span></label>
+                            {{ form.policy_number }}
+                            {% if form.policy_number.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.policy_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Início de Vigência <span class="text-danger">*</span></label>
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.start_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fim de Vigência <span class="text-danger">*</span></label>
+                            {{ form.end_date }}
+                            {% if form.end_date.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.end_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Valor do Prêmio <span class="text-danger">*</span></label>
+                            {{ form.premium_amount }}
+                            {% if form.premium_amount.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.premium_amount.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Seguradora</label>
+                            {{ form.insurer }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Apólice Original</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="fs-12 text-muted mb-1">Número</div>
+                            <div class="fw-semibold">{{ policy.policy_number }}</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="fs-12 text-muted mb-1">Cliente</div>
+                            <div class="fw-semibold">{{ policy.client.name }}</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="fs-12 text-muted mb-1">Seguradora</div>
+                            <div class="fw-semibold">{{ policy.insurer.name }}</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="fs-12 text-muted mb-1">Vigência</div>
+                            <div class="fw-semibold">{{ policy.start_date|date:'d/m/Y' }} a {{ policy.end_date|date:'d/m/Y' }}</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="fs-12 text-muted mb-1">Prêmio Atual</div>
+                            <div class="fw-semibold fs-16">R$ {{ policy.premium_amount|floatformat:2 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-success">
+                    <i class="feather-refresh-cw me-2"></i>Renovar
+                </button>
+                <a href="{% url 'renewals:renewal_detail' renewal.pk %}" class="btn btn-light">Cancelar</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

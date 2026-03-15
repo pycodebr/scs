@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CRM - Kanban{% endblock %}
+{% block page_title %}Pipeline de Negociações{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'crm:deal_list' %}">CRM</a></li>
+<li class="breadcrumb-item">Kanban</li>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'crm:deal_create' %}" class="btn btn-primary">
+    <i class="feather-plus me-2"></i>
+    <span>Nova Negociação</span>
+</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kanban-board {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        padding-bottom: 16px;
+        min-height: 500px;
+    }
+    .kanban-column {
+        min-width: 280px;
+        max-width: 320px;
+        flex: 0 0 280px;
+        display: flex;
+        flex-direction: column;
+    }
+    .kanban-column-header {
+        padding: 12px 16px;
+        border-radius: 8px 8px 0 0;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .kanban-column-header .count {
+        background: rgba(255,255,255,0.25);
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+    }
+    .kanban-column-body {
+        flex: 1;
+        background: #f0f2f5;
+        border-radius: 0 0 8px 8px;
+        padding: 8px;
+        min-height: 200px;
+    }
+    .kanban-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+        cursor: grab;
+        transition: box-shadow 0.15s ease, transform 0.15s ease;
+    }
+    .kanban-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .kanban-card.sortable-ghost {
+        opacity: 0.4;
+        transform: rotate(2deg);
+    }
+    .kanban-card.sortable-drag {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .kanban-card-title a {
+        font-weight: 600;
+        font-size: 13px;
+        color: #1e293b;
+        text-decoration: none;
+    }
+    .kanban-card-title a:hover {
+        color: #3454d1;
+    }
+    .kanban-card-meta {
+        font-size: 11px;
+        color: #6b7280;
+    }
+    .kanban-card-value {
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .kanban-column-total {
+        font-size: 11px;
+        color: rgba(255,255,255,0.8);
+        margin-top: 2px;
+    }
+    .priority-badge {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .priority-low { background: #198754; }
+    .priority-medium { background: #ffc107; }
+    .priority-high { background: #fd7e14; }
+    .priority-urgent { background: #dc3545; }
+
+    /* ---- Dark Mode (app-skin-dark) ---- */
+    html.app-skin-dark .kanban-column-body {
+        background: #1c2438;
+    }
+    html.app-skin-dark .kanban-card {
+        background: #0f172a;
+        border-color: #25324a;
+    }
+    html.app-skin-dark .kanban-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    html.app-skin-dark .kanban-card-title a {
+        color: #e2e8f0;
+    }
+    html.app-skin-dark .kanban-card-title a:hover {
+        color: #3454d1;
+    }
+    html.app-skin-dark .kanban-card-meta {
+        color: #8b92a5;
+    }
+    html.app-skin-dark .kanban-card-value {
+        color: #e2e8f0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if pipeline %}
+<!-- Filters -->
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card stretch stretch-full mb-0">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="feather-trello me-2"></i>{{ pipeline.name }}
+                </h5>
+                <div class="card-header-action">
+                    <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
+                        <select name="pipeline" class="form-select" style="width:auto; min-width:160px;" onchange="this.form.submit()">
+                            {% for p in pipelines %}
+                            <option value="{{ p.pk }}" {% if p.pk == pipeline.pk %}selected{% endif %}>{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <select name="priority" class="form-select" style="width:auto; min-width:160px;" onchange="this.form.submit()">
+                            <option value="">Todas prioridades</option>
+                            <option value="low" {% if request.GET.priority == 'low' %}selected{% endif %}>Baixa</option>
+                            <option value="medium" {% if request.GET.priority == 'medium' %}selected{% endif %}>Média</option>
+                            <option value="high" {% if request.GET.priority == 'high' %}selected{% endif %}>Alta</option>
+                            <option value="urgent" {% if request.GET.priority == 'urgent' %}selected{% endif %}>Urgente</option>
+                        </select>
+                        {% if request.user.role != 'broker' %}
+                        <select name="broker" class="form-select" style="width:auto; min-width:180px;" onchange="this.form.submit()">
+                            <option value="">Todos os corretores</option>
+                            {% for b in brokers %}
+                            <option value="{{ b.pk }}" {% if request.GET.broker == b.pk|stringformat:'d' %}selected{% endif %}>{{ b.get_full_name }}</option>
+                            {% endfor %}
+                        </select>
+                        {% endif %}
+                        <a href="{% url 'crm:deal_list' %}" class="btn btn-light-brand">
+                            <i class="feather-list me-1"></i>Ver Lista
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Kanban Board -->
+<div class="kanban-board" id="kanban-board">
+    {% for sd in stages_data %}
+    <div class="kanban-column">
+        <div class="kanban-column-header" style="background-color: {{ sd.stage.color }};">
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-semibold fs-12">{{ sd.stage.name }}</span>
+                    <span class="count">{{ sd.count }}</span>
+                </div>
+                <div class="kanban-column-total">R$ {{ sd.total|floatformat:2 }}</div>
+            </div>
+            {% if sd.stage.is_won %}
+            <i class="feather-award"></i>
+            {% elif sd.stage.is_lost %}
+            <i class="feather-x-circle"></i>
+            {% endif %}
+        </div>
+        <div class="kanban-column-body" data-stage-id="{{ sd.stage.pk }}">
+            {% for deal in sd.deals %}
+            <div class="kanban-card" data-deal-id="{{ deal.pk }}">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                    <div class="kanban-card-title">
+                        <a href="{% url 'crm:deal_detail' deal.pk %}">
+                            {{ deal.title }}
+                        </a>
+                    </div>
+                    <span class="priority-badge priority-{{ deal.priority }}" data-bs-toggle="tooltip" title="{{ deal.get_priority_display }}"></span>
+                </div>
+                <div class="kanban-card-meta">
+                    <div class="d-flex align-items-center gap-1 mb-1">
+                        <i class="feather-user" style="width:12px;height:12px;"></i>
+                        {{ deal.client.name }}
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="kanban-card-value">R$ {{ deal.expected_value|floatformat:2 }}</span>
+                        <span>{{ deal.broker.first_name }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-body text-center py-5">
+                <i class="feather-target fs-1 mb-3 d-block text-muted"></i>
+                <h5 class="text-muted">Nenhum pipeline configurado</h5>
+                <p class="text-muted mb-3">Crie um pipeline para começar a usar o CRM.</p>
+                <a href="{% url 'crm:pipeline_manage' %}" class="btn btn-primary">
+                    <i class="feather-settings me-2"></i>Gerenciar Pipelines
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const columns = document.querySelectorAll('.kanban-column-body');
+    const csrfToken = '{{ csrf_token }}';
+
+    columns.forEach(function(column) {
+        new Sortable(column, {
+            group: 'kanban',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag',
+            onEnd: function(evt) {
+                const dealId = evt.item.dataset.dealId;
+                const newStageId = evt.to.dataset.stageId;
+                const oldStageId = evt.from.dataset.stageId;
+
+                if (newStageId === oldStageId) return;
+
+                fetch(`/crm/deals/${dealId}/move/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: JSON.stringify({ stage_id: parseInt(newStageId) }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        // Revert on error
+                        evt.from.appendChild(evt.item);
+                    }
+                    // Update counters
+                    updateColumnCounters();
+                })
+                .catch(() => {
+                    evt.from.appendChild(evt.item);
+                });
+            }
+        });
+    });
+
+    function updateColumnCounters() {
+        document.querySelectorAll('.kanban-column').forEach(function(col) {
+            const body = col.querySelector('.kanban-column-body');
+            const cards = body.querySelectorAll('.kanban-card');
+            const countEl = col.querySelector('.count');
+            if (countEl) {
+                countEl.textContent = cards.length;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

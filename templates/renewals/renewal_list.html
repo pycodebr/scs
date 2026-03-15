@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Renovações{% endblock %}
+{% block page_title %}Renovações{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item">Renovações</li>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'renewals:renewal_create' %}" class="btn btn-primary">
+    <i class="feather-plus me-2"></i>
+    <span>Nova Renovação</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Lista de Renovações</h5>
+                <div class="card-header-action">
+                    <form method="get" class="d-flex gap-2">
+                        <select name="period" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                            <option value="">Todas</option>
+                            <option value="30" {% if request.GET.period == '30' %}selected{% endif %}>Próximos 30 dias</option>
+                            <option value="60" {% if request.GET.period == '60' %}selected{% endif %}>Próximos 60 dias</option>
+                            <option value="90" {% if request.GET.period == '90' %}selected{% endif %}>Próximos 90 dias</option>
+                        </select>
+                        <select name="status" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                            <option value="">Todos os status</option>
+                            <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pendente</option>
+                            <option value="contacted" {% if request.GET.status == 'contacted' %}selected{% endif %}>Contatado</option>
+                            <option value="quote_sent" {% if request.GET.status == 'quote_sent' %}selected{% endif %}>Cotação Enviada</option>
+                            <option value="renewed" {% if request.GET.status == 'renewed' %}selected{% endif %}>Renovada</option>
+                            <option value="not_renewed" {% if request.GET.status == 'not_renewed' %}selected{% endif %}>Não Renovada</option>
+                            <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelada</option>
+                        </select>
+                        <div class="input-group input-group-sm" style="width:250px">
+                            <input type="text" name="q" class="form-control" placeholder="Buscar..." value="{{ request.GET.q|default:'' }}">
+                            <button type="submit" class="btn btn-light-brand">
+                                <i class="feather-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body custom-card-action p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr class="border-b">
+                                <th>Apólice</th>
+                                <th>Cliente</th>
+                                <th>Seguradora</th>
+                                <th>Vencimento</th>
+                                <th>Contato</th>
+                                <th>Status</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for renewal in renewals %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'renewals:renewal_detail' renewal.pk %}">
+                                        {{ renewal.policy.policy_number }}
+                                    </a>
+                                </td>
+                                <td>{{ renewal.policy.client.name }}</td>
+                                <td>{{ renewal.policy.insurer.name }}</td>
+                                <td>
+                                    {% if renewal.is_overdue %}
+                                    <span class="text-danger fw-semibold">
+                                        <i class="feather-alert-triangle me-1"></i>{{ renewal.due_date|date:'d/m/Y' }}
+                                    </span>
+                                    {% elif renewal.is_urgent %}
+                                    <span class="text-warning fw-semibold">
+                                        <i class="feather-clock me-1"></i>{{ renewal.due_date|date:'d/m/Y' }}
+                                    </span>
+                                    {% else %}
+                                    {{ renewal.due_date|date:'d/m/Y' }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ renewal.contact_date|date:'d/m/Y'|default:'-' }}</td>
+                                <td>
+                                    {% if renewal.status == 'pending' %}
+                                    <span class="badge bg-soft-warning text-warning">Pendente</span>
+                                    {% elif renewal.status == 'contacted' %}
+                                    <span class="badge bg-soft-info text-info">Contatado</span>
+                                    {% elif renewal.status == 'quote_sent' %}
+                                    <span class="badge bg-soft-primary text-primary">Cotação Enviada</span>
+                                    {% elif renewal.status == 'renewed' %}
+                                    <span class="badge bg-soft-success text-success">Renovada</span>
+                                    {% elif renewal.status == 'not_renewed' %}
+                                    <span class="badge bg-soft-danger text-danger">Não Renovada</span>
+                                    {% elif renewal.status == 'cancelled' %}
+                                    <span class="badge bg-soft-dark text-dark">Cancelada</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="hstack gap-2 justify-content-end">
+                                        <a href="{% url 'renewals:renewal_detail' renewal.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Ver">
+                                            <i class="feather-eye"></i>
+                                        </a>
+                                        <a href="{% url 'renewals:renewal_update' renewal.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Editar">
+                                            <i class="feather-edit"></i>
+                                        </a>
+                                        {% if renewal.status != 'renewed' and renewal.status != 'not_renewed' %}
+                                        <a href="{% url 'renewals:renewal_renew' renewal.pk %}" class="avatar-text avatar-md text-success" data-bs-toggle="tooltip" title="Renovar">
+                                            <i class="feather-refresh-cw"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <i class="feather-refresh-cw fs-1 mb-3 d-block"></i>
+                                    Nenhuma renovação encontrada.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if page_obj.has_other_pages %}
+            <div class="card-footer">
+                {% include 'partials/_pagination.html' %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

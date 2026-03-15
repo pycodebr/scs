@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar Negociação{% else %}Nova Negociação{% endif %}{% endblock %}
+{% block page_title %}{% if object %}Editar Negociação{% else %}Nova Negociação{% endif %}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'crm:deal_list' %}">CRM</a></li>
+<li class="breadcrumb-item">{% if object %}Editar{% else %}Nova{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Dados da Negociação</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Título <span class="text-danger">*</span></label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.title.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Cliente <span class="text-danger">*</span></label>
+                            {{ form.client }}
+                            {% if form.client.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.client.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de Seguro</label>
+                            {{ form.insurance_type }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Seguradora</label>
+                            {{ form.insurer }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Valor Esperado</label>
+                            {{ form.expected_value }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Data Prevista de Fechamento</label>
+                            {{ form.expected_close_date }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Origem</label>
+                            {{ form.source }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Proposta Vinculada</label>
+                            {{ form.proposal }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Apólice Gerada</label>
+                            {{ form.policy }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Observações</label>
+                            {{ form.notes }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Motivo da Perda</label>
+                            {{ form.lost_reason }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card stretch stretch-full">
+                <div class="card-header">
+                    <h5 class="card-title">Pipeline</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Pipeline <span class="text-danger">*</span></label>
+                            {{ form.pipeline }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Etapa <span class="text-danger">*</span></label>
+                            {{ form.stage }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Prioridade</label>
+                            {{ form.priority }}
+                        </div>
+                        {% if form.broker.field.widget.input_type != 'hidden' %}
+                        <div class="col-12">
+                            <label class="form-label">Corretor <span class="text-danger">*</span></label>
+                            {{ form.broker }}
+                            {% if form.broker.errors %}
+                            <div class="fs-11 text-danger mt-1">{{ form.broker.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        {{ form.broker }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="feather-save me-2"></i>Salvar
+                </button>
+                <a href="{% url 'crm:deal_list' %}" class="btn btn-light">Cancelar</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Filter stages by selected pipeline
+document.addEventListener('DOMContentLoaded', function() {
+    const pipelineSelect = document.getElementById('id_pipeline');
+    const stageSelect = document.getElementById('id_stage');
+
+    if (!pipelineSelect || !stageSelect) return;
+
+    const allOptions = Array.from(stageSelect.options).map(opt => ({
+        value: opt.value,
+        text: opt.textContent,
+        pipelineName: opt.textContent.split(' - ')[0]
+    }));
+
+    pipelineSelect.addEventListener('change', function() {
+        const selectedPipeline = pipelineSelect.options[pipelineSelect.selectedIndex].text;
+        stageSelect.innerHTML = '';
+
+        allOptions.forEach(opt => {
+            if (!opt.value || opt.pipelineName === selectedPipeline) {
+                const option = document.createElement('option');
+                option.value = opt.value;
+                option.textContent = opt.text;
+                stageSelect.appendChild(option);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

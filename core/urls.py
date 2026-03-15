@@ -13,6 +13,8 @@ urlpatterns = [
     path('policies/', include('policies.urls')),
     path('claims/', include('claims.urls')),
     path('endorsements/', include('endorsements.urls')),
+    path('renewals/', include('renewals.urls')),
+    path('crm/', include('crm.urls')),
     path('', RedirectView.as_view(url='/accounts/login/', permanent=False)),
 ]
 

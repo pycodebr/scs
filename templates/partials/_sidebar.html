@@ -69,7 +69,7 @@
                     </a>
                 </li>
                 <li class="nxl-item">
-                    <a href="/renewals/" class="nxl-link">
+                    <a href="{% url 'renewals:renewal_list' %}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-refresh-cw"></i></span>
                         <span class="nxl-mtext">Renovações</span>
                     </a>
@@ -85,9 +85,9 @@
                         <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
-                        <li class="nxl-item"><a class="nxl-link" href="/crm/kanban/">Kanban</a></li>
-                        <li class="nxl-item"><a class="nxl-link" href="/crm/deals/">Negociações</a></li>
-                        <li class="nxl-item"><a class="nxl-link" href="/crm/pipelines/">Pipelines</a></li>
+                        <li class="nxl-item"><a class="nxl-link" href="{% url 'crm:deal_kanban' %}">Kanban</a></li>
+                        <li class="nxl-item"><a class="nxl-link" href="{% url 'crm:deal_list' %}">Negociações</a></li>
+                        <li class="nxl-item"><a class="nxl-link" href="{% url 'crm:pipeline_manage' %}">Pipelines</a></li>
                     </ul>
                 </li>
 

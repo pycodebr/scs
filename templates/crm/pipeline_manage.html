@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciar Pipelines{% endblock %}
+{% block page_title %}Gerenciar Pipelines{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'crm:deal_list' %}">CRM</a></li>
+<li class="breadcrumb-item">Pipelines</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- New Pipeline Form -->
+    <div class="col-lg-4">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Novo Pipeline</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'crm:pipeline_create' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Nome <span class="text-danger">*</span></label>
+                        {{ pipeline_form.name }}
+                    </div>
+                    <div class="mb-3 form-check">
+                        {{ pipeline_form.is_default }}
+                        <label class="form-check-label">Pipeline Padrão</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        {{ pipeline_form.is_active }}
+                        <label class="form-check-label">Ativo</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="feather-plus me-2"></i>Criar Pipeline
+                    </button>
+                </form>
+                <div class="mt-3 p-2 bg-soft-info rounded">
+                    <div class="fs-11 text-info">
+                        <i class="feather-info me-1"></i>
+                        Ao criar um pipeline, as etapas padrão (Prospecção, Primeiro Contato, Cotação, Proposta Enviada, Negociação, Fechamento, Perdido) serão criadas automaticamente.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pipelines List -->
+    <div class="col-lg-8">
+        {% for pipeline in pipelines %}
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">
+                    {{ pipeline.name }}
+                    {% if pipeline.is_default %}
+                    <span class="badge bg-soft-primary text-primary ms-2">Padrão</span>
+                    {% endif %}
+                    {% if not pipeline.is_active %}
+                    <span class="badge bg-soft-danger text-danger ms-2">Inativo</span>
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm mb-3">
+                        <thead>
+                            <tr>
+                                <th>Ordem</th>
+                                <th>Etapa</th>
+                                <th>Cor</th>
+                                <th>Tipo</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stage in pipeline.stages.all %}
+                            <tr>
+                                <td>{{ stage.order }}</td>
+                                <td>
+                                    <span class="fw-semibold">{{ stage.name }}</span>
+                                </td>
+                                <td>
+                                    <span class="d-inline-block rounded" style="width:24px;height:24px;background-color:{{ stage.color }};"></span>
+                                </td>
+                                <td>
+                                    {% if stage.is_won %}
+                                    <span class="badge bg-soft-success text-success">Ganho</span>
+                                    {% elif stage.is_lost %}
+                                    <span class="badge bg-soft-danger text-danger">Perda</span>
+                                    {% else %}
+                                    <span class="badge bg-soft-primary text-primary">Normal</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <form method="post" action="{% url 'crm:pipeline_stage_delete' stage.pk %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-light-danger" onclick="return confirm('Excluir etapa {{ stage.name }}?')">
+                                            <i class="feather-trash-2"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Add Stage Form -->
+                <form method="post" action="{% url 'crm:pipeline_stage_create' pipeline.pk %}" class="row g-2 align-items-end">
+                    {% csrf_token %}
+                    <div class="col-md-3">
+                        <label class="form-label fs-11">Nome</label>
+                        <input type="text" name="name" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fs-11">Ordem</label>
+                        <input type="number" name="order" class="form-control form-control-sm" value="0">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fs-11">Cor</label>
+                        <input type="color" name="color" class="form-control form-control-sm form-control-color" value="#6c757d">
+                    </div>
+                    <div class="col-md-1">
+                        <div class="form-check">
+                            <input type="checkbox" name="is_won" class="form-check-input" id="won_{{ pipeline.pk }}">
+                            <label class="form-check-label fs-11" for="won_{{ pipeline.pk }}">Ganho</label>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="form-check">
+                            <input type="checkbox" name="is_lost" class="form-check-input" id="lost_{{ pipeline.pk }}">
+                            <label class="form-check-label fs-11" for="lost_{{ pipeline.pk }}">Perda</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-sm btn-light-brand w-100">
+                            <i class="feather-plus me-1"></i>Nova Etapa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <div class="card stretch stretch-full">
+            <div class="card-body text-center py-5">
+                <i class="feather-git-branch fs-1 mb-3 d-block text-muted"></i>
+                <h5 class="text-muted">Nenhum pipeline cadastrado</h5>
+                <p class="text-muted">Use o formulário ao lado para criar o primeiro pipeline.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

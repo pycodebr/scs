@@ -1227,9 +1227,9 @@ class BrokerFilterMixin:
 
 ### Fase 4 — Operações Avançadas (Semana 8-9)
 
-- [ ] App `renewals` (gestão de renovações + management command)
-- [ ] App `crm` (pipeline, etapas, deals, atividades, kanban + grid)
-- [ ] JavaScript do kanban (drag-and-drop, AJAX)
+- [x] App `renewals` (gestão de renovações + management command)
+- [x] App `crm` (pipeline, etapas, deals, atividades, kanban + grid)
+- [x] JavaScript do kanban (drag-and-drop, AJAX)
 
 ### Fase 5 — Inteligência e Relatórios (Semana 10-11)
 
