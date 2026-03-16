@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block page_actions %}
+{% include 'ai_agent/components/ai_summary_button.html' with entity_type='claim' entity_id=claim.pk %}
 <a href="{% url 'claims:claim_update' claim.pk %}" class="btn btn-light-brand">
     <i class="feather-edit me-2"></i>
     <span>Editar</span>
@@ -27,7 +28,7 @@
                 {% if claim.status == 'open' %}
                 <span class="badge bg-soft-info text-info">Aberto</span>
                 {% elif claim.status == 'under_analysis' %}
-                <span class="badge bg-soft-warning text-warning">Em Analise</span>
+                <span class="badge bg-soft-warning text-warning">Em Análise</span>
                 {% elif claim.status == 'documentation_pending' %}
                 <span class="badge bg-soft-secondary text-secondary">Pendente Doc.</span>
                 {% elif claim.status == 'approved' %}
@@ -70,9 +71,10 @@
     </div>
 
     <div class="col-lg-8">
+        {% include 'ai_agent/components/ai_summary_card.html' %}
         <div class="card stretch stretch-full">
             <div class="card-header">
-                <h5 class="card-title">Informacoes</h5>
+                <h5 class="card-title">Informações</h5>
             </div>
             <div class="card-body">
                 <div class="row g-3">
@@ -83,31 +85,31 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="fs-12 text-muted mb-1">Apolice</div>
+                        <div class="fs-12 text-muted mb-1">Apólice</div>
                         <div class="fw-semibold">
                             <a href="{% url 'policies:policy_detail' claim.policy.pk %}">{{ claim.policy.policy_number }}</a>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="fs-12 text-muted mb-1">Data da Ocorrencia</div>
+                        <div class="fs-12 text-muted mb-1">Data da Ocorrência</div>
                         <div class="fw-semibold">{{ claim.occurrence_date|date:'d/m/Y' }}</div>
                     </div>
                     <div class="col-md-4">
-                        <div class="fs-12 text-muted mb-1">Data da Notificacao</div>
+                        <div class="fs-12 text-muted mb-1">Data da Notificação</div>
                         <div class="fw-semibold">{{ claim.notification_date|date:'d/m/Y' }}</div>
                     </div>
                     <div class="col-md-4">
-                        <div class="fs-12 text-muted mb-1">Data de Resolucao</div>
+                        <div class="fs-12 text-muted mb-1">Data de Resolução</div>
                         <div class="fw-semibold">{{ claim.resolution_date|date:'d/m/Y'|default:'-' }}</div>
                     </div>
                     {% if claim.location %}
                     <div class="col-md-12">
-                        <div class="fs-12 text-muted mb-1">Local da Ocorrencia</div>
+                        <div class="fs-12 text-muted mb-1">Local da Ocorrência</div>
                         <div class="fw-semibold">{{ claim.location }}</div>
                     </div>
                     {% endif %}
                     <div class="col-md-12">
-                        <div class="fs-12 text-muted mb-1">Descricao</div>
+                        <div class="fs-12 text-muted mb-1">Descrição</div>
                         <div class="fw-semibold">{{ claim.description|linebreaksbr }}</div>
                     </div>
                 </div>
@@ -117,7 +119,7 @@
         {% if claim.resolution_notes %}
         <div class="card stretch stretch-full">
             <div class="card-header">
-                <h5 class="card-title">Observacoes da Resolucao</h5>
+                <h5 class="card-title">Observações da Resolução</h5>
             </div>
             <div class="card-body">
                 <p>{{ claim.resolution_notes|linebreaksbr }}</p>
@@ -136,7 +138,7 @@
                     <table class="table table-sm mb-3">
                         <thead>
                             <tr>
-                                <th>Titulo</th>
+                                <th>Título</th>
                                 <th>Tipo</th>
                                 <th>Enviado por</th>
                                 <th>Data</th>
@@ -173,7 +175,7 @@
                 <form method="post" action="{% url 'claims:claim_document_create' claim.pk %}" enctype="multipart/form-data" class="row g-2 align-items-end">
                     {% csrf_token %}
                     <div class="col-md-4">
-                        <label class="form-label">Titulo</label>
+                        <label class="form-label">Título</label>
                         {{ document_form.title }}
                     </div>
                     <div class="col-md-3">
@@ -196,7 +198,7 @@
         <!-- Timeline -->
         <div class="card stretch stretch-full">
             <div class="card-header">
-                <h5 class="card-title">Historico</h5>
+                <h5 class="card-title">Histórico</h5>
             </div>
             <div class="card-body">
                 {% if timeline %}

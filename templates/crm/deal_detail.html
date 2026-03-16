@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block page_actions %}
+{% include 'ai_agent/components/ai_summary_button.html' with entity_type='deal' entity_id=deal.pk %}
 <a href="{% url 'crm:deal_update' deal.pk %}" class="btn btn-light-brand">
     <i class="feather-edit me-2"></i>
     <span>Editar</span>
@@ -75,6 +76,7 @@
     </div>
 
     <div class="col-lg-8">
+        {% include 'ai_agent/components/ai_summary_card.html' %}
         <div class="card stretch stretch-full">
             <div class="card-header">
                 <h5 class="card-title">Informações</h5>

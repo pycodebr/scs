@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Assistente IA{% endblock %}
+{% block page_title %}Assistente IA{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item">Assistente IA</li>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.chat-layout { display: flex; gap: 1rem; height: calc(100vh - 200px); min-height: 500px; }
+.chat-sidebar { width: 280px; flex-shrink: 0; display: flex; flex-direction: column; }
+.chat-sidebar .session-list { flex: 1; overflow-y: auto; }
+.chat-sidebar .session-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.75rem; border-radius: 6px; cursor: pointer; transition: background 0.15s; text-decoration: none; color: inherit; }
+.chat-sidebar .session-item:hover { background: rgba(52, 84, 209, 0.06); }
+.chat-sidebar .session-item.active { background: rgba(52, 84, 209, 0.1); font-weight: 600; }
+.chat-sidebar .session-item .session-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.chat-sidebar .session-item .session-delete { opacity: 0; transition: opacity 0.15s; color: #dc3545; border: none; background: none; cursor: pointer; padding: 2px; }
+.chat-sidebar .session-item:hover .session-delete { opacity: 1; }
+.chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 1.25rem; }
+.chat-bubble { max-width: 85%; margin-bottom: 1rem; animation: fadeInUp 0.2s ease; }
+.chat-bubble.user { margin-left: auto; }
+.chat-bubble.assistant { margin-right: auto; }
+.chat-bubble .bubble-content { padding: 0.75rem 1rem; border-radius: 12px; font-size: 14px; line-height: 1.6; }
+.chat-bubble.user .bubble-content { background: #3454d1; color: #fff; border-bottom-right-radius: 4px; }
+.chat-bubble.assistant .bubble-content { background: #f0f2f5; color: #1a1a2e; border-bottom-left-radius: 4px; }
+.chat-bubble.assistant .bubble-content p { margin-bottom: 0.5rem; }
+.chat-bubble.assistant .bubble-content p:last-child { margin-bottom: 0; }
+.chat-bubble.assistant .bubble-content ul,
+.chat-bubble.assistant .bubble-content ol { padding-left: 1.25rem; margin-bottom: 0.5rem; }
+.chat-bubble.assistant .bubble-content strong { font-weight: 600; }
+.chat-bubble .bubble-meta { font-size: 11px; color: #8e8e8e; margin-top: 4px; }
+.chat-bubble.user .bubble-meta { text-align: right; }
+.chat-input-area { padding: 1rem 1.25rem; border-top: 1px solid #e8e8e8; }
+.chat-input-wrap { display: flex; gap: 0.5rem; align-items: flex-end; }
+.chat-input-wrap textarea { flex: 1; border: 1px solid #ddd; border-radius: 10px; padding: 0.6rem 1rem; font-size: 14px; resize: none; min-height: 42px; max-height: 120px; line-height: 1.5; outline: none; transition: border-color 0.15s; }
+.chat-input-wrap textarea:focus { border-color: #3454d1; }
+.chat-input-wrap .btn-send { width: 42px; height: 42px; border-radius: 50%; border: none; background: #3454d1; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s; flex-shrink: 0; }
+.chat-input-wrap .btn-send:hover { background: #2a44b0; }
+.chat-input-wrap .btn-send:disabled { background: #ccc; cursor: not-allowed; }
+.chat-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #aaa; }
+.chat-empty i { font-size: 48px; margin-bottom: 1rem; }
+.typing-indicator { display: inline-flex; gap: 4px; padding: 0.75rem 1rem; background: #f0f2f5; border-radius: 12px; border-bottom-left-radius: 4px; }
+.typing-indicator span { width: 8px; height: 8px; background: #aaa; border-radius: 50%; animation: typingBounce 1.2s infinite; }
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 768px) {
+    .chat-sidebar { display: none; }
+    .chat-layout { height: calc(100vh - 180px); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-layout">
+    <!-- Sidebar -->
+    <div class="chat-sidebar">
+        <div class="card stretch stretch-full mb-0">
+            <div class="card-header py-2">
+                <button id="btnNewChat" class="btn btn-primary btn-sm w-100">
+                    <i class="feather-plus me-1"></i>Novo Chat
+                </button>
+            </div>
+            <div class="card-body p-2 session-list" id="sessionList">
+                {% for s in sessions %}
+                <a href="{% url 'ai_agent:chat_session' s.pk %}"
+                   class="session-item {% if active_session and active_session.pk == s.pk %}active{% endif %}"
+                   data-session-id="{{ s.pk }}">
+                    <i class="feather-message-square" style="font-size:14px;flex-shrink:0;"></i>
+                    <span class="session-title">{{ s.title }}</span>
+                    <button class="session-delete" onclick="event.preventDefault();event.stopPropagation();deleteSession({{ s.pk }});" title="Excluir">
+                        <i class="feather-x" style="font-size:12px;"></i>
+                    </button>
+                </a>
+                {% empty %}
+                <div class="text-center text-muted py-3 fs-12">Nenhuma conversa ainda.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-main">
+        <div class="card stretch stretch-full mb-0" style="display:flex;flex-direction:column;flex:1;">
+            <div class="card-header py-2 d-flex align-items-center gap-2">
+                <div class="avatar-text avatar-sm bg-soft-primary text-primary">
+                    <i class="feather-cpu"></i>
+                </div>
+                <div>
+                    <div class="fw-semibold fs-13" id="chatTitle">
+                        {% if active_session %}{{ active_session.title }}{% else %}Assistente IA{% endif %}
+                    </div>
+                    <div class="fs-11 text-muted">Pergunte sobre seus dados de negócios</div>
+                </div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                {% if chat_messages %}
+                    {% for msg in chat_messages %}
+                    <div class="chat-bubble {{ msg.role }}">
+                        <div class="bubble-content">
+                            {% if msg.role == 'assistant' %}
+                                <div class="ai-md-content">{{ msg.content }}</div>
+                            {% else %}
+                                {{ msg.content }}
+                            {% endif %}
+                        </div>
+                        <div class="bubble-meta">{{ msg.created_at|date:'H:i' }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="chat-empty" id="chatEmpty">
+                        <i class="feather-message-circle"></i>
+                        <div class="fw-semibold fs-16 mb-1">Olá! Como posso ajudar?</div>
+                        <div class="fs-13">Pergunte sobre clientes, apólices, sinistros, negócios ou métricas.</div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="chat-input-area">
+                <div class="chat-input-wrap">
+                    <textarea id="chatInput" placeholder="Digite sua mensagem..." rows="1"></textarea>
+                    <button class="btn-send" id="btnSend" title="Enviar">
+                        <i class="feather-send" style="font-size:16px;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const btnSend = document.getElementById('btnSend');
+    const btnNewChat = document.getElementById('btnNewChat');
+    const chatTitle = document.getElementById('chatTitle');
+    const chatEmpty = document.getElementById('chatEmpty');
+    const csrfToken = '{{ csrf_token }}';
+
+    let currentSessionId = {{ active_session.pk|default:"null" }};
+    let sending = false;
+
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    scrollToBottom();
+
+    // Auto-resize textarea
+    chatInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // Enter to send (Shift+Enter for newline)
+    chatInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    btnSend.addEventListener('click', sendMessage);
+
+    btnNewChat.addEventListener('click', function() {
+        window.location.href = '{% url "ai_agent:chat" %}';
+    });
+
+    function addBubble(content, role) {
+        if (chatEmpty) chatEmpty.remove();
+        var div = document.createElement('div');
+        div.className = 'chat-bubble ' + role;
+        var now = new Date();
+        var time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        if (role === 'assistant') {
+            div.innerHTML = '<div class="bubble-content"><div class="ai-md-content">' + renderMarkdown(content) + '</div></div><div class="bubble-meta">' + time + '</div>';
+        } else {
+            div.innerHTML = '<div class="bubble-content">' + escapeHtml(content) + '</div><div class="bubble-meta">' + time + '</div>';
+        }
+        chatMessages.appendChild(div);
+        scrollToBottom();
+        return div;
+    }
+
+    function addTypingIndicator() {
+        var div = document.createElement('div');
+        div.className = 'chat-bubble assistant';
+        div.id = 'typingIndicator';
+        div.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+        chatMessages.appendChild(div);
+        scrollToBottom();
+    }
+
+    function removeTypingIndicator() {
+        var el = document.getElementById('typingIndicator');
+        if (el) el.remove();
+    }
+
+    function sendMessage() {
+        if (sending) return;
+        var text = chatInput.value.trim();
+        if (!text) return;
+
+        sending = true;
+        chatInput.value = '';
+        chatInput.style.height = 'auto';
+        btnSend.disabled = true;
+
+        addBubble(text, 'user');
+        addTypingIndicator();
+
+        fetch('{% url "ai_agent:chat_send" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({
+                message: text,
+                session_id: currentSessionId,
+            }),
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            removeTypingIndicator();
+            if (data.error) {
+                addBubble('Erro: ' + data.error, 'assistant');
+            } else {
+                addBubble(data.response, 'assistant');
+                if (!currentSessionId && data.session_id) {
+                    currentSessionId = data.session_id;
+                    chatTitle.textContent = data.session_title;
+                    // Update URL without reload
+                    history.replaceState(null, '', '/ai/' + 'chat/' + data.session_id + '/');
+                    addSessionToSidebar(data.session_id, data.session_title);
+                }
+            }
+        })
+        .catch(function(err) {
+            removeTypingIndicator();
+            addBubble('Erro de conexão. Tente novamente.', 'assistant');
+        })
+        .finally(function() {
+            sending = false;
+            btnSend.disabled = false;
+            chatInput.focus();
+        });
+    }
+
+    function addSessionToSidebar(id, title) {
+        var list = document.getElementById('sessionList');
+        // Remove empty message if present
+        var emptyMsg = list.querySelector('.text-muted');
+        if (emptyMsg) emptyMsg.remove();
+        var a = document.createElement('a');
+        a.href = '/ai/chat/' + id + '/';
+        a.className = 'session-item active';
+        a.dataset.sessionId = id;
+        a.innerHTML = '<i class="feather-message-square" style="font-size:14px;flex-shrink:0;"></i>' +
+            '<span class="session-title">' + escapeHtml(title) + '</span>' +
+            '<button class="session-delete" onclick="event.preventDefault();event.stopPropagation();deleteSession(' + id + ');" title="Excluir">' +
+            '<i class="feather-x" style="font-size:12px;"></i></button>';
+        list.prepend(a);
+        // Deactivate other items
+        list.querySelectorAll('.session-item').forEach(function(el) {
+            if (el !== a) el.classList.remove('active');
+        });
+    }
+
+    function escapeHtml(text) {
+        var d = document.createElement('div');
+        d.textContent = text;
+        return d.innerHTML;
+    }
+
+    function renderMarkdown(text) {
+        // Basic markdown: bold, italic, lists, line breaks
+        var html = escapeHtml(text);
+        // Bold
+        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        // Italic
+        html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+        // Unordered lists
+        html = html.replace(/^[-•]\s+(.+)/gm, '<li>$1</li>');
+        html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+        // Numbered lists
+        html = html.replace(/^\d+\.\s+(.+)/gm, '<li>$1</li>');
+        // Headings
+        html = html.replace(/^### (.+)/gm, '<strong style="font-size:14px;">$1</strong>');
+        html = html.replace(/^## (.+)/gm, '<strong style="font-size:15px;">$1</strong>');
+        // Line breaks
+        html = html.replace(/\n/g, '<br>');
+        // Clean up double <br> after lists
+        html = html.replace(/<\/ul><br>/g, '</ul>');
+        html = html.replace(/<\/li><br>/g, '</li>');
+        return html;
+    }
+
+    // Render markdown for server-rendered assistant messages
+    document.querySelectorAll('.ai-md-content').forEach(function(el) {
+        el.innerHTML = renderMarkdown(el.textContent);
+    });
+
+    // Focus input on load
+    chatInput.focus();
+})();
+
+function deleteSession(sessionId) {
+    if (!confirm('Excluir esta conversa?')) return;
+    fetch('/ai/chat/delete/' + sessionId + '/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.ok) {
+            var el = document.querySelector('[data-session-id="' + sessionId + '"]');
+            if (el) el.remove();
+            // If this was the active session, redirect to clean chat
+            if (window.location.pathname.includes('/' + sessionId + '/')) {
+                window.location.href = '{% url "ai_agent:chat" %}';
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

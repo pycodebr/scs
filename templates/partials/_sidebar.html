@@ -99,6 +99,16 @@
                     </ul>
                 </li>
 
+                <li class="nxl-item nxl-caption">
+                    <label>Inteligencia</label>
+                </li>
+                <li class="nxl-item {% active_url_startswith request '/ai/' %}">
+                    <a href="{% url 'ai_agent:chat' %}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-cpu"></i></span>
+                        <span class="nxl-mtext">Assistente IA</span>
+                    </a>
+                </li>
+
                 {% if user.role != 'broker' %}
                 <li class="nxl-item nxl-caption">
                     <label>Análise</label>

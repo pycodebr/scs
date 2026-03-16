@@ -14,7 +14,7 @@ Sistema completo de gestão para corretoras de seguros, desenvolvido em Django. 
 - [Seed de Dados Demo](#-seed-de-dados-demo)
 - [Usuários e Senhas de Teste](#-usuários-e-senhas-de-teste)
 - [Papéis e Permissões](#-papéis-e-permissões)
-- [Screenshots](#-screenshots)
+- [Licença](#-licença)
 
 ---
 
@@ -141,13 +141,31 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Execute as migrações
+### 4. Configure as variáveis de ambiente
+
+Crie o arquivo `.env` na raiz do projeto usando o `.env.example` como base:
+
+```bash
+cp .env.example .env
+```
+
+Edite o `.env` e preencha com suas credenciais:
+
+```env
+OPENAI_API_KEY=sua-chave-de-api-da-openai
+OPENAI_MODEL=gpt-5.4
+```
+
+- `OPENAI_API_KEY` — Chave de API da OpenAI (obrigatória para funcionalidades de IA)
+- `OPENAI_MODEL` — Modelo a ser utilizado (padrão: `gpt-5.4`)
+
+### 5. Execute as migrações
 
 ```bash
 python manage.py migrate
 ```
 
-### 5. Popule com dados de demonstração (opcional, recomendado)
+### 6. Popule com dados de demonstração (opcional, recomendado)
 
 ```bash
 python manage.py seed_demo
@@ -155,13 +173,26 @@ python manage.py seed_demo
 
 > 💡 Isso cria automaticamente os usuários de teste, seguradoras, clientes, apólices e todos os dados necessários para uma demonstração funcional. Veja a seção [Seed de Dados Demo](#-seed-de-dados-demo) para mais detalhes.
 
-### 6. Inicie o servidor de desenvolvimento
+### 7. Gere os insights de IA (opcional, requer `.env` configurado)
+
+```bash
+python manage.py generate_insights
+```
+
+Este comando gera insights personalizados no dashboard de cada usuário usando IA. Pode ser executado periodicamente para manter os insights atualizados.
+
+```bash
+# Gerar apenas para um usuário específico
+python manage.py generate_insights --user_id 1
+```
+
+### 8. Inicie o servidor de desenvolvimento
 
 ```bash
 python manage.py runserver
 ```
 
-### 7. Acesse no navegador
+### 9. Acesse no navegador
 
 ```
 http://localhost:8000
@@ -246,19 +277,6 @@ O sistema possui 3 papéis com níveis de acesso distintos:
 - ❌ **Sem acesso** a relatórios gerenciais
 - ❌ **Sem acesso** a gestão de pipelines
 - ❌ **Sem acesso** a gestão de usuários
-
----
-
-## 📸 Screenshots
-
-### Dashboard
-Dashboard com KPIs, gráficos de produção mensal, distribuição por tipo de seguro e seguradora, e tabelas de atividade recente.
-
-### CRM Kanban
-Board visual com colunas por etapa do pipeline, cards de negociação com drag-and-drop, filtros por pipeline, prioridade e corretor.
-
-### Relatórios
-10 relatórios especializados com filtros por período, exportação CSV e PDF.
 
 ---
 

@@ -1,0 +1,49 @@
+{% if dashboard_insight %}
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card mb-0">
+            <div class="card-header cursor-pointer" data-bs-toggle="collapse" data-bs-target="#insightCollapse" aria-expanded="false" style="cursor:pointer;">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar-text avatar-sm bg-soft-primary text-primary">
+                        <i class="feather-cpu"></i>
+                    </div>
+                    <h5 class="card-title mb-0 flex-grow-1">Insights do Assistente IA</h5>
+                    <span class="fs-11 text-muted">{{ dashboard_insight.generated_at|date:'d/m/Y H:i' }}</span>
+                    <i class="feather-chevron-down ms-2" id="insightChevron" style="transition:transform 0.2s;"></i>
+                </div>
+            </div>
+            <div class="collapse" id="insightCollapse">
+                <div class="card-body pt-0">
+                    <div class="ai-insight-content fs-13" id="insightContent" style="line-height:1.7;">{{ dashboard_insight.content }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var collapse = document.getElementById('insightCollapse');
+    var chevron = document.getElementById('insightChevron');
+    if (collapse && chevron) {
+        collapse.addEventListener('show.bs.collapse', function() { chevron.style.transform = 'rotate(180deg)'; });
+        collapse.addEventListener('hide.bs.collapse', function() { chevron.style.transform = 'rotate(0deg)'; });
+    }
+    // Render basic markdown in insight
+    var el = document.getElementById('insightContent');
+    if (el) {
+        var html = el.textContent;
+        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+        html = html.replace(/^[-\u2022]\s+(.+)/gm, '<li>$1</li>');
+        html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+        html = html.replace(/^\d+\.\s+(.+)/gm, '<li>$1</li>');
+        html = html.replace(/^### (.+)/gm, '<strong>$1</strong><br>');
+        html = html.replace(/^## (.+)/gm, '<strong style="font-size:14px;">$1</strong><br>');
+        html = html.replace(/\n/g, '<br>');
+        html = html.replace(/<\/ul><br>/g, '</ul>');
+        html = html.replace(/<\/li><br>/g, '</li>');
+        el.innerHTML = html;
+    }
+});
+</script>
+{% endif %}

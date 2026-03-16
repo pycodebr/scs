@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block page_actions %}
+{% include 'ai_agent/components/ai_summary_button.html' with entity_type='proposal' entity_id=proposal.pk %}
 <a href="{% url 'policies:proposal_update' proposal.pk %}" class="btn btn-light-brand">
     <i class="feather-edit me-2"></i>
     <span>Editar</span>
@@ -16,7 +17,7 @@
 {% if proposal.status == 'approved' %}
 <a href="{% url 'policies:proposal_convert' proposal.pk %}" class="btn btn-primary">
     <i class="feather-arrow-right-circle me-2"></i>
-    <span>Converter em Apolice</span>
+    <span>Converter em Apólice</span>
 </a>
 {% endif %}
 {% endblock %}
@@ -35,7 +36,7 @@
                 {% elif proposal.status == 'submitted' %}
                 <span class="badge bg-soft-info text-info">Enviada</span>
                 {% elif proposal.status == 'under_analysis' %}
-                <span class="badge bg-soft-warning text-warning">Em Analise</span>
+                <span class="badge bg-soft-warning text-warning">Em Análise</span>
                 {% elif proposal.status == 'approved' %}
                 <span class="badge bg-soft-success text-success">Aprovada</span>
                 {% elif proposal.status == 'rejected' %}
@@ -51,9 +52,10 @@
         </div>
     </div>
     <div class="col-lg-8">
+        {% include 'ai_agent/components/ai_summary_card.html' %}
         <div class="card stretch stretch-full">
             <div class="card-header">
-                <h5 class="card-title">Informacoes</h5>
+                <h5 class="card-title">Informações</h5>
             </div>
             <div class="card-body">
                 <div class="row g-3">
@@ -70,7 +72,7 @@
                         <div class="fw-semibold">{{ proposal.insurance_type.name }}</div>
                     </div>
                     <div class="col-md-6">
-                        <div class="fs-12 text-muted mb-1">Valor do Premio</div>
+                        <div class="fs-12 text-muted mb-1">Valor do Prêmio</div>
                         <div class="fw-semibold">{{ proposal.premium_amount|brl }}</div>
                     </div>
                     <div class="col-md-6">
@@ -92,7 +94,7 @@
         {% if proposal.notes %}
         <div class="card stretch stretch-full">
             <div class="card-header">
-                <h5 class="card-title">Observacoes</h5>
+                <h5 class="card-title">Observações</h5>
             </div>
             <div class="card-body">
                 <p>{{ proposal.notes|linebreaksbr }}</p>

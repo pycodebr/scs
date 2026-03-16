@@ -76,6 +76,14 @@ class ProposalDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
     def get_queryset(self):
         return super().get_queryset().select_related('client', 'insurer', 'insurance_type', 'broker')
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        from ai_agent.models import EntitySummary
+        ctx['ai_summary'] = EntitySummary.objects.filter(
+            entity_type='proposal', entity_id=self.object.pk,
+        ).first()
+        return ctx
+
 
 class ProposalDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
     model = Proposal
@@ -202,6 +210,10 @@ class PolicyDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
         ctx['documents'] = self.object.documents.select_related('uploaded_by')
         ctx['document_form'] = PolicyDocumentForm()
         ctx['coverage_form'] = PolicyCoverageForm()
+        from ai_agent.models import EntitySummary
+        ctx['ai_summary'] = EntitySummary.objects.filter(
+            entity_type='policy', entity_id=self.object.pk,
+        ).first()
         return ctx
 
 

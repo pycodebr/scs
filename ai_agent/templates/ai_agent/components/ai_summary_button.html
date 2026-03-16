@@ -1,0 +1,108 @@
+<button type="button"
+        class="btn btn-light-brand ai-summary-btn"
+        data-entity-type="{{ entity_type }}"
+        data-entity-id="{{ entity_id }}"
+        onclick="requestAISummary(this)">
+    <i class="feather-cpu me-2 ai-summary-icon"></i>
+    <span class="ai-summary-label">Resumir com IA</span>
+    <span class="spinner-border spinner-border-sm ms-1 ai-summary-spinner" style="display:none;" role="status"></span>
+</button>
+
+<script>
+function requestAISummary(btn) {
+    if (btn.disabled) return;
+    var entityType = btn.dataset.entityType;
+    var entityId = btn.dataset.entityId;
+    var icon = btn.querySelector('.ai-summary-icon');
+    var label = btn.querySelector('.ai-summary-label');
+    var spinner = btn.querySelector('.ai-summary-spinner');
+
+    // Show loading state on button (non-blocking)
+    btn.disabled = true;
+    icon.style.display = 'none';
+    spinner.style.display = '';
+    label.textContent = 'Gerando...';
+
+    // Get CSRF token from cookie
+    var csrfToken = '';
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var c = cookies[i].trim();
+        if (c.startsWith('csrftoken=')) {
+            csrfToken = c.substring('csrftoken='.length);
+            break;
+        }
+    }
+    // Fallback: get from hidden input if available
+    if (!csrfToken) {
+        var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfInput) csrfToken = csrfInput.value;
+    }
+
+    fetch('/ai/summary/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify({
+            entity_type: entityType,
+            entity_id: parseInt(entityId),
+        }),
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        btn.disabled = false;
+        icon.style.display = '';
+        spinner.style.display = 'none';
+        label.textContent = 'Resumir com IA';
+
+        var card = document.getElementById('aiSummaryCard');
+        if (data.error) {
+            if (card) {
+                card.style.display = '';
+                card.querySelector('.ai-summary-text').innerHTML = '<div class="alert alert-soft-danger mb-0">' + data.error + '</div>';
+                card.querySelector('.ai-summary-date').textContent = '';
+            }
+        } else {
+            if (card) {
+                card.style.display = '';
+                card.querySelector('.ai-summary-text').innerHTML = renderAISummary(data.summary);
+                card.querySelector('.ai-summary-date').textContent = 'Gerado agora';
+            }
+        }
+    })
+    .catch(function(err) {
+        btn.disabled = false;
+        icon.style.display = '';
+        spinner.style.display = 'none';
+        label.textContent = 'Resumir com IA';
+
+        var card = document.getElementById('aiSummaryCard');
+        if (card) {
+            card.style.display = '';
+            card.querySelector('.ai-summary-text').innerHTML = '<div class="alert alert-soft-danger mb-0">Erro de conexão. Tente novamente.</div>';
+            card.querySelector('.ai-summary-date').textContent = '';
+        }
+    });
+}
+
+function renderAISummary(text) {
+    // Escape HTML
+    var d = document.createElement('div');
+    d.textContent = text;
+    var html = d.innerHTML;
+    // Basic markdown rendering
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    html = html.replace(/^[-\u2022]\s+(.+)/gm, '<li>$1</li>');
+    html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+    html = html.replace(/^\d+\.\s+(.+)/gm, '<li>$1</li>');
+    html = html.replace(/^### (.+)/gm, '<strong>$1</strong><br>');
+    html = html.replace(/^## (.+)/gm, '<strong style="font-size:15px;">$1</strong><br>');
+    html = html.replace(/\n/g, '<br>');
+    html = html.replace(/<\/ul><br>/g, '</ul>');
+    html = html.replace(/<\/li><br>/g, '</li>');
+    return html;
+}
+</script>

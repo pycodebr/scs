@@ -79,6 +79,14 @@ class ClientDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
     template_name = 'clients/client_detail.html'
     context_object_name = 'client'
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        from ai_agent.models import EntitySummary
+        ctx['ai_summary'] = EntitySummary.objects.filter(
+            entity_type='client', entity_id=self.object.pk,
+        ).first()
+        return ctx
+
 
 class ClientDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
     model = Client

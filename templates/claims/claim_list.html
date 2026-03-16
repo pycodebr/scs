@@ -25,7 +25,7 @@
                         <select name="status" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
                             <option value="">Todos os status</option>
                             <option value="open" {% if request.GET.status == 'open' %}selected{% endif %}>Aberto</option>
-                            <option value="under_analysis" {% if request.GET.status == 'under_analysis' %}selected{% endif %}>Em Analise</option>
+                            <option value="under_analysis" {% if request.GET.status == 'under_analysis' %}selected{% endif %}>Em Análise</option>
                             <option value="documentation_pending" {% if request.GET.status == 'documentation_pending' %}selected{% endif %}>Pendente Doc.</option>
                             <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Aprovado</option>
                             <option value="partially_approved" {% if request.GET.status == 'partially_approved' %}selected{% endif %}>Parc. Aprovado</option>
@@ -49,11 +49,11 @@
                             <tr class="border-b">
                                 <th>Sinistro</th>
                                 <th>Cliente</th>
-                                <th>Apolice</th>
-                                <th>Data Ocorrencia</th>
+                                <th>Apólice</th>
+                                <th>Data Ocorrência</th>
                                 <th>Valor Reclamado</th>
                                 <th>Status</th>
-                                <th class="text-end">Acoes</th>
+                                <th class="text-end">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -72,7 +72,7 @@
                                     {% if claim.status == 'open' %}
                                     <span class="badge bg-soft-info text-info">Aberto</span>
                                     {% elif claim.status == 'under_analysis' %}
-                                    <span class="badge bg-soft-warning text-warning">Em Analise</span>
+                                    <span class="badge bg-soft-warning text-warning">Em Análise</span>
                                     {% elif claim.status == 'documentation_pending' %}
                                     <span class="badge bg-soft-secondary text-secondary">Pendente Doc.</span>
                                     {% elif claim.status == 'approved' %}

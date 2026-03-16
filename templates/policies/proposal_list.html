@@ -26,7 +26,7 @@
                             <option value="">Todos os status</option>
                             <option value="draft" {% if request.GET.status == 'draft' %}selected{% endif %}>Rascunho</option>
                             <option value="submitted" {% if request.GET.status == 'submitted' %}selected{% endif %}>Enviada</option>
-                            <option value="under_analysis" {% if request.GET.status == 'under_analysis' %}selected{% endif %}>Em Analise</option>
+                            <option value="under_analysis" {% if request.GET.status == 'under_analysis' %}selected{% endif %}>Em Análise</option>
                             <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Aprovada</option>
                             <option value="rejected" {% if request.GET.status == 'rejected' %}selected{% endif %}>Recusada</option>
                             <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelada</option>
@@ -50,9 +50,9 @@
                                 <th>Seguradora</th>
                                 <th>Tipo</th>
                                 <th>Data Envio</th>
-                                <th>Premio</th>
+                                <th>Prêmio</th>
                                 <th>Status</th>
-                                <th class="text-end">Acoes</th>
+                                <th class="text-end">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -74,7 +74,7 @@
                                     {% elif proposal.status == 'submitted' %}
                                     <span class="badge bg-soft-info text-info">Enviada</span>
                                     {% elif proposal.status == 'under_analysis' %}
-                                    <span class="badge bg-soft-warning text-warning">Em Analise</span>
+                                    <span class="badge bg-soft-warning text-warning">Em Análise</span>
                                     {% elif proposal.status == 'approved' %}
                                     <span class="badge bg-soft-success text-success">Aprovada</span>
                                     {% elif proposal.status == 'rejected' %}
@@ -92,7 +92,7 @@
                                             <i class="feather-edit"></i>
                                         </a>
                                         {% if proposal.status == 'approved' %}
-                                        <a href="{% url 'policies:proposal_convert' proposal.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Converter em Apolice">
+                                        <a href="{% url 'policies:proposal_convert' proposal.pk %}" class="avatar-text avatar-md" data-bs-toggle="tooltip" title="Converter em Apólice">
                                             <i class="feather-arrow-right-circle"></i>
                                         </a>
                                         {% endif %}

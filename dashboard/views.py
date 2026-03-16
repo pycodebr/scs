@@ -14,6 +14,7 @@ from claims.models import Claim, ClaimStatus
 from clients.models import Client
 from renewals.models import Renewal, RenewalStatus
 from crm.models import Deal, Pipeline, PipelineStage
+from ai_agent.models import DashboardInsight
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -226,6 +227,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             renewal_months_values.append(count)
         ctx['chart_renewal_months'] = json.dumps(renewal_months_labels)
         ctx['chart_renewal_values'] = json.dumps(renewal_months_values)
+
+        # Dashboard AI Insight
+        ctx['dashboard_insight'] = DashboardInsight.objects.filter(
+            user=user
+        ).first()
 
         # Quick shortcuts (respect permissions)
         ctx['user_role'] = user.role

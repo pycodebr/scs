@@ -1,0 +1,30 @@
+<div class="card stretch stretch-full" id="aiSummaryCard" {% if not ai_summary %}style="display:none;"{% endif %}>
+    <div class="card-header">
+        <div class="d-flex align-items-center gap-2">
+            <div class="avatar-text avatar-sm bg-soft-primary text-primary">
+                <i class="feather-cpu"></i>
+            </div>
+            <h5 class="card-title mb-0">Resumo com IA</h5>
+        </div>
+        <span class="fs-11 text-muted ai-summary-date">
+            {% if ai_summary %}Gerado em {{ ai_summary.generated_at|date:'d/m/Y H:i' }}{% endif %}
+        </span>
+    </div>
+    <div class="card-body">
+        <div class="ai-summary-text fs-13" style="line-height:1.7;">
+            {% if ai_summary %}{{ ai_summary.content }}{% endif %}
+        </div>
+    </div>
+</div>
+{% if ai_summary %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var el = document.querySelector('#aiSummaryCard .ai-summary-text');
+    if (el && el.textContent.trim()) {
+        if (typeof renderAISummary === 'function') {
+            el.innerHTML = renderAISummary(el.textContent);
+        }
+    }
+});
+</script>
+{% endif %}

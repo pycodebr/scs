@@ -1,14 +1,15 @@
 {% extends 'base.html' %}
 {% load utils_tags %}
 
-{% block title %}Apolice {{ policy.policy_number }}{% endblock %}
-{% block page_title %}Detalhes da Apolice{% endblock %}
+{% block title %}Apólice {{ policy.policy_number }}{% endblock %}
+{% block page_title %}Detalhes da Apólice{% endblock %}
 {% block breadcrumb %}
-<li class="breadcrumb-item"><a href="{% url 'policies:policy_list' %}">Apolices</a></li>
+<li class="breadcrumb-item"><a href="{% url 'policies:policy_list' %}">Apólices</a></li>
 <li class="breadcrumb-item">{{ policy.policy_number }}</li>
 {% endblock %}
 
 {% block page_actions %}
+{% include 'ai_agent/components/ai_summary_button.html' with entity_type='policy' entity_id=policy.pk %}
 <a href="{% url 'policies:policy_update' policy.pk %}" class="btn btn-light-brand">
     <i class="feather-edit me-2"></i>
     <span>Editar</span>
@@ -60,19 +61,19 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-12">
-                        <div class="fs-12 text-muted mb-1">Valor do Premio</div>
+                        <div class="fs-12 text-muted mb-1">Valor do Prêmio</div>
                         <div class="fw-semibold fs-16">{{ policy.premium_amount|brl }}</div>
                     </div>
                     <div class="col-12">
-                        <div class="fs-12 text-muted mb-1">Importancia Segurada</div>
+                        <div class="fs-12 text-muted mb-1">Importância Segurada</div>
                         <div class="fw-semibold">{{ policy.insured_amount|brl }}</div>
                     </div>
                     <div class="col-6">
-                        <div class="fs-12 text-muted mb-1">Comissao</div>
+                        <div class="fs-12 text-muted mb-1">Comissão</div>
                         <div class="fw-semibold">{{ policy.commission_rate }}%</div>
                     </div>
                     <div class="col-6">
-                        <div class="fs-12 text-muted mb-1">Valor Comissao</div>
+                        <div class="fs-12 text-muted mb-1">Valor Comissão</div>
                         <div class="fw-semibold">{{ policy.commission_amount|brl }}</div>
                     </div>
                     <div class="col-6">
@@ -89,9 +90,10 @@
     </div>
 
     <div class="col-lg-8">
+        {% include 'ai_agent/components/ai_summary_card.html' %}
         <div class="card stretch stretch-full">
             <div class="card-header">
-                <h5 class="card-title">Informacoes</h5>
+                <h5 class="card-title">Informações</h5>
             </div>
             <div class="card-body">
                 <div class="row g-3">
@@ -112,11 +114,11 @@
                         <div class="fw-semibold">{{ policy.insurance_type.name }}</div>
                     </div>
                     <div class="col-md-3">
-                        <div class="fs-12 text-muted mb-1">Inicio de Vigencia</div>
+                        <div class="fs-12 text-muted mb-1">Início de Vigência</div>
                         <div class="fw-semibold">{{ policy.start_date|date:'d/m/Y' }}</div>
                     </div>
                     <div class="col-md-3">
-                        <div class="fs-12 text-muted mb-1">Fim de Vigencia</div>
+                        <div class="fs-12 text-muted mb-1">Fim de Vigência</div>
                         <div class="fw-semibold">{{ policy.end_date|date:'d/m/Y' }}</div>
                     </div>
                     <div class="col-md-6">
@@ -141,7 +143,7 @@
                                 <th>Cobertura</th>
                                 <th>Valor Segurado</th>
                                 <th>Franquia</th>
-                                <th>Premio</th>
+                                <th>Prêmio</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -183,7 +185,7 @@
                         {{ coverage_form.deductible }}
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">Premio</label>
+                        <label class="form-label">Prêmio</label>
                         {{ coverage_form.premium_amount }}
                     </div>
                     <div class="col-md-2">
@@ -206,7 +208,7 @@
                     <table class="table table-sm mb-3">
                         <thead>
                             <tr>
-                                <th>Titulo</th>
+                                <th>Título</th>
                                 <th>Tipo</th>
                                 <th>Enviado por</th>
                                 <th>Data</th>
@@ -243,7 +245,7 @@
                 <form method="post" action="{% url 'policies:policy_document_create' policy.pk %}" enctype="multipart/form-data" class="row g-2 align-items-end">
                     {% csrf_token %}
                     <div class="col-md-4">
-                        <label class="form-label">Titulo</label>
+                        <label class="form-label">Título</label>
                         {{ document_form.title }}
                     </div>
                     <div class="col-md-3">
@@ -266,7 +268,7 @@
         {% if policy.notes %}
         <div class="card stretch stretch-full">
             <div class="card-header">
-                <h5 class="card-title">Observacoes</h5>
+                <h5 class="card-title">Observações</h5>
             </div>
             <div class="card-body">
                 <p>{{ policy.notes|linebreaksbr }}</p>

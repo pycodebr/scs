@@ -163,6 +163,10 @@ class DealDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         ctx['activities'] = self.object.activities.select_related('performed_by')
         ctx['activity_form'] = DealActivityForm()
+        from ai_agent.models import EntitySummary
+        ctx['ai_summary'] = EntitySummary.objects.filter(
+            entity_type='deal', entity_id=self.object.pk,
+        ).first()
         return ctx
 
 

@@ -1,6 +1,11 @@
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = 'django-insecure-0&jg$37j300af9e4t_fb*(8w#kt8g+p#+75d)tdu=m3q3*z0j7'
 
@@ -30,6 +35,7 @@ INSTALLED_APPS = [
     'crm',
     'dashboard',
     'reports',
+    'ai_agent',
 ]
 
 MIDDLEWARE = [
@@ -102,3 +108,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# OpenAI
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+OPENAI_MODEL = os.environ.get('OPENAI_MODEL', 'gpt-5.4')

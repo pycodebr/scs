@@ -34,7 +34,7 @@
                             <option value="">Todos os status</option>
                             <option value="draft" {% if request.GET.status == 'draft' %}selected{% endif %}>Rascunho</option>
                             <option value="requested" {% if request.GET.status == 'requested' %}selected{% endif %}>Solicitado</option>
-                            <option value="under_analysis" {% if request.GET.status == 'under_analysis' %}selected{% endif %}>Em Analise</option>
+                            <option value="under_analysis" {% if request.GET.status == 'under_analysis' %}selected{% endif %}>Em Análise</option>
                             <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Aprovado</option>
                             <option value="rejected" {% if request.GET.status == 'rejected' %}selected{% endif %}>Rejeitado</option>
                             <option value="applied" {% if request.GET.status == 'applied' %}selected{% endif %}>Aplicado</option>
@@ -54,13 +54,13 @@
                         <thead>
                             <tr class="border-b">
                                 <th>Endosso</th>
-                                <th>Apolice</th>
+                                <th>Apólice</th>
                                 <th>Cliente</th>
                                 <th>Tipo</th>
-                                <th>Data Solicitacao</th>
-                                <th>Dif. Premio</th>
+                                <th>Data Solicitação</th>
+                                <th>Dif. Prêmio</th>
                                 <th>Status</th>
-                                <th class="text-end">Acoes</th>
+                                <th class="text-end">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -84,7 +84,7 @@
                                     {% elif endorsement.status == 'requested' %}
                                     <span class="badge bg-soft-info text-info">Solicitado</span>
                                     {% elif endorsement.status == 'under_analysis' %}
-                                    <span class="badge bg-soft-warning text-warning">Em Analise</span>
+                                    <span class="badge bg-soft-warning text-warning">Em Análise</span>
                                     {% elif endorsement.status == 'approved' %}
                                     <span class="badge bg-soft-success text-success">Aprovado</span>
                                     {% elif endorsement.status == 'rejected' %}

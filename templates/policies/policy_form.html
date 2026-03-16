@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% load utils_tags %}
 
-{% block title %}{% if converting %}Converter Proposta em Apolice{% elif object %}Editar Apolice{% else %}Nova Apolice{% endif %}{% endblock %}
-{% block page_title %}{% if converting %}Converter Proposta em Apolice{% elif object %}Editar Apolice{% else %}Nova Apolice{% endif %}{% endblock %}
+{% block title %}{% if converting %}Converter Proposta em Apólice{% elif object %}Editar Apólice{% else %}Nova Apólice{% endif %}{% endblock %}
+{% block page_title %}{% if converting %}Converter Proposta em Apólice{% elif object %}Editar Apólice{% else %}Nova Apólice{% endif %}{% endblock %}
 {% block breadcrumb %}
-<li class="breadcrumb-item"><a href="{% url 'policies:policy_list' %}">Apolices</a></li>
+<li class="breadcrumb-item"><a href="{% url 'policies:policy_list' %}">Apólices</a></li>
 <li class="breadcrumb-item">{% if converting %}Converter{% elif object %}Editar{% else %}Nova{% endif %}</li>
 {% endblock %}
 
@@ -16,32 +16,32 @@
             {% if converting %}
             <div class="alert alert-soft-info mb-3">
                 <i class="feather-info me-2"></i>
-                Convertendo proposta <strong>{{ proposal.proposal_number }}</strong> em apolice. Verifique os dados preenchidos.
+                Convertendo proposta <strong>{{ proposal.proposal_number }}</strong> em apólice. Verifique os dados preenchidos.
             </div>
             {% endif %}
 
             <div class="card stretch stretch-full">
                 <div class="card-header">
-                    <h5 class="card-title">Dados da Apolice</h5>
+                    <h5 class="card-title">Dados da Apólice</h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label">Numero da Apolice <span class="text-danger">*</span></label>
+                            <label class="form-label">Número da Apólice <span class="text-danger">*</span></label>
                             {{ form.policy_number }}
                             {% if form.policy_number.errors %}
                             <div class="fs-11 text-danger mt-1">{{ form.policy_number.errors.0 }}</div>
                             {% endif %}
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Inicio de Vigencia <span class="text-danger">*</span></label>
+                            <label class="form-label">Início de Vigência <span class="text-danger">*</span></label>
                             {{ form.start_date }}
                             {% if form.start_date.errors %}
                             <div class="fs-11 text-danger mt-1">{{ form.start_date.errors.0 }}</div>
                             {% endif %}
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Fim de Vigencia <span class="text-danger">*</span></label>
+                            <label class="form-label">Fim de Vigência <span class="text-danger">*</span></label>
                             {{ form.end_date }}
                             {% if form.end_date.errors %}
                             <div class="fs-11 text-danger mt-1">{{ form.end_date.errors.0 }}</div>
@@ -83,11 +83,11 @@
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label">Valor do Premio</label>
+                            <label class="form-label">Valor do Prêmio</label>
                             {{ form.premium_amount }}
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Importancia Segurada</label>
+                            <label class="form-label">Importância Segurada</label>
                             {{ form.insured_amount }}
                         </div>
                         <div class="col-md-4">
@@ -95,11 +95,11 @@
                             {{ form.payment_method }}
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Comissao (%)</label>
+                            <label class="form-label">Comissão (%)</label>
                             {{ form.commission_rate }}
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Valor da Comissao</label>
+                            <label class="form-label">Valor da Comissão</label>
                             {{ form.commission_amount }}
                         </div>
                         <div class="col-md-3">
@@ -124,7 +124,7 @@
                                     <th>Cobertura</th>
                                     <th>Valor Segurado</th>
                                     <th>Franquia</th>
-                                    <th>Premio</th>
+                                    <th>Prêmio</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -164,7 +164,7 @@
                             {{ coverage_form.deductible }}
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Premio</label>
+                            <label class="form-label">Prêmio</label>
                             {{ coverage_form.premium_amount }}
                         </div>
                         <div class="col-md-2">
@@ -179,7 +179,7 @@
 
             <div class="card stretch stretch-full">
                 <div class="card-header">
-                    <h5 class="card-title">Observacoes</h5>
+                    <h5 class="card-title">Observações</h5>
                 </div>
                 <div class="card-body">
                     {{ form.notes }}
@@ -190,7 +190,7 @@
         <div class="col-lg-4">
             <div class="card stretch stretch-full">
                 <div class="card-header">
-                    <h5 class="card-title">Configuracoes</h5>
+                    <h5 class="card-title">Configurações</h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">

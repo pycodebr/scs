@@ -63,7 +63,7 @@
     <div class="col-lg-8">
         <div class="card stretch stretch-full">
             <div class="card-header">
-                <h5 class="card-title">Informacoes</h5>
+                <h5 class="card-title">Informações</h5>
             </div>
             <div class="card-body">
                 <div class="row g-3">
@@ -72,7 +72,7 @@
                         <div class="fw-semibold">{{ insurer.cnpj }}</div>
                     </div>
                     <div class="col-md-6">
-                        <div class="fs-12 text-muted mb-1">Codigo SUSEP</div>
+                        <div class="fs-12 text-muted mb-1">Código SUSEP</div>
                         <div class="fw-semibold">{{ insurer.susep_code|default:'-' }}</div>
                     </div>
                     <div class="col-md-6">
@@ -85,7 +85,7 @@
                     </div>
                     {% if insurer.street %}
                     <div class="col-12">
-                        <div class="fs-12 text-muted mb-1">Endereco</div>
+                        <div class="fs-12 text-muted mb-1">Endereço</div>
                         <div class="fw-semibold">
                             {{ insurer.street }}{% if insurer.number %}, {{ insurer.number }}{% endif %}
                             {% if insurer.complement %} - {{ insurer.complement }}{% endif %}
@@ -101,7 +101,7 @@
 
         <div class="card stretch stretch-full">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="card-title">Ramos de Atuacao</h5>
+                <h5 class="card-title">Ramos de Atuação</h5>
             </div>
             <div class="card-body p-0">
                 <form method="post" action="{% url 'insurers:branch_create' insurer.pk %}" class="p-3 border-bottom">
@@ -112,7 +112,7 @@
                             {{ branch_form.name }}
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fs-12">Codigo SUSEP</label>
+                            <label class="form-label fs-12">Código SUSEP</label>
                             {{ branch_form.susep_branch_code }}
                         </div>
                         <div class="col-md-3">
@@ -127,9 +127,9 @@
                         <thead>
                             <tr class="border-b">
                                 <th>Ramo</th>
-                                <th>Codigo SUSEP</th>
+                                <th>Código SUSEP</th>
                                 <th>Status</th>
-                                <th class="text-end">Acoes</th>
+                                <th class="text-end">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -169,7 +169,7 @@
         {% if insurer.notes %}
         <div class="card stretch stretch-full">
             <div class="card-header">
-                <h5 class="card-title">Observacoes</h5>
+                <h5 class="card-title">Observações</h5>
             </div>
             <div class="card-body">
                 <p>{{ insurer.notes|linebreaksbr }}</p>

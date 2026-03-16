@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% load utils_tags %}
 
-{% block title %}Apolices{% endblock %}
-{% block page_title %}Apolices{% endblock %}
+{% block title %}Apólices{% endblock %}
+{% block page_title %}Apólices{% endblock %}
 {% block breadcrumb %}
-<li class="breadcrumb-item">Apolices</li>
+<li class="breadcrumb-item">Apólices</li>
 {% endblock %}
 
 {% block page_actions %}
@@ -14,7 +14,7 @@
 </a>
 <a href="{% url 'policies:policy_create' %}" class="btn btn-primary">
     <i class="feather-plus me-2"></i>
-    <span>Nova Apolice</span>
+    <span>Nova Apólice</span>
 </a>
 {% endblock %}
 
@@ -23,7 +23,7 @@
     <div class="col-12">
         <div class="card stretch stretch-full">
             <div class="card-header">
-                <h5 class="card-title">Lista de Apolices</h5>
+                <h5 class="card-title">Lista de Apólices</h5>
                 <div class="card-header-action">
                     <form method="get" class="d-flex gap-2">
                         <select name="status" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
@@ -48,13 +48,13 @@
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr class="border-b">
-                                <th>Apolice</th>
+                                <th>Apólice</th>
                                 <th>Cliente</th>
                                 <th>Seguradora</th>
-                                <th>Vigencia</th>
-                                <th>Premio</th>
+                                <th>Vigência</th>
+                                <th>Prêmio</th>
                                 <th>Status</th>
-                                <th class="text-end">Acoes</th>
+                                <th class="text-end">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -103,7 +103,7 @@
                             <tr>
                                 <td colspan="7" class="text-center py-4 text-muted">
                                     <i class="feather-file-text fs-1 mb-3 d-block"></i>
-                                    Nenhuma apolice encontrada.
+                                    Nenhuma apólice encontrada.
                                 </td>
                             </tr>
                             {% endfor %}

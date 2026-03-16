@@ -78,6 +78,10 @@ class ClaimDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
         ctx['documents'] = self.object.documents.select_related('uploaded_by')
         ctx['timeline'] = self.object.timeline.select_related('performed_by')
         ctx['document_form'] = ClaimDocumentForm()
+        from ai_agent.models import EntitySummary
+        ctx['ai_summary'] = EntitySummary.objects.filter(
+            entity_type='claim', entity_id=self.object.pk,
+        ).first()
         return ctx
 
 
