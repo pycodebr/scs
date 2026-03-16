@@ -1,6 +1,5 @@
 import csv
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db.models import Q
 from django.http import HttpResponse
@@ -8,13 +7,13 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 
-from utils.mixins import BrokerFilterMixin
+from utils.mixins import BrokerageFilterMixin, BrokerageFormMixin
 
 from .forms import ClientForm
 from .models import Client
 
 
-class ClientListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
+class ClientListView(BrokerageFilterMixin, ListView):
     model = Client
     template_name = 'clients/client_list.html'
     context_object_name = 'clients'
@@ -43,7 +42,7 @@ class ClientListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
         return qs
 
 
-class ClientCreateView(LoginRequiredMixin, CreateView):
+class ClientCreateView(BrokerageFormMixin, CreateView):
     model = Client
     form_class = ClientForm
     template_name = 'clients/client_form.html'
@@ -63,7 +62,7 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ClientUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
+class ClientUpdateView(BrokerageFormMixin, BrokerageFilterMixin, UpdateView):
     model = Client
     form_class = ClientForm
     template_name = 'clients/client_form.html'
@@ -74,7 +73,7 @@ class ClientUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
         return super().form_valid(form)
 
 
-class ClientDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
+class ClientDetailView(BrokerageFilterMixin, DetailView):
     model = Client
     template_name = 'clients/client_detail.html'
     context_object_name = 'client'
@@ -83,12 +82,13 @@ class ClientDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         from ai_agent.models import EntitySummary
         ctx['ai_summary'] = EntitySummary.objects.filter(
+            brokerage=self.request.user.brokerage,
             entity_type='client', entity_id=self.object.pk,
         ).first()
         return ctx
 
 
-class ClientDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
+class ClientDeleteView(BrokerageFilterMixin, DeleteView):
     model = Client
     template_name = 'partials/_confirm_delete.html'
     success_url = reverse_lazy('clients:client_list')
@@ -98,9 +98,9 @@ class ClientDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
         return super().form_valid(form)
 
 
-class ClientExportView(LoginRequiredMixin, View):
+class ClientExportView(BrokerageFormMixin, View):
     def get(self, request):
-        qs = Client.objects.all()
+        qs = Client.objects.filter(brokerage=request.user.brokerage)
         if request.user.role == 'broker':
             qs = qs.filter(broker=request.user)
         qs = qs.select_related('broker').order_by('name')

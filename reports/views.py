@@ -3,6 +3,7 @@ import io
 from datetime import date, timedelta
 from decimal import Decimal
 
+from django.core.exceptions import FieldError
 from django.db.models import Sum, Count, Q, F, Value, CharField
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
@@ -11,7 +12,7 @@ from django.views.generic import TemplateView, FormView
 
 from xhtml2pdf import pisa
 
-from utils.mixins import ManagerRequiredMixin
+from utils.mixins import ModuleRequiredMixin
 
 from .forms import (
     ProductionFilterForm, CommissionFilterForm, InsurerPortfolioFilterForm,
@@ -21,11 +22,29 @@ from .forms import (
 )
 
 
-class ReportIndexView(ManagerRequiredMixin, TemplateView):
+class ReportAccessMixin(ModuleRequiredMixin):
+    required_module = 'reports'
+
+    def has_full_report_access(self):
+        return self.request.user.role == 'admin'
+
+    def scope_queryset_to_user(self, queryset, *candidate_fields):
+        if self.has_full_report_access():
+            return queryset
+
+        for field_name in candidate_fields:
+            try:
+                return queryset.filter(**{field_name: self.request.user})
+            except FieldError:
+                continue
+        return queryset.none()
+
+
+class ReportIndexView(ReportAccessMixin, TemplateView):
     template_name = 'reports/report_index.html'
 
 
-class BaseReportView(ManagerRequiredMixin, FormView):
+class BaseReportView(ReportAccessMixin, FormView):
     """Base class for all report views."""
     export_filename = 'relatorio.csv'
     pdf_title = 'Relatório'
@@ -37,10 +56,15 @@ class BaseReportView(ManagerRequiredMixin, FormView):
         initial.setdefault('end_date', today)
         return initial
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def get(self, request, *args, **kwargs):
         form = self.get_form()
         if request.GET.get('start_date'):
-            form = self.form_class(request.GET)
+            form = self.form_class(request.GET, user=request.user)
             if form.is_valid():
                 ctx = self.get_context_data(form=form)
                 ctx['results'] = self.get_report_data(form.cleaned_data)
@@ -103,9 +127,11 @@ class ProductionReportView(BaseReportView):
     def get_report_data(self, filters):
         from policies.models import Policy
         qs = Policy.objects.filter(
+            brokerage=self.request.user.brokerage,
             start_date__gte=filters['start_date'],
             start_date__lte=filters['end_date'],
         ).select_related('client', 'insurer', 'insurance_type', 'broker')
+        qs = self.scope_queryset_to_user(qs, 'broker')
         if filters.get('broker'):
             qs = qs.filter(broker_id=filters['broker'])
         if filters.get('insurer'):
@@ -163,12 +189,12 @@ class CommissionReportView(BaseReportView):
 
     def get_report_data(self, filters):
         from policies.models import Policy
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
         qs = Policy.objects.filter(
+            brokerage=self.request.user.brokerage,
             start_date__gte=filters['start_date'],
             start_date__lte=filters['end_date'],
         )
+        qs = self.scope_queryset_to_user(qs, 'broker')
         if filters.get('broker'):
             qs = qs.filter(broker_id=filters['broker'])
         data = (
@@ -225,9 +251,11 @@ class InsurerPortfolioReportView(BaseReportView):
     def get_report_data(self, filters):
         from policies.models import Policy
         qs = Policy.objects.filter(
+            brokerage=self.request.user.brokerage,
             start_date__gte=filters['start_date'],
             start_date__lte=filters['end_date'],
         )
+        qs = self.scope_queryset_to_user(qs, 'broker')
         if filters.get('status'):
             qs = qs.filter(status=filters['status'])
         data = (
@@ -274,9 +302,11 @@ class InsuranceTypePortfolioReportView(BaseReportView):
     def get_report_data(self, filters):
         from policies.models import Policy
         qs = Policy.objects.filter(
+            brokerage=self.request.user.brokerage,
             start_date__gte=filters['start_date'],
             start_date__lte=filters['end_date'],
         )
+        qs = self.scope_queryset_to_user(qs, 'broker')
         if filters.get('insurer'):
             qs = qs.filter(insurer_id=filters['insurer'])
         data = (
@@ -320,9 +350,11 @@ class ClaimsReportView(BaseReportView):
     def get_report_data(self, filters):
         from claims.models import Claim
         qs = Claim.objects.filter(
+            brokerage=self.request.user.brokerage,
             occurrence_date__gte=filters['start_date'],
             occurrence_date__lte=filters['end_date'],
         ).select_related('client', 'policy', 'policy__insurer')
+        qs = self.scope_queryset_to_user(qs, 'broker', 'policy__broker')
         if filters.get('status'):
             qs = qs.filter(status=filters['status'])
         if filters.get('insurer'):
@@ -381,14 +413,18 @@ class LossRatioReportView(BaseReportView):
         from policies.models import Policy
         from claims.models import Claim
         p_qs = Policy.objects.filter(
+            brokerage=self.request.user.brokerage,
             start_date__gte=filters['start_date'],
             start_date__lte=filters['end_date'],
         )
+        p_qs = self.scope_queryset_to_user(p_qs, 'broker')
         c_qs = Claim.objects.filter(
+            brokerage=self.request.user.brokerage,
             occurrence_date__gte=filters['start_date'],
             occurrence_date__lte=filters['end_date'],
             status__in=['approved', 'partially_approved', 'paid'],
         )
+        c_qs = self.scope_queryset_to_user(c_qs, 'broker', 'policy__broker')
         if filters.get('insurer'):
             p_qs = p_qs.filter(insurer_id=filters['insurer'])
             c_qs = c_qs.filter(policy__insurer_id=filters['insurer'])
@@ -448,9 +484,11 @@ class RenewalReportView(BaseReportView):
     def get_report_data(self, filters):
         from renewals.models import Renewal
         qs = Renewal.objects.filter(
+            brokerage=self.request.user.brokerage,
             due_date__gte=filters['start_date'],
             due_date__lte=filters['end_date'],
         ).select_related('policy', 'policy__client', 'policy__insurer', 'broker')
+        qs = self.scope_queryset_to_user(qs, 'broker', 'policy__broker')
         if filters.get('broker'):
             qs = qs.filter(broker_id=filters['broker'])
         totals = qs.aggregate(count=Count('id'))
@@ -489,15 +527,20 @@ class RenewalReportView(BaseReportView):
         }
 
 
-class ClientsByBrokerReportView(ManagerRequiredMixin, FormView):
+class ClientsByBrokerReportView(ReportAccessMixin, FormView):
     template_name = 'reports/report_clients_by_broker.html'
     form_class = ClientsByBrokerFilterForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def get(self, request, *args, **kwargs):
         form = self.get_form()
         ctx = self.get_context_data(form=form)
         if request.GET.get('submit'):
-            form = self.form_class(request.GET)
+            form = self.form_class(request.GET, user=request.user)
             if form.is_valid():
                 ctx['form'] = form
                 ctx['results'] = self.get_report_data(form.cleaned_data)
@@ -509,10 +552,9 @@ class ClientsByBrokerReportView(ManagerRequiredMixin, FormView):
         return self.render_to_response(ctx)
 
     def get_report_data(self, filters):
-        from django.contrib.auth import get_user_model
         from clients.models import Client
-        User = get_user_model()
-        qs = Client.objects.all()
+        qs = Client.objects.filter(brokerage=self.request.user.brokerage)
+        qs = self.scope_queryset_to_user(qs, 'broker')
         if filters.get('broker'):
             qs = qs.filter(broker_id=filters['broker'])
         if filters.get('status') == 'active':
@@ -569,9 +611,11 @@ class CRMFunnelReportView(BaseReportView):
     def get_report_data(self, filters):
         from crm.models import Deal, PipelineStage
         qs = Deal.objects.filter(
+            brokerage=self.request.user.brokerage,
             created_at__date__gte=filters['start_date'],
             created_at__date__lte=filters['end_date'],
         )
+        qs = self.scope_queryset_to_user(qs, 'broker')
         if filters.get('broker'):
             qs = qs.filter(broker_id=filters['broker'])
         if filters.get('pipeline'):
@@ -618,9 +662,11 @@ class EndorsementReportView(BaseReportView):
     def get_report_data(self, filters):
         from endorsements.models import Endorsement
         qs = Endorsement.objects.filter(
+            brokerage=self.request.user.brokerage,
             request_date__gte=filters['start_date'],
             request_date__lte=filters['end_date'],
         ).select_related('policy', 'policy__client', 'requested_by')
+        qs = self.scope_queryset_to_user(qs, 'policy__broker', 'requested_by')
         if filters.get('endorsement_type'):
             qs = qs.filter(endorsement_type=filters['endorsement_type'])
         totals = qs.aggregate(

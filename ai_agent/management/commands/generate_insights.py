@@ -30,9 +30,9 @@ class Command(BaseCommand):
 
         user_id = options.get('user_id')
         if user_id:
-            users = User.objects.filter(pk=user_id, is_active=True)
+            users = User.objects.filter(pk=user_id, is_active=True, is_platform_admin=False)
         else:
-            users = User.objects.filter(is_active=True)
+            users = User.objects.filter(is_active=True, is_platform_admin=False).exclude(brokerage__isnull=True)
 
         total = users.count()
         self.stdout.write(f'Gerando insights para {total} usuario(s)...')
@@ -44,6 +44,7 @@ class Command(BaseCommand):
                 content = generate_insight_for_user(user)
                 if content:
                     DashboardInsight.objects.create(
+                        brokerage=user.brokerage,
                         user=user,
                         content=content,
                     )

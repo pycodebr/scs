@@ -1,9 +1,11 @@
 from django import forms
 
+from utils.forms import BrokerageScopedFormMixin
+
 from .models import Deal, DealActivity, Pipeline, PipelineStage
 
 
-class DealForm(forms.ModelForm):
+class DealForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = Deal
         fields = [
@@ -32,9 +34,6 @@ class DealForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        self.fields['broker'].queryset = User.objects.filter(is_active=True)
         self.fields['pipeline'].queryset = Pipeline.objects.filter(is_active=True)
         self.fields['stage'].queryset = PipelineStage.objects.select_related('pipeline')
         self.fields['proposal'].required = False
@@ -43,7 +42,7 @@ class DealForm(forms.ModelForm):
         self.fields['insurance_type'].required = False
 
 
-class DealActivityForm(forms.ModelForm):
+class DealActivityForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = DealActivity
         fields = ['activity_type', 'title', 'description', 'due_date', 'is_completed']
@@ -56,7 +55,7 @@ class DealActivityForm(forms.ModelForm):
         }
 
 
-class PipelineForm(forms.ModelForm):
+class PipelineForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = Pipeline
         fields = ['name', 'is_default', 'is_active']
@@ -67,7 +66,7 @@ class PipelineForm(forms.ModelForm):
         }
 
 
-class PipelineStageForm(forms.ModelForm):
+class PipelineStageForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = PipelineStage
         fields = ['name', 'order', 'color', 'is_won', 'is_lost']

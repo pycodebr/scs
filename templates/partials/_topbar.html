@@ -75,6 +75,16 @@
                                         <span class="badge bg-soft-success text-success ms-1">{{ user.get_role_display }}</span>
                                     </h6>
                                     <span class="fs-12 fw-medium text-muted">{{ user.email }}</span>
+                                    {% if current_brokerage %}
+                                    <div class="fs-11 text-muted mt-1">
+                                        {{ current_brokerage }}
+                                        {% if current_brokerage.status == 'overdue' %}
+                                        <span class="badge bg-soft-warning text-warning ms-1">Em atraso</span>
+                                        {% elif current_brokerage.status == 'active' %}
+                                        <span class="badge bg-soft-success text-success ms-1">Ativa</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>

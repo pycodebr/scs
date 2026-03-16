@@ -3,7 +3,7 @@
 <nav class="nxl-navigation">
     <div class="navbar-wrapper">
         <div class="m-header">
-            <a href="/" class="b-brand">
+            <a href="{% url 'dashboard:dashboard' %}" class="b-brand">
                 <img src="{% static 'images/logo-full.png' %}" alt="SCS" class="logo logo-lg">
                 <img src="{% static 'images/logo-abbr.png' %}" alt="SCS" class="logo logo-sm">
             </a>
@@ -62,25 +62,32 @@
                         <li class="nxl-item"><a class="nxl-link" href="{% url 'policies:policy_list' %}">Apólices</a></li>
                     </ul>
                 </li>
+                {% if 'claims' in enabled_modules %}
                 <li class="nxl-item {% active_url_startswith request '/claims/' %}">
                     <a href="{% url 'claims:claim_list' %}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-alert-circle"></i></span>
                         <span class="nxl-mtext">Sinistros</span>
                     </a>
                 </li>
+                {% endif %}
+                {% if 'endorsements' in enabled_modules %}
                 <li class="nxl-item {% active_url_startswith request '/endorsements/' %}">
                     <a href="{% url 'endorsements:endorsement_list' %}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-edit-3"></i></span>
                         <span class="nxl-mtext">Endossos</span>
                     </a>
                 </li>
+                {% endif %}
+                {% if 'renewals' in enabled_modules %}
                 <li class="nxl-item {% active_url_startswith request '/renewals/' %}">
                     <a href="{% url 'renewals:renewal_list' %}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-refresh-cw"></i></span>
                         <span class="nxl-mtext">Renovações</span>
                     </a>
                 </li>
+                {% endif %}
 
+                {% if 'crm' in enabled_modules %}
                 <li class="nxl-item nxl-caption">
                     <label>Comercial</label>
                 </li>
@@ -98,7 +105,9 @@
                         {% endif %}
                     </ul>
                 </li>
+                {% endif %}
 
+                {% if 'ai_agent' in enabled_modules %}
                 <li class="nxl-item nxl-caption">
                     <label>Inteligencia</label>
                 </li>
@@ -108,8 +117,9 @@
                         <span class="nxl-mtext">Assistente IA</span>
                     </a>
                 </li>
+                {% endif %}
 
-                {% if user.role != 'broker' %}
+                {% if 'reports' in enabled_modules %}
                 <li class="nxl-item nxl-caption">
                     <label>Análise</label>
                 </li>
@@ -129,6 +139,12 @@
                     <a href="{% url 'accounts:user_list' %}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-settings"></i></span>
                         <span class="nxl-mtext">Usuários</span>
+                    </a>
+                </li>
+                <li class="nxl-item {% active_url_startswith request '/billing/' %}">
+                    <a href="{% url 'billing:overview' %}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-credit-card"></i></span>
+                        <span class="nxl-mtext">Plano e Faturamento</span>
                     </a>
                 </li>
                 {% endif %}

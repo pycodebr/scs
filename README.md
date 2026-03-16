@@ -198,7 +198,7 @@ python manage.py runserver
 http://localhost:8000
 ```
 
-Você será redirecionado para a tela de login. Use as credenciais da seção [Usuários e Senhas de Teste](#-usuários-e-senhas-de-teste).
+Você verá a landing page pública do SCS. Para entrar com os usuários de demonstração, acesse `/accounts/login/` e use as credenciais da seção [Usuários e Senhas de Teste](#-usuários-e-senhas-de-teste).
 
 ---
 
@@ -242,13 +242,13 @@ Criados automaticamente pelo `seed_demo`:
 
 | Nome | Email | Senha | Papel |
 |------|-------|-------|-------|
-| Administrador SCS | `admin@scs.com` | `admin123` | Admin |
-| Maria Oliveira | `gerente@scs.com` | `gerente123` | Gerente (Manager) |
-| Carlos Silva | `carlos@scs.com` | `corretor123` | Corretor (Broker) |
-| Ana Santos | `ana@scs.com` | `corretor123` | Corretor (Broker) |
-| Rafael Pereira | `rafael@scs.com` | `corretor123` | Corretor (Broker) |
+| Plataforma SCS | `plataforma@scs.com` | `admin123` | Admin da Plataforma |
+| Administrador Tenant | `admin@demo-corretora.com` | `admin123` | Admin |
+| Marina Oliveira | `gerente@demo-corretora.com` | `gerente123` | Gerente (Manager) |
+| Carlos Silva | `carlos@demo-corretora.com` | `corretor123` | Corretor (Broker) |
+| Ana Souza | `ana@demo-corretora.com` | `corretor123` | Corretor (Broker) |
 
-> 💡 Para testar as diferenças de permissão, faça login como **Admin** (acesso total), depois como **Corretor** (acesso restrito aos próprios dados).
+> 💡 Para testar as diferenças de permissão, faça login como **Admin da Plataforma** (administra o SaaS no Django Admin), depois como **Admin** da corretora, **Gerente** e **Corretor** para validar o escopo de acesso por tenant e por usuário.
 
 ---
 

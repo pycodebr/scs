@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Plano e Faturamento{% endblock %}
+{% block page_title %}Plano e Faturamento{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item">Plano e Faturamento</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-xl-4">
+        <div class="card stretch stretch-full">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <div class="fs-12 text-muted">Plano atual</div>
+                        <h3 class="fs-22 fw-bold mb-0">{{ subscription.plan.name|default:'Sem plano' }}</h3>
+                    </div>
+                    {% if subscription %}
+                    <span class="badge bg-soft-primary text-primary">{{ subscription.get_status_display }}</span>
+                    {% endif %}
+                </div>
+                {% if subscription %}
+                <div class="fs-13 text-muted mb-3">{{ subscription.plan.description }}</div>
+                <div class="d-grid gap-2">
+                    <div class="d-flex justify-content-between"><span class="text-muted">Preço por usuário</span><strong>R$ {{ subscription.price_per_user }}</strong></div>
+                    <div class="d-flex justify-content-between"><span class="text-muted">Usuários ativos</span><strong>{{ subscription.active_user_count }}</strong></div>
+                    <div class="d-flex justify-content-between"><span class="text-muted">Próxima cobrança</span><strong>{{ subscription.next_billing_at|date:'d/m/Y'|default:'-' }}</strong></div>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Nenhuma assinatura encontrada para esta corretora.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-8">
+        <div class="card stretch stretch-full">
+            <div class="card-header">
+                <h5 class="card-title">Pagamentos</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>Forma</th>
+                                <th class="text-end">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in payments %}
+                            <tr>
+                                <td>{{ payment.due_date|date:'d/m/Y' }}</td>
+                                <td><span class="badge bg-gray-200 text-dark">{{ payment.get_status_display }}</span></td>
+                                <td>{{ payment.get_payment_method_display }}</td>
+                                <td class="text-end">R$ {{ payment.amount }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">Nenhum pagamento registrado.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -193,7 +193,7 @@
                             <div class="shortcut-label fw-semibold text-dark">Novo Sinistro</div>
                         </div>
                     </a>
-                    {% if user.role != 'broker' %}
+                    {% if 'reports' in enabled_modules %}
                     <a href="{% url 'reports:report_index' %}" class="card shortcut-card mb-0 text-decoration-none">
                         <div class="card-body d-flex align-items-center gap-2">
                             <div class="shortcut-icon bg-soft-dark text-dark">

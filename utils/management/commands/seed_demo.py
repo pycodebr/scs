@@ -1,21 +1,33 @@
-import random
-from datetime import date, timedelta
+from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
+from django.utils import timezone
+
+from billing.models import (
+    BillingCycle,
+    BillingPaymentMethod,
+    PaymentRecord,
+    PaymentStatus,
+    Subscription,
+    SubscriptionStatus,
+)
+from billing.services import bootstrap_catalog
+from brokerages.models import Brokerage, BrokerageStatus
+from brokerages.services import sync_brokerage_modules
 
 User = get_user_model()
 
 
 class Command(BaseCommand):
-    help = 'Popula o banco com dados de demonstração para o SCS.'
+    help = 'Popula o banco com dados de demonstração compatíveis com o SaaS multi-tenant.'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--clear',
             action='store_true',
-            help='Remove todos os dados antes de semear.',
+            help='Remove os dados existentes antes de semear o ambiente.',
         )
 
     def handle(self, *args, **options):
@@ -23,35 +35,39 @@ class Command(BaseCommand):
             self.stdout.write('Limpando dados existentes...')
             self._clear_data()
 
-        self.stdout.write(self.style.MIGRATE_HEADING('Iniciando seed de dados de demonstração...'))
+        self.stdout.write(self.style.MIGRATE_HEADING('Iniciando seed multi-tenant do SCS...'))
+        plans = {plan.slug: plan for plan in bootstrap_catalog()}
+        brokerage = self._create_brokerage()
+        users = self._create_users(brokerage)
+        self._create_subscription(brokerage, plans['smart'])
+        insurance_types = self._create_insurance_types(brokerage)
+        insurers = self._create_insurers(brokerage)
+        clients = self._create_clients(brokerage, users)
+        policies = self._create_policies(brokerage, users, clients, insurers, insurance_types)
+        self._create_claims(brokerage, users, policies)
+        self._create_endorsements(brokerage, users, policies)
+        self._create_renewals(brokerage, users, policies, insurers)
+        self._create_crm_data(brokerage, users, clients, insurers, insurance_types, policies)
 
-        users = self._create_users()
-        insurance_types = self._create_insurance_types()
-        insurers = self._create_insurers()
-        clients = self._create_clients(users)
-        policies = self._create_policies(clients, insurers, insurance_types, users)
-        self._create_claims(policies, users)
-        self._create_endorsements(policies, users)
-        self._create_renewals(policies, users, insurers)
-        self._create_crm_data(clients, users, insurance_types, insurers)
-
-        self.stdout.write(self.style.SUCCESS('\n✅ Seed de dados concluído com sucesso!'))
+        self.stdout.write(self.style.SUCCESS('\nSeed concluído com sucesso.'))
         self.stdout.write(self.style.WARNING('\nCredenciais de acesso:'))
-        self.stdout.write('  Admin:   admin@scs.com / admin123')
-        self.stdout.write('  Gerente: gerente@scs.com / gerente123')
-        self.stdout.write('  Corretor: carlos@scs.com / corretor123')
-        self.stdout.write('  Corretor: ana@scs.com / corretor123')
-        self.stdout.write('  Corretor: rafael@scs.com / corretor123')
+        self.stdout.write('  Plataforma: plataforma@scs.com / admin123')
+        self.stdout.write('  Admin tenant: admin@demo-corretora.com / admin123')
+        self.stdout.write('  Gerente: gerente@demo-corretora.com / gerente123')
+        self.stdout.write('  Corretor: carlos@demo-corretora.com / corretor123')
+        self.stdout.write('  Corretor: ana@demo-corretora.com / corretor123')
 
     def _clear_data(self):
-        from crm.models import DealActivity, Deal, PipelineStage, Pipeline
-        from renewals.models import Renewal
-        from endorsements.models import EndorsementDocument, Endorsement
-        from claims.models import ClaimTimeline, ClaimDocument, Claim
-        from policies.models import PolicyDocument, PolicyCoverage, Policy, Proposal
+        from ai_agent.models import ChatMessage, ChatSession, DashboardInsight, EntitySummary
+        from brokerages.models import BrokerageModule
+        from claims.models import Claim, ClaimDocument, ClaimTimeline
         from clients.models import Client
-        from insurers.models import InsurerBranch, Insurer
-        from coverages.models import CoverageItem, Coverage, InsuranceType
+        from coverages.models import Coverage, CoverageItem, InsuranceType
+        from crm.models import Deal, DealActivity, Pipeline, PipelineStage
+        from endorsements.models import Endorsement, EndorsementDocument
+        from insurers.models import Insurer, InsurerBranch
+        from policies.models import Policy, PolicyCoverage, PolicyDocument, Proposal
+        from renewals.models import Renewal
 
         DealActivity.objects.all().delete()
         Deal.objects.all().delete()
@@ -67,593 +83,459 @@ class Command(BaseCommand):
         PolicyCoverage.objects.all().delete()
         Policy.objects.all().delete()
         Proposal.objects.all().delete()
-        Renewal.objects.all().delete()
         Client.objects.all().delete()
         InsurerBranch.objects.all().delete()
         Insurer.objects.all().delete()
         CoverageItem.objects.all().delete()
         Coverage.objects.all().delete()
         InsuranceType.objects.all().delete()
-        User.objects.filter(is_superuser=False).delete()
-        self.stdout.write(self.style.SUCCESS('  Dados limpos.'))
+        ChatMessage.objects.all().delete()
+        ChatSession.objects.all().delete()
+        DashboardInsight.objects.all().delete()
+        EntitySummary.objects.all().delete()
+        PaymentRecord.objects.all().delete()
+        Subscription.objects.all().delete()
+        BrokerageModule.objects.all().delete()
+        User.objects.all().delete()
+        Brokerage.objects.all().delete()
+        self.stdout.write(self.style.SUCCESS('  Dados removidos.'))
 
-    def _create_users(self):
-        self.stdout.write('Criando usuários...')
-        users = {}
-
-        admin, _ = User.objects.update_or_create(
-            email='admin@scs.com',
+    def _create_brokerage(self):
+        brokerage, _ = Brokerage.objects.update_or_create(
+            cnpj='12.345.678/0001-90',
             defaults={
-                'first_name': 'Administrador',
+                'legal_name': 'Demo Corretora de Seguros LTDA',
+                'trade_name': 'Demo Corretora',
+                'email': 'contato@demo-corretora.com',
+                'phone': '(11) 4000-1020',
+                'zip_code': '01310-100',
+                'street': 'Avenida Paulista',
+                'number': '1000',
+                'complement': '11 andar',
+                'neighborhood': 'Bela Vista',
+                'city': 'Sao Paulo',
+                'state': 'SP',
+                'status': BrokerageStatus.ACTIVE,
+                'notes': 'Tenant de demonstração do SCS.',
+            },
+        )
+        return brokerage
+
+    def _create_users(self, brokerage):
+        platform_admin, _ = User.objects.update_or_create(
+            email='plataforma@scs.com',
+            defaults={
+                'first_name': 'Plataforma',
                 'last_name': 'SCS',
                 'role': 'admin',
+                'is_active': True,
                 'is_staff': True,
                 'is_superuser': True,
-                'is_active': True,
+                'is_platform_admin': True,
+                'brokerage': None,
             },
         )
-        admin.set_password('admin123')
-        admin.save()
-        users['admin'] = admin
+        platform_admin.set_password('admin123')
+        platform_admin.save()
 
-        manager, _ = User.objects.update_or_create(
-            email='gerente@scs.com',
+        admin_user, _ = User.objects.update_or_create(
+            email='admin@demo-corretora.com',
             defaults={
-                'first_name': 'Maria',
+                'first_name': 'Administrador',
+                'last_name': 'Tenant',
+                'role': 'admin',
+                'is_active': True,
+                'brokerage': brokerage,
+                'phone': '(11) 99999-0001',
+            },
+        )
+        admin_user.set_password('admin123')
+        admin_user.save()
+
+        manager_user, _ = User.objects.update_or_create(
+            email='gerente@demo-corretora.com',
+            defaults={
+                'first_name': 'Marina',
                 'last_name': 'Oliveira',
                 'role': 'manager',
-                'is_staff': True,
                 'is_active': True,
+                'brokerage': brokerage,
+                'phone': '(11) 99999-0002',
             },
         )
-        manager.set_password('gerente123')
-        manager.save()
-        users['manager'] = manager
+        manager_user.set_password('gerente123')
+        manager_user.save()
 
-        broker_data = [
-            ('carlos@scs.com', 'Carlos', 'Silva'),
-            ('ana@scs.com', 'Ana', 'Santos'),
-            ('rafael@scs.com', 'Rafael', 'Pereira'),
-        ]
-        users['brokers'] = []
-        for email, first, last in broker_data:
+        brokers = []
+        for email, first_name, last_name in (
+            ('carlos@demo-corretora.com', 'Carlos', 'Silva'),
+            ('ana@demo-corretora.com', 'Ana', 'Souza'),
+        ):
             broker, _ = User.objects.update_or_create(
                 email=email,
                 defaults={
-                    'first_name': first,
-                    'last_name': last,
+                    'first_name': first_name,
+                    'last_name': last_name,
                     'role': 'broker',
                     'is_active': True,
+                    'brokerage': brokerage,
                 },
             )
             broker.set_password('corretor123')
             broker.save()
-            users['brokers'].append(broker)
+            brokers.append(broker)
 
-        self.stdout.write(self.style.SUCCESS(f'  {len(users["brokers"]) + 2} usuários criados.'))
-        return users
+        self.stdout.write(self.style.SUCCESS('  Usuários da plataforma e da corretora criados.'))
+        return {
+            'platform_admin': platform_admin,
+            'admin': admin_user,
+            'manager': manager_user,
+            'brokers': brokers,
+        }
 
-    def _create_insurance_types(self):
-        self.stdout.write('Criando tipos de seguro e coberturas...')
-        from coverages.models import InsuranceType, Coverage
+    def _create_subscription(self, brokerage, plan):
+        today = timezone.localdate()
+        subscription, _ = Subscription.objects.update_or_create(
+            brokerage=brokerage,
+            plan=plan,
+            defaults={
+                'status': SubscriptionStatus.ACTIVE,
+                'billing_cycle': BillingCycle.MONTHLY,
+                'price_per_user': plan.monthly_price_per_user,
+                'active_user_count': brokerage.users.filter(is_active=True).count(),
+                'started_at': today - timedelta(days=10),
+                'trial_ends_at': None,
+                'next_billing_at': today + timedelta(days=20),
+                'cancelled_at': None,
+            },
+        )
+        Subscription.objects.filter(brokerage=brokerage).exclude(pk=subscription.pk).delete()
+        PaymentRecord.objects.update_or_create(
+            subscription=subscription,
+            due_date=today - timedelta(days=10),
+            defaults={
+                'status': PaymentStatus.PAID,
+                'amount': plan.monthly_price_per_user * subscription.active_user_count,
+                'payment_method': BillingPaymentMethod.MANUAL,
+                'paid_at': timezone.now() - timedelta(days=8),
+                'reference_code': 'DEMO-PAY-001',
+                'notes': 'Pagamento de demonstração registrado manualmente.',
+            },
+        )
+        brokerage.status = BrokerageStatus.ACTIVE
+        brokerage.save(update_fields=['status', 'updated_at'])
+        sync_brokerage_modules(brokerage, plan, granted_by=brokerage.users.filter(role='admin').first())
+        self.stdout.write(self.style.SUCCESS(f'  Assinatura "{plan.name}" configurada para a corretora.'))
+
+    def _create_insurance_types(self, brokerage):
+        from coverages.models import Coverage, CoverageItem, InsuranceType
 
         types_data = {
-            'Automóvel': [
-                'Colisão', 'Roubo e Furto', 'Incêndio', 'Terceiros',
-                'Danos Materiais', 'Danos Corporais', 'Assistência 24h', 'Vidros',
-            ],
-            'Vida Individual': [
-                'Morte Natural', 'Morte Acidental', 'Invalidez Permanente',
-                'Invalidez Funcional', 'Doenças Graves', 'Diária por Incapacidade',
-            ],
-            'Residencial': [
-                'Incêndio', 'Raio', 'Explosão', 'Roubo e Furto',
-                'Danos Elétricos', 'Responsabilidade Civil', 'Vendaval',
-            ],
-            'Empresarial': [
-                'Incêndio', 'Roubo', 'Responsabilidade Civil',
-                'Equipamentos', 'Lucros Cessantes', 'Danos Elétricos',
-            ],
-            'Saúde': [
-                'Consultas', 'Exames', 'Internação', 'Cirurgias',
-                'Pronto Socorro', 'Obstetrícia',
-            ],
-            'Viagem': [
-                'Despesas Médicas', 'Bagagem', 'Cancelamento de Viagem',
-                'Assistência Jurídica', 'Regresso Antecipado',
-            ],
-            'Responsabilidade Civil': [
-                'RC Profissional', 'RC Operações', 'RC Produtos',
-                'RC Empregador', 'RC Ambiental',
-            ],
-            'Transporte': [
-                'Carga Nacional', 'Carga Internacional', 'Responsabilidade Civil Transportes',
-                'Lucros Esperados', 'Frete',
-            ],
+            'Automovel': ['Colisao', 'Roubo e Furto', 'Assistencia 24h'],
+            'Residencial': ['Incendio', 'Danos Eletricos', 'Responsabilidade Civil'],
+            'Empresarial': ['Incendio', 'Equipamentos', 'Lucros Cessantes'],
         }
 
         insurance_types = {}
         for type_name, coverages in types_data.items():
-            it, _ = InsuranceType.objects.update_or_create(
+            insurance_type, _ = InsuranceType.objects.update_or_create(
+                brokerage=brokerage,
                 name=type_name,
-                defaults={'is_active': True},
-            )
-            insurance_types[type_name] = it
-            for cov_name in coverages:
-                Coverage.objects.update_or_create(
-                    insurance_type=it,
-                    name=cov_name,
-                    defaults={'is_active': True},
-                )
-
-        self.stdout.write(self.style.SUCCESS(f'  {len(insurance_types)} tipos de seguro criados.'))
-        return insurance_types
-
-    def _create_insurers(self):
-        self.stdout.write('Criando seguradoras...')
-        from insurers.models import Insurer
-
-        insurers_data = [
-            ('Porto Seguro', '61.198.164/0001-60', '06050', 'atendimento@portoseguro.com.br', '(11) 3366-3000', 'São Paulo', 'SP'),
-            ('SulAmérica', '33.000.167/0001-59', '06190', 'contato@sulamerica.com.br', '(21) 3503-4000', 'Rio de Janeiro', 'RJ'),
-            ('Bradesco Seguros', '33.055.146/0001-90', '05886', 'seguros@bradesco.com.br', '(11) 3003-1010', 'São Paulo', 'SP'),
-            ('Allianz Seguros', '61.573.796/0001-66', '05495', 'contato@allianz.com.br', '(11) 3370-1515', 'São Paulo', 'SP'),
-            ('Tokio Marine', '33.164.021/0001-00', '06840', 'atendimento@tokiomarine.com.br', '(11) 3054-7100', 'São Paulo', 'SP'),
-            ('HDI Seguros', '29.980.158/0001-57', '05746', 'atendimento@hdi.com.br', '(11) 3054-3500', 'São Paulo', 'SP'),
-            ('Mapfre Seguros', '61.074.175/0001-38', '05765', 'contato@mapfre.com.br', '(11) 4004-7500', 'São Paulo', 'SP'),
-            ('Liberty Seguros', '61.550.141/0001-72', '05765', 'contato@libertyseguros.com.br', '(11) 3003-2442', 'São Paulo', 'SP'),
-        ]
-        insurers = []
-        for name, cnpj, susep, email, phone, city, state in insurers_data:
-            ins, _ = Insurer.objects.update_or_create(
-                cnpj=cnpj,
                 defaults={
-                    'name': name,
-                    'susep_code': susep,
-                    'email': email,
-                    'phone': phone,
-                    'city': city,
-                    'state': state,
+                    'description': f'Carteira {type_name.lower()} da corretora demo.',
                     'is_active': True,
                 },
             )
-            insurers.append(ins)
+            insurance_types[type_name] = insurance_type
 
-        self.stdout.write(self.style.SUCCESS(f'  {len(insurers)} seguradoras criadas.'))
+            for coverage_name in coverages:
+                coverage, _ = Coverage.objects.update_or_create(
+                    brokerage=brokerage,
+                    insurance_type=insurance_type,
+                    name=coverage_name,
+                    defaults={
+                        'description': f'Cobertura {coverage_name.lower()}.',
+                        'is_active': True,
+                    },
+                )
+                CoverageItem.objects.get_or_create(
+                    brokerage=brokerage,
+                    coverage=coverage,
+                    name=f'{coverage_name} basica',
+                    defaults={'description': 'Item padrão de demonstração.', 'is_active': True},
+                )
+
+        self.stdout.write(self.style.SUCCESS('  Ramos e coberturas criados.'))
+        return insurance_types
+
+    def _create_insurers(self, brokerage):
+        from insurers.models import Insurer
+
+        insurers = []
+        for name, cnpj, email in (
+            ('Porto Seguro', '61.198.164/0001-60', 'atendimento@porto-demo.com'),
+            ('SulAmerica', '33.000.167/0001-59', 'atendimento@sulamerica-demo.com'),
+            ('Allianz', '61.573.796/0001-66', 'atendimento@allianz-demo.com'),
+        ):
+            insurer, _ = Insurer.objects.update_or_create(
+                brokerage=brokerage,
+                cnpj=cnpj,
+                defaults={
+                    'name': name,
+                    'email': email,
+                    'phone': '(11) 3000-0000',
+                    'city': 'Sao Paulo',
+                    'state': 'SP',
+                    'is_active': True,
+                },
+            )
+            insurers.append(insurer)
+
+        self.stdout.write(self.style.SUCCESS('  Seguradoras criadas.'))
         return insurers
 
-    def _create_clients(self, users):
-        self.stdout.write('Criando clientes...')
+    def _create_clients(self, brokerage, users):
         from clients.models import Client
 
         brokers = users['brokers']
-        clients_data = [
-            # (name, cpf_cnpj, type, email, phone, city, state, broker_idx)
-            ('João Mendes', '123.456.789-01', 'pf', 'joao.mendes@email.com', '(11) 99999-1001', 'São Paulo', 'SP', 0),
-            ('Maria Clara Ferreira', '234.567.890-12', 'pf', 'maria.clara@email.com', '(11) 99999-1002', 'São Paulo', 'SP', 0),
-            ('Pedro Henrique Alves', '345.678.901-23', 'pf', 'pedro.alves@email.com', '(21) 99999-1003', 'Rio de Janeiro', 'RJ', 0),
-            ('Luciana Barbosa', '456.789.012-34', 'pf', 'luciana.barbosa@email.com', '(31) 99999-1004', 'Belo Horizonte', 'MG', 1),
-            ('Roberto Costa Neto', '567.890.123-45', 'pf', 'roberto.costa@email.com', '(41) 99999-1005', 'Curitiba', 'PR', 1),
-            ('Fernanda Dias', '678.901.234-56', 'pf', 'fernanda.dias@email.com', '(51) 99999-1006', 'Porto Alegre', 'RS', 1),
-            ('André Luiz Martins', '789.012.345-67', 'pf', 'andre.martins@email.com', '(61) 99999-1007', 'Brasília', 'DF', 2),
-            ('Camila Rocha', '890.123.456-78', 'pf', 'camila.rocha@email.com', '(71) 99999-1008', 'Salvador', 'BA', 2),
-            ('Gustavo Lopes', '901.234.567-89', 'pf', 'gustavo.lopes@email.com', '(85) 99999-1009', 'Fortaleza', 'CE', 2),
-            ('Patrícia Souza Lima', '012.345.678-90', 'pf', 'patricia.souza@email.com', '(11) 99999-1010', 'Santos', 'SP', 0),
-            ('Felipe Augusto Silva', '111.222.333-44', 'pf', 'felipe.augusto@email.com', '(11) 99999-1011', 'Campinas', 'SP', 1),
-            ('Bianca Vieira', '222.333.444-55', 'pf', 'bianca.vieira@email.com', '(21) 99999-1012', 'Niterói', 'RJ', 2),
-            ('Tech Solutions LTDA', '12.345.678/0001-00', 'pj', 'contato@techsolutions.com.br', '(11) 3000-0001', 'São Paulo', 'SP', 0),
-            ('Comércio Nacional S.A.', '23.456.789/0001-11', 'pj', 'contato@comercionacional.com.br', '(11) 3000-0002', 'São Paulo', 'SP', 0),
-            ('Transportes Rápidos LTDA', '34.567.890/0001-22', 'pj', 'contato@transportesrapidos.com.br', '(21) 3000-0003', 'Rio de Janeiro', 'RJ', 1),
-            ('Construtora Horizonte', '45.678.901/0001-33', 'pj', 'contato@construtora.com.br', '(31) 3000-0004', 'Belo Horizonte', 'MG', 1),
-            ('Restaurante Sabor & Arte', '56.789.012/0001-44', 'pj', 'contato@saborarte.com.br', '(41) 3000-0005', 'Curitiba', 'PR', 2),
-            ('Clínica Vida Plena', '67.890.123/0001-55', 'pj', 'contato@vidaplena.com.br', '(51) 3000-0006', 'Porto Alegre', 'RS', 0),
-            ('Indústria Metalmax', '78.901.234/0001-66', 'pj', 'contato@metalmax.com.br', '(11) 3000-0007', 'Guarulhos', 'SP', 1),
-            ('Escola Futuro Brilhante', '89.012.345/0001-77', 'pj', 'contato@futurobrilhante.com.br', '(71) 3000-0008', 'Salvador', 'BA', 2),
-        ]
+        client_specs = (
+            ('Joao Mendes', '123.456.789-01', 'pf', 'joao@cliente-demo.com', brokers[0]),
+            ('Marina Costa', '234.567.890-12', 'pf', 'marina@cliente-demo.com', brokers[1]),
+            ('Construtora Horizonte LTDA', '45.678.901/0001-33', 'pj', 'contato@horizonte-demo.com', brokers[0]),
+            ('Clinica Vida Plena', '67.890.123/0001-55', 'pj', 'contato@vida-plena-demo.com', brokers[1]),
+        )
 
         clients = []
-        for name, cpf_cnpj, ctype, email, phone, city, state, broker_idx in clients_data:
+        for index, (name, cpf_cnpj, client_type, email, broker) in enumerate(client_specs, start=1):
             client, _ = Client.objects.update_or_create(
+                brokerage=brokerage,
                 cpf_cnpj=cpf_cnpj,
                 defaults={
                     'name': name,
-                    'client_type': ctype,
+                    'client_type': client_type,
                     'email': email,
-                    'phone': phone,
-                    'city': city,
-                    'state': state,
-                    'broker': brokers[broker_idx],
+                    'phone': f'(11) 99999-10{index:02d}',
+                    'city': 'Sao Paulo',
+                    'state': 'SP',
+                    'broker': broker,
                     'is_active': True,
                 },
             )
             clients.append(client)
 
-        self.stdout.write(self.style.SUCCESS(f'  {len(clients)} clientes criados.'))
+        self.stdout.write(self.style.SUCCESS('  Clientes criados.'))
         return clients
 
-    def _create_policies(self, clients, insurers, insurance_types, users):
-        self.stdout.write('Criando propostas e apólices...')
-        from policies.models import Proposal, Policy, ProposalStatus, PolicyStatus, PaymentMethod
+    def _create_policies(self, brokerage, users, clients, insurers, insurance_types):
+        from policies.models import Policy, PolicyCoverage, Proposal
 
-        brokers = users['brokers']
-        today = date.today()
-        types_list = list(insurance_types.values())
+        coverages_by_type = {
+            insurance_type.name: list(insurance_type.coverages.filter(brokerage=brokerage)[:2])
+            for insurance_type in insurance_types.values()
+        }
         policies = []
-        proposal_count = 0
 
-        # Generate policies spanning last 12 months
-        for i, client in enumerate(clients):
-            broker = brokers[i % len(brokers)]
-            insurer = insurers[i % len(insurers)]
-            ins_type = types_list[i % len(types_list)]
+        for index, client in enumerate(clients, start=1):
+            if client.client_type == 'pf':
+                insurance_type = insurance_types['Automovel']
+            elif 'Clinica' in client.name:
+                insurance_type = insurance_types['Empresarial']
+            else:
+                insurance_type = insurance_types['Residencial']
 
-            # Create proposal
-            months_back = random.randint(1, 12)
-            sub_date = today - timedelta(days=months_back * 30 + random.randint(5, 25))
-            premium = Decimal(str(random.randint(800, 25000)))
-            commission_rate = Decimal(str(random.randint(10, 25)))
-
+            insurer = insurers[(index - 1) % len(insurers)]
+            broker = client.broker
             proposal, _ = Proposal.objects.update_or_create(
-                proposal_number=f'PROP-{2026}{i + 1:04d}',
+                brokerage=brokerage,
+                proposal_number=f'PRP-{index:04d}',
                 defaults={
                     'client': client,
                     'insurer': insurer,
-                    'insurance_type': ins_type,
+                    'insurance_type': insurance_type,
                     'broker': broker,
-                    'status': ProposalStatus.APPROVED,
-                    'submission_date': sub_date,
-                    'response_date': sub_date + timedelta(days=random.randint(3, 10)),
-                    'premium_amount': premium,
+                    'status': 'approved',
+                    'submission_date': timezone.localdate() - timedelta(days=30 - index),
+                    'response_date': timezone.localdate() - timedelta(days=25 - index),
+                    'premium_amount': Decimal('1800.00') + Decimal(index * 250),
+                    'notes': 'Proposta aprovada na base de demonstração.',
                 },
             )
-            proposal_count += 1
-
-            # Create policy from proposal
-            start_date = sub_date + timedelta(days=random.randint(5, 15))
-            end_date = start_date + timedelta(days=365)
-
-            # Determine status based on dates
-            if end_date < today:
-                status = PolicyStatus.EXPIRED
-            elif i >= 17:
-                status = PolicyStatus.CANCELLED
-            else:
-                status = PolicyStatus.ACTIVE
-
-            commission_amount = premium * commission_rate / 100
-            insured_amount = premium * Decimal(str(random.randint(10, 50)))
-            payment_methods = [pm[0] for pm in PaymentMethod.choices]
-
             policy, _ = Policy.objects.update_or_create(
-                policy_number=f'APL-{2026}{i + 1:04d}',
+                brokerage=brokerage,
+                policy_number=f'POL-{index:04d}',
                 defaults={
                     'proposal': proposal,
                     'client': client,
                     'insurer': insurer,
-                    'insurance_type': ins_type,
+                    'insurance_type': insurance_type,
                     'broker': broker,
-                    'status': status,
-                    'start_date': start_date,
-                    'end_date': end_date,
-                    'premium_amount': premium,
-                    'insured_amount': insured_amount,
-                    'commission_rate': commission_rate,
-                    'commission_amount': commission_amount,
-                    'installments': random.choice([1, 3, 6, 12]),
-                    'payment_method': random.choice(payment_methods),
+                    'status': 'active',
+                    'start_date': timezone.localdate() - timedelta(days=20),
+                    'end_date': timezone.localdate() + timedelta(days=120 - (index * 5)),
+                    'premium_amount': Decimal('2400.00') + Decimal(index * 300),
+                    'insured_amount': Decimal('150000.00') + Decimal(index * 10000),
+                    'commission_rate': Decimal('12.50'),
+                    'commission_amount': Decimal('300.00') + Decimal(index * 45),
+                    'installments': 6,
+                    'payment_method': 'pix',
+                    'notes': 'Apolice ativa para demonstração.',
                 },
             )
+            for coverage in coverages_by_type.get(insurance_type.name, []):
+                PolicyCoverage.objects.update_or_create(
+                    brokerage=brokerage,
+                    policy=policy,
+                    coverage=coverage,
+                    defaults={
+                        'insured_amount': Decimal('50000.00'),
+                        'deductible': Decimal('1500.00'),
+                        'premium_amount': Decimal('250.00'),
+                        'notes': 'Cobertura adicionada automaticamente ao seed.',
+                    },
+                )
             policies.append(policy)
 
-        # Extra rejected proposals (no policy)
-        for i in range(5):
-            sub_date = today - timedelta(days=random.randint(30, 180))
-            Proposal.objects.update_or_create(
-                proposal_number=f'PROP-REJ-{2026}{i + 1:04d}',
-                defaults={
-                    'client': random.choice(clients),
-                    'insurer': random.choice(insurers),
-                    'insurance_type': random.choice(types_list),
-                    'broker': random.choice(brokers),
-                    'status': ProposalStatus.REJECTED,
-                    'submission_date': sub_date,
-                    'response_date': sub_date + timedelta(days=random.randint(5, 15)),
-                    'premium_amount': Decimal(str(random.randint(1000, 15000))),
-                    'rejection_reason': 'Risco fora do apetite da seguradora.',
-                },
-            )
-            proposal_count += 1
-
-        # Pending proposals
-        for i in range(3):
-            sub_date = today - timedelta(days=random.randint(1, 15))
-            Proposal.objects.update_or_create(
-                proposal_number=f'PROP-PEN-{2026}{i + 1:04d}',
-                defaults={
-                    'client': random.choice(clients),
-                    'insurer': random.choice(insurers),
-                    'insurance_type': random.choice(types_list),
-                    'broker': random.choice(brokers),
-                    'status': random.choice([ProposalStatus.SUBMITTED, ProposalStatus.UNDER_ANALYSIS]),
-                    'submission_date': sub_date,
-                    'premium_amount': Decimal(str(random.randint(1000, 20000))),
-                },
-            )
-            proposal_count += 1
-
-        self.stdout.write(self.style.SUCCESS(f'  {proposal_count} propostas e {len(policies)} apólices criadas.'))
+        self.stdout.write(self.style.SUCCESS('  Propostas, apolices e coberturas contratadas criadas.'))
         return policies
 
-    def _create_claims(self, policies, users):
-        self.stdout.write('Criando sinistros...')
-        from claims.models import Claim, ClaimStatus
+    def _create_claims(self, brokerage, users, policies):
+        from claims.models import Claim, ClaimTimeline
 
-        today = date.today()
-        active_policies = [p for p in policies if p.status == 'active']
-        claims_count = 0
-
-        statuses = [
-            ClaimStatus.OPEN, ClaimStatus.UNDER_ANALYSIS,
-            ClaimStatus.DOCUMENTATION_PENDING, ClaimStatus.APPROVED,
-            ClaimStatus.PAID, ClaimStatus.DENIED,
-        ]
-
-        descriptions = [
-            'Colisão traseira em cruzamento. Danos no para-choque e lataria traseira.',
-            'Sinistro por alagamento. Veículo submerso em enchente.',
-            'Roubo do veículo no estacionamento do shopping.',
-            'Incêndio no imóvel causado por curto-circuito.',
-            'Queda de árvore sobre o telhado da residência após tempestade.',
-            'Furto de equipamentos eletrônicos do escritório.',
-            'Acidente de trabalho com afastamento do funcionário.',
-            'Danos por vandalismo na fachada do estabelecimento.',
-        ]
-
-        for i in range(min(8, len(active_policies))):
-            policy = active_policies[i]
-            status = statuses[i % len(statuses)]
-            occurrence = today - timedelta(days=random.randint(5, 120))
-            notification = occurrence + timedelta(days=random.randint(1, 5))
-            claimed = Decimal(str(random.randint(2000, 50000)))
-            approved = None
-            resolution_date = None
-
-            if status in (ClaimStatus.APPROVED, ClaimStatus.PAID):
-                approved = claimed * Decimal(str(random.uniform(0.5, 1.0)))
-                approved = approved.quantize(Decimal('0.01'))
-                resolution_date = occurrence + timedelta(days=random.randint(30, 90))
-            elif status == ClaimStatus.DENIED:
-                approved = Decimal('0')
-                resolution_date = occurrence + timedelta(days=random.randint(15, 60))
-
-            Claim.objects.update_or_create(
-                claim_number=f'SIN-{2026}{i + 1:04d}',
+        for index, policy in enumerate(policies[:2], start=1):
+            claim, _ = Claim.objects.update_or_create(
+                brokerage=brokerage,
+                claim_number=f'SIN-{index:04d}',
                 defaults={
                     'policy': policy,
                     'client': policy.client,
-                    'status': status,
-                    'occurrence_date': occurrence,
-                    'notification_date': notification,
-                    'description': descriptions[i % len(descriptions)],
-                    'location': f'{policy.client.city}/{policy.client.state}',
-                    'claimed_amount': claimed,
-                    'approved_amount': approved,
-                    'resolution_date': resolution_date,
+                    'status': 'under_analysis',
+                    'occurrence_date': timezone.localdate() - timedelta(days=12 * index),
+                    'notification_date': timezone.localdate() - timedelta(days=11 * index),
+                    'description': 'Evento monitorado pela equipe de sinistros da corretora demo.',
+                    'location': 'Sao Paulo/SP',
+                    'claimed_amount': Decimal('12000.00') + Decimal(index * 1500),
                     'broker': policy.broker,
                 },
             )
-            claims_count += 1
+            ClaimTimeline.objects.update_or_create(
+                brokerage=brokerage,
+                claim=claim,
+                action='Abertura do sinistro',
+                defaults={
+                    'performed_by': users['manager'],
+                    'old_status': '',
+                    'new_status': claim.status,
+                    'notes': 'Sinistro aberto automaticamente no seed.',
+                },
+            )
 
-        self.stdout.write(self.style.SUCCESS(f'  {claims_count} sinistros criados.'))
+        self.stdout.write(self.style.SUCCESS('  Sinistros criados.'))
 
-    def _create_endorsements(self, policies, users):
-        self.stdout.write('Criando endossos...')
-        from endorsements.models import Endorsement, EndorsementType, EndorsementStatus
+    def _create_endorsements(self, brokerage, users, policies):
+        from endorsements.models import Endorsement
 
-        today = date.today()
-        active_policies = [p for p in policies if p.status == 'active']
-        endorsement_count = 0
-
-        types = [et[0] for et in EndorsementType.choices]
-        statuses = [es[0] for es in EndorsementStatus.choices]
-
-        descriptions_map = {
-            'inclusion': 'Inclusão de novo item/condutor na apólice.',
-            'exclusion': 'Exclusão de cobertura adicional.',
-            'modification': 'Alteração de dados cadastrais do segurado.',
-            'cancellation': 'Cancelamento parcial da apólice por solicitação do cliente.',
-            'transfer': 'Transferência de titularidade da apólice.',
-        }
-
-        for i in range(min(6, len(active_policies))):
-            policy = active_policies[i]
-            etype = types[i % len(types)]
-            request_date = today - timedelta(days=random.randint(5, 90))
-            effective_date = request_date + timedelta(days=random.randint(1, 15))
-            premium_diff = Decimal(str(random.randint(-500, 800)))
-
+        for index, policy in enumerate(policies[:2], start=1):
             Endorsement.objects.update_or_create(
-                endorsement_number=f'END-{2026}{i + 1:04d}',
+                brokerage=brokerage,
+                endorsement_number=f'END-{index:04d}',
                 defaults={
                     'policy': policy,
-                    'endorsement_type': etype,
-                    'status': statuses[min(i, len(statuses) - 1)],
-                    'request_date': request_date,
-                    'effective_date': effective_date,
-                    'description': descriptions_map.get(etype, 'Endosso de alteração.'),
-                    'premium_difference': premium_diff,
-                    'requested_by': policy.broker,
+                    'endorsement_type': 'modification',
+                    'status': 'approved',
+                    'request_date': timezone.localdate() - timedelta(days=8 * index),
+                    'effective_date': timezone.localdate() - timedelta(days=7 * index),
+                    'description': 'Ajuste de limite e atualização cadastral.',
+                    'premium_difference': Decimal('180.00'),
+                    'requested_by': users['admin'],
+                    'notes': 'Endosso de demonstração.',
                 },
             )
-            endorsement_count += 1
 
-        self.stdout.write(self.style.SUCCESS(f'  {endorsement_count} endossos criados.'))
+        self.stdout.write(self.style.SUCCESS('  Endossos criados.'))
 
-    def _create_renewals(self, policies, users, insurers):
-        self.stdout.write('Criando renovações...')
-        from renewals.models import Renewal, RenewalStatus
+    def _create_renewals(self, brokerage, users, policies, insurers):
+        from renewals.models import Renewal
 
-        today = date.today()
-        renewal_count = 0
-
-        # For active policies expiring within 60 days
-        active_policies = [p for p in policies if p.status == 'active']
-
-        statuses = [
-            RenewalStatus.PENDING, RenewalStatus.CONTACTED,
-            RenewalStatus.QUOTE_SENT, RenewalStatus.PENDING,
-            RenewalStatus.RENEWED, RenewalStatus.NOT_RENEWED,
-        ]
-
-        for i, policy in enumerate(active_policies[:10]):
-            due_date = policy.end_date - timedelta(days=random.randint(5, 30))
-            status = statuses[i % len(statuses)]
-            contact_date = None
-            new_premium = None
-
-            if status in (RenewalStatus.CONTACTED, RenewalStatus.QUOTE_SENT, RenewalStatus.RENEWED):
-                contact_date = today - timedelta(days=random.randint(1, 20))
-            if status in (RenewalStatus.QUOTE_SENT, RenewalStatus.RENEWED):
-                new_premium = policy.premium_amount * Decimal(str(random.uniform(0.9, 1.15)))
-                new_premium = new_premium.quantize(Decimal('0.01'))
-
+        for index, policy in enumerate(policies[-2:], start=1):
             Renewal.objects.update_or_create(
+                brokerage=brokerage,
                 policy=policy,
                 defaults={
-                    'status': status,
-                    'due_date': due_date,
-                    'contact_date': contact_date,
-                    'new_premium': new_premium,
-                    'new_insurer': random.choice(insurers) if random.random() > 0.6 else None,
+                    'status': 'contacted' if index == 1 else 'pending',
+                    'due_date': policy.end_date - timedelta(days=20),
+                    'contact_date': timezone.localdate() - timedelta(days=2) if index == 1 else None,
+                    'new_premium': policy.premium_amount + Decimal('220.00'),
+                    'new_insurer': insurers[index % len(insurers)],
                     'broker': policy.broker,
-                    'notes': 'Renovação gerada automaticamente pelo seed.' if i % 3 == 0 else '',
+                    'notes': 'Renovação acompanhada pela corretora demo.',
                 },
             )
-            renewal_count += 1
 
-        self.stdout.write(self.style.SUCCESS(f'  {renewal_count} renovações criadas.'))
+        self.stdout.write(self.style.SUCCESS('  Renovações criadas.'))
 
-    def _create_crm_data(self, clients, users, insurance_types, insurers):
-        self.stdout.write('Criando dados do CRM (pipeline, deals, atividades)...')
-        from crm.models import Pipeline, PipelineStage, Deal, DealActivity, DealPriority, DealSource
+    def _create_crm_data(self, brokerage, users, clients, insurers, insurance_types, policies):
+        from crm.models import Deal, DealActivity, Pipeline, PipelineStage
 
-        brokers = users['brokers']
-        types_list = list(insurance_types.values())
-        today = date.today()
-
-        # Pipeline: Novos Negócios (default)
         pipeline, _ = Pipeline.objects.update_or_create(
-            name='Novos Negócios',
+            brokerage=brokerage,
+            name='Pipeline Comercial',
             defaults={'is_default': True, 'is_active': True},
         )
-        # Remove existing stages for idempotency
-        PipelineStage.objects.filter(pipeline=pipeline).delete()
-
-        stages_data = [
-            ('Prospecção', 0, '#6c757d', False, False),
-            ('Primeiro Contato', 1, '#0d6efd', False, False),
-            ('Cotação', 2, '#ffc107', False, False),
-            ('Proposta Enviada', 3, '#fd7e14', False, False),
-            ('Negociação', 4, '#6610f2', False, False),
-            ('Fechamento', 5, '#198754', True, False),
-            ('Perdido', 6, '#dc3545', False, True),
-        ]
-        stages = []
-        for name, order, color, is_won, is_lost in stages_data:
-            stage = PipelineStage.objects.create(
+        stage_specs = (
+            ('Lead Qualificado', 1, '#0d6efd', False, False),
+            ('Proposta Enviada', 2, '#f59e0b', False, False),
+            ('Fechado', 3, '#16a34a', True, False),
+            ('Perdido', 4, '#dc2626', False, True),
+        )
+        stages = {}
+        for name, order, color, is_won, is_lost in stage_specs:
+            stage, _ = PipelineStage.objects.update_or_create(
+                brokerage=brokerage,
                 pipeline=pipeline,
                 name=name,
-                order=order,
-                color=color,
-                is_won=is_won,
-                is_lost=is_lost,
-            )
-            stages.append(stage)
-
-        # Second pipeline: Renovações
-        pipeline2, _ = Pipeline.objects.update_or_create(
-            name='Renovações',
-            defaults={'is_default': False, 'is_active': True},
-        )
-        PipelineStage.objects.filter(pipeline=pipeline2).delete()
-        for name, order, color, is_won, is_lost in [
-            ('Identificada', 0, '#6c757d', False, False),
-            ('Contato Realizado', 1, '#0d6efd', False, False),
-            ('Cotação em Análise', 2, '#ffc107', False, False),
-            ('Proposta Aceita', 3, '#198754', True, False),
-            ('Não Renovada', 4, '#dc3545', False, True),
-        ]:
-            PipelineStage.objects.create(
-                pipeline=pipeline2,
-                name=name,
-                order=order,
-                color=color,
-                is_won=is_won,
-                is_lost=is_lost,
-            )
-
-        # Create deals in main pipeline
-        priorities = [p[0] for p in DealPriority.choices]
-        sources = [s[0] for s in DealSource.choices]
-
-        deal_data = [
-            ('Seguro Auto - João Mendes', 0, 3200, 'medium', 0, 0),
-            ('Seguro Residencial - Maria Clara', 1, 1800, 'low', 1, 0),
-            ('Seguro Empresarial - Tech Solutions', 2, 15000, 'high', 12, 0),
-            ('Seguro Vida - Pedro Alves', 1, 4500, 'medium', 2, 1),
-            ('Seguro Auto - Luciana Barbosa', 3, 5200, 'urgent', 3, 1),
-            ('Seguro Saúde - Clínica Vida Plena', 4, 28000, 'high', 17, 1),
-            ('Seguro Viagem - Roberto Costa', 0, 900, 'low', 4, 2),
-            ('Seguro Empresarial - Comércio Nacional', 2, 22000, 'high', 13, 2),
-            ('Seguro RC - Construtora Horizonte', 3, 18000, 'urgent', 15, 0),
-            ('Seguro Auto - André Martins', 1, 2800, 'medium', 6, 2),
-            ('Seguro Transporte - Transp. Rápidos', 4, 35000, 'high', 14, 1),
-            ('Seguro Residencial - Camila Rocha', 0, 1500, 'low', 7, 0),
-            ('Seguro Auto - Gustavo Lopes', 2, 4100, 'medium', 8, 2),
-            ('Seguro Empresarial - Metalmax', 5, 42000, 'high', 18, 1),  # Won
-            ('Seguro Vida - Patrícia Souza', 6, 3800, 'low', 9, 0),  # Lost
-        ]
-
-        deals = []
-        for title, stage_idx, value, priority, client_idx, broker_idx in deal_data:
-            deal, _ = Deal.objects.update_or_create(
-                title=title,
                 defaults={
-                    'client': clients[client_idx],
-                    'broker': brokers[broker_idx],
-                    'pipeline': pipeline,
-                    'stage': stages[stage_idx],
-                    'insurance_type': random.choice(types_list),
-                    'insurer': random.choice(insurers) if random.random() > 0.3 else None,
-                    'expected_value': Decimal(str(value)),
-                    'expected_close_date': today + timedelta(days=random.randint(5, 60)),
-                    'priority': priority,
-                    'source': random.choice(sources),
+                    'order': order,
+                    'color': color,
+                    'is_won': is_won,
+                    'is_lost': is_lost,
                 },
             )
-            deals.append(deal)
+            stages[name] = stage
 
-        # Create activities for each deal
-        activity_types = ['note', 'call', 'email', 'meeting', 'task']
-        activity_titles = {
-            'note': ['Registrado interesse do cliente', 'Atualização de dados', 'Observação sobre perfil de risco'],
-            'call': ['Ligação de apresentação', 'Follow-up telefônico', 'Ligação para negociação'],
-            'email': ['Email com proposta enviada', 'Resposta ao email do cliente', 'Email de follow-up'],
-            'meeting': ['Reunião de apresentação', 'Reunião para fechar proposta', 'Visita ao cliente'],
-            'task': ['Preparar cotação', 'Revisar documentação', 'Emitir proposta'],
-        }
+        for index, client in enumerate(clients, start=1):
+            insurance_type = policies[index - 1].insurance_type
+            insurer = insurers[(index - 1) % len(insurers)]
+            stage = stages['Fechado'] if index == 1 else stages['Proposta Enviada']
+            deal, _ = Deal.objects.update_or_create(
+                brokerage=brokerage,
+                title=f'Negociacao {client.name}',
+                defaults={
+                    'client': client,
+                    'broker': client.broker,
+                    'pipeline': pipeline,
+                    'stage': stage,
+                    'insurance_type': insurance_type,
+                    'insurer': insurer,
+                    'expected_value': Decimal('3500.00') + Decimal(index * 400),
+                    'expected_close_date': timezone.localdate() + timedelta(days=10 * index),
+                    'priority': 'high' if index == 1 else 'medium',
+                    'source': 'website' if index % 2 else 'referral',
+                    'proposal': policies[index - 1].proposal,
+                    'policy': policies[index - 1] if stage.is_won else None,
+                    'notes': 'Deal gerado para demonstrar o funil comercial tenant-scoped.',
+                },
+            )
+            DealActivity.objects.update_or_create(
+                brokerage=brokerage,
+                deal=deal,
+                title='Contato inicial realizado',
+                defaults={
+                    'activity_type': 'call',
+                    'description': 'Cliente contatado e oportunidade registrada no CRM.',
+                    'due_date': timezone.now() - timedelta(days=1),
+                    'is_completed': True,
+                    'performed_by': users['manager'],
+                },
+            )
 
-        for deal in deals:
-            num_activities = random.randint(1, 4)
-            for j in range(num_activities):
-                atype = random.choice(activity_types)
-                DealActivity.objects.create(
-                    deal=deal,
-                    activity_type=atype,
-                    title=random.choice(activity_titles[atype]),
-                    description=f'Atividade referente à negociação {deal.title}.',
-                    performed_by=deal.broker,
-                    is_completed=random.random() > 0.4,
-                )
-
-        self.stdout.write(self.style.SUCCESS(f'  2 pipelines, {len(deals)} negociações e atividades criadas.'))
+        self.stdout.write(self.style.SUCCESS('  Pipeline, negociações e atividades de CRM criados.'))

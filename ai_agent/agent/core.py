@@ -184,7 +184,7 @@ def _collect_entity_data(user, entity_type: str, entity_id: int) -> dict | None:
         if not client:
             return None
 
-        policies = Policy.objects.filter(client=client)
+        policies = Policy.objects.filter(brokerage=user.brokerage, client=client)
         if user.role == 'broker':
             policies = policies.filter(broker=user)
         policies_detail = '\n'.join([
@@ -194,7 +194,7 @@ def _collect_entity_data(user, entity_type: str, entity_id: int) -> dict | None:
             for p in policies.select_related('insurer', 'insurance_type')[:10]
         ]) or '  Nenhuma'
 
-        claims = Claim.objects.filter(client=client)
+        claims = Claim.objects.filter(brokerage=user.brokerage, client=client)
         if user.role == 'broker':
             claims = claims.filter(broker=user)
         claims_detail = '\n'.join([
@@ -203,7 +203,7 @@ def _collect_entity_data(user, entity_type: str, entity_id: int) -> dict | None:
             for c in claims[:10]
         ]) or '  Nenhum'
 
-        deals = Deal.objects.filter(client=client)
+        deals = Deal.objects.filter(brokerage=user.brokerage, client=client)
         if user.role == 'broker':
             deals = deals.filter(broker=user)
         deals_detail = '\n'.join([
@@ -281,7 +281,7 @@ def _collect_entity_data(user, entity_type: str, entity_id: int) -> dict | None:
             for pc in coverages
         ]) or '  Nenhuma'
 
-        claims = Claim.objects.filter(policy=policy)
+        claims = Claim.objects.filter(brokerage=user.brokerage, policy=policy)
         if user.role == 'broker':
             claims = claims.filter(broker=user)
         claims_detail = '\n'.join([

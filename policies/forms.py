@@ -1,9 +1,11 @@
 from django import forms
 
+from utils.forms import BrokerageScopedFormMixin
+
 from .models import Proposal, Policy, PolicyCoverage, PolicyDocument
 
 
-class ProposalForm(forms.ModelForm):
+class ProposalForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = Proposal
         fields = [
@@ -27,12 +29,9 @@ class ProposalForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        self.fields['broker'].queryset = User.objects.filter(is_active=True)
 
 
-class PolicyForm(forms.ModelForm):
+class PolicyForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = Policy
         fields = [
@@ -62,13 +61,10 @@ class PolicyForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        self.fields['broker'].queryset = User.objects.filter(is_active=True)
         self.fields['proposal'].required = False
 
 
-class PolicyCoverageForm(forms.ModelForm):
+class PolicyCoverageForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = PolicyCoverage
         fields = ['coverage', 'insured_amount', 'deductible', 'premium_amount', 'notes']
@@ -81,7 +77,7 @@ class PolicyCoverageForm(forms.ModelForm):
         }
 
 
-class PolicyDocumentForm(forms.ModelForm):
+class PolicyDocumentForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = PolicyDocument
         fields = ['title', 'file', 'document_type']

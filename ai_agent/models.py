@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.db import models
 
-from utils.models import TimeStampedModel
+from utils.models import BrokerageScopedModel, TimeStampedModel
 
 
-class ChatSession(TimeStampedModel):
+class ChatSession(BrokerageScopedModel):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
         related_name='chat_sessions', verbose_name='Usuario',
@@ -20,7 +20,7 @@ class ChatSession(TimeStampedModel):
         return self.title or f'Chat #{self.pk}'
 
 
-class ChatMessage(TimeStampedModel):
+class ChatMessage(BrokerageScopedModel):
     class Role(models.TextChoices):
         USER = 'user', 'Usuario'
         ASSISTANT = 'assistant', 'Assistente'
@@ -42,6 +42,11 @@ class ChatMessage(TimeStampedModel):
     def __str__(self):
         return f'{self.get_role_display()}: {self.content[:50]}'
 
+    def save(self, *args, **kwargs):
+        if self.session_id and not self.brokerage_id:
+            self.brokerage = self.session.brokerage
+        super().save(*args, **kwargs)
+
 
 class EntitySummary(TimeStampedModel):
     ENTITY_TYPES = [
@@ -53,6 +58,12 @@ class EntitySummary(TimeStampedModel):
     ]
     entity_type = models.CharField('Tipo', max_length=20, choices=ENTITY_TYPES)
     entity_id = models.PositiveIntegerField('ID da Entidade')
+    brokerage = models.ForeignKey(
+        'brokerages.Brokerage',
+        on_delete=models.PROTECT,
+        related_name='entity_summaries',
+        verbose_name='Corretora',
+    )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
         related_name='entity_summaries', verbose_name='Usuario',
@@ -73,6 +84,12 @@ class EntitySummary(TimeStampedModel):
 
 
 class DashboardInsight(TimeStampedModel):
+    brokerage = models.ForeignKey(
+        'brokerages.Brokerage',
+        on_delete=models.PROTECT,
+        related_name='dashboard_insights',
+        verbose_name='Corretora',
+    )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
         related_name='dashboard_insights', verbose_name='Usuario',

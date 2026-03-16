@@ -2,7 +2,6 @@ import json
 from datetime import date, timedelta
 from decimal import Decimal
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum, Count, Q, F, Avg
 from django.db.models.functions import TruncMonth
 from django.http import JsonResponse
@@ -15,10 +14,12 @@ from clients.models import Client
 from renewals.models import Renewal, RenewalStatus
 from crm.models import Deal, Pipeline, PipelineStage
 from ai_agent.models import DashboardInsight
+from utils.mixins import ModuleRequiredMixin
 
 
-class DashboardView(LoginRequiredMixin, TemplateView):
+class DashboardView(ModuleRequiredMixin, TemplateView):
     template_name = 'dashboard/dashboard.html'
+    required_module = 'dashboard'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -26,11 +27,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         today = date.today()
 
         # Base querysets (broker-filtered)
-        policies_qs = Policy.objects.all()
-        claims_qs = Claim.objects.all()
-        clients_qs = Client.objects.all()
-        renewals_qs = Renewal.objects.all()
-        deals_qs = Deal.objects.all()
+        policies_qs = Policy.objects.filter(brokerage=user.brokerage)
+        claims_qs = Claim.objects.filter(brokerage=user.brokerage)
+        clients_qs = Client.objects.filter(brokerage=user.brokerage)
+        renewals_qs = Renewal.objects.filter(brokerage=user.brokerage)
+        deals_qs = Deal.objects.filter(brokerage=user.brokerage)
 
         if user.role == 'broker':
             policies_qs = policies_qs.filter(broker=user)
@@ -128,9 +129,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # ── CRM Funnel Data ──
         default_pipeline = Pipeline.objects.filter(
-            is_default=True, is_active=True).first()
+            brokerage=user.brokerage,
+            is_default=True,
+            is_active=True,
+        ).first()
         if not default_pipeline:
-            default_pipeline = Pipeline.objects.filter(is_active=True).first()
+            default_pipeline = Pipeline.objects.filter(
+                brokerage=user.brokerage,
+                is_active=True,
+            ).first()
 
         funnel_labels = []
         funnel_values = []
@@ -230,6 +237,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # Dashboard AI Insight
         ctx['dashboard_insight'] = DashboardInsight.objects.filter(
+            brokerage=user.brokerage,
             user=user
         ).first()
 
@@ -265,8 +273,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         return ctx
 
 
-class GlobalSearchView(LoginRequiredMixin, View):
+class GlobalSearchView(ModuleRequiredMixin, View):
     """AJAX endpoint for global search autocomplete."""
+    required_module = 'dashboard'
 
     def get(self, request):
         q = request.GET.get('q', '').strip()
@@ -279,7 +288,8 @@ class GlobalSearchView(LoginRequiredMixin, View):
 
         # Search clients
         clients_qs = Client.objects.filter(
-            Q(name__icontains=q) | Q(cpf_cnpj__icontains=q) | Q(email__icontains=q)
+            Q(name__icontains=q) | Q(cpf_cnpj__icontains=q) | Q(email__icontains=q),
+            brokerage=user.brokerage,
         )
         if user.role == 'broker':
             clients_qs = clients_qs.filter(broker=user)
@@ -294,7 +304,8 @@ class GlobalSearchView(LoginRequiredMixin, View):
 
         # Search policies
         policies_qs = Policy.objects.filter(
-            Q(policy_number__icontains=q) | Q(client__name__icontains=q)
+            Q(policy_number__icontains=q) | Q(client__name__icontains=q),
+            brokerage=user.brokerage,
         ).select_related('client')
         if user.role == 'broker':
             policies_qs = policies_qs.filter(broker=user)
@@ -309,7 +320,8 @@ class GlobalSearchView(LoginRequiredMixin, View):
 
         # Search proposals
         proposals_qs = Proposal.objects.filter(
-            Q(proposal_number__icontains=q) | Q(client__name__icontains=q)
+            Q(proposal_number__icontains=q) | Q(client__name__icontains=q),
+            brokerage=user.brokerage,
         ).select_related('client')
         if user.role == 'broker':
             proposals_qs = proposals_qs.filter(broker=user)
@@ -324,7 +336,8 @@ class GlobalSearchView(LoginRequiredMixin, View):
 
         # Search claims
         claims_qs = Claim.objects.filter(
-            Q(claim_number__icontains=q) | Q(client__name__icontains=q)
+            Q(claim_number__icontains=q) | Q(client__name__icontains=q),
+            brokerage=user.brokerage,
         ).select_related('client')
         if user.role == 'broker':
             claims_qs = claims_qs.filter(broker=user)

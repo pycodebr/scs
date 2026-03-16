@@ -23,6 +23,7 @@ class UserManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_platform_admin', True)
         extra_fields.setdefault('role', Role.ADMIN)
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser deve ter is_staff=True.')
@@ -37,6 +38,14 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     last_name = models.CharField('Sobrenome', max_length=150, blank=True)
     cpf = models.CharField('CPF', max_length=14, unique=True, blank=True, null=True)
     phone = models.CharField('Telefone', max_length=20, blank=True)
+    brokerage = models.ForeignKey(
+        'brokerages.Brokerage',
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name='users',
+        verbose_name='Corretora',
+    )
     role = models.CharField(
         'Papel',
         max_length=10,
@@ -45,6 +54,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     )
     is_active = models.BooleanField('Ativo', default=True)
     is_staff = models.BooleanField('Acesso ao admin', default=False)
+    is_platform_admin = models.BooleanField('Admin da plataforma', default=False)
     date_joined = models.DateTimeField('Data de cadastro', auto_now_add=True)
     avatar = models.ImageField('Avatar', upload_to='avatars/', blank=True, null=True)
 
@@ -88,4 +98,25 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 
     @property
     def can_manage_users(self):
-        return self.role in (Role.ADMIN, Role.MANAGER)
+        return self.role in (Role.ADMIN, Role.MANAGER) and not self.is_platform_admin
+
+    def has_module(self, slug):
+        if self.is_platform_admin or self.is_superuser:
+            return True
+        if not self.brokerage_id:
+            return False
+        brokerage_module = self.brokerage.modules.filter(
+            module__slug=slug,
+            module__is_active=True,
+        ).values_list('is_enabled', flat=True).first()
+        if brokerage_module is not None:
+            return brokerage_module
+
+        subscription = self.brokerage.subscriptions.select_related('plan').order_by('-created_at').first()
+        if not subscription:
+            return False
+
+        return subscription.plan.modules.filter(
+            slug=slug,
+            is_active=True,
+        ).exists()

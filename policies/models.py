@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from utils.models import TimeStampedModel
+from utils.models import BrokerageScopedModel
 
 
 class ProposalStatus(models.TextChoices):
@@ -36,8 +36,8 @@ class DocumentType(models.TextChoices):
     OTHER = 'other', 'Outros'
 
 
-class Proposal(TimeStampedModel):
-    proposal_number = models.CharField('Numero da Proposta', max_length=50, unique=True)
+class Proposal(BrokerageScopedModel):
+    proposal_number = models.CharField('Numero da Proposta', max_length=50)
     client = models.ForeignKey(
         'clients.Client', on_delete=models.PROTECT,
         related_name='proposals', verbose_name='Cliente',
@@ -70,13 +70,24 @@ class Proposal(TimeStampedModel):
         verbose_name = 'Proposta'
         verbose_name_plural = 'Propostas'
         ordering = ['-submission_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['brokerage', 'proposal_number'],
+                name='unique_proposal_number_per_brokerage',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.proposal_number} - {self.client.name}'
 
+    def save(self, *args, **kwargs):
+        if self.client_id and not self.brokerage_id:
+            self.brokerage = self.client.brokerage
+        super().save(*args, **kwargs)
 
-class Policy(TimeStampedModel):
-    policy_number = models.CharField('Numero da Apolice', max_length=50, unique=True)
+
+class Policy(BrokerageScopedModel):
+    policy_number = models.CharField('Numero da Apolice', max_length=50)
     proposal = models.ForeignKey(
         Proposal, on_delete=models.SET_NULL,
         blank=True, null=True, related_name='policies',
@@ -127,9 +138,20 @@ class Policy(TimeStampedModel):
         verbose_name = 'Apolice'
         verbose_name_plural = 'Apolices'
         ordering = ['-start_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['brokerage', 'policy_number'],
+                name='unique_policy_number_per_brokerage',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.policy_number} - {self.client.name}'
+
+    def save(self, *args, **kwargs):
+        if self.client_id and not self.brokerage_id:
+            self.brokerage = self.client.brokerage
+        super().save(*args, **kwargs)
 
     @property
     def is_expiring_soon(self):
@@ -143,7 +165,7 @@ class Policy(TimeStampedModel):
         return self.end_date < date.today()
 
 
-class PolicyCoverage(TimeStampedModel):
+class PolicyCoverage(BrokerageScopedModel):
     policy = models.ForeignKey(
         Policy, on_delete=models.CASCADE,
         related_name='coverages', verbose_name='Apolice',
@@ -170,8 +192,13 @@ class PolicyCoverage(TimeStampedModel):
     def __str__(self):
         return f'{self.policy.policy_number} - {self.coverage.name}'
 
+    def save(self, *args, **kwargs):
+        if self.policy_id and not self.brokerage_id:
+            self.brokerage = self.policy.brokerage
+        super().save(*args, **kwargs)
 
-class PolicyDocument(TimeStampedModel):
+
+class PolicyDocument(BrokerageScopedModel):
     policy = models.ForeignKey(
         Policy, on_delete=models.CASCADE,
         related_name='documents', verbose_name='Apolice',
@@ -194,3 +221,8 @@ class PolicyDocument(TimeStampedModel):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.policy_id and not self.brokerage_id:
+            self.brokerage = self.policy.brokerage
+        super().save(*args, **kwargs)

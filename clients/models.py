@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from utils.models import TimeStampedModel
+from utils.models import BrokerageScopedModel
 from utils.validators import validate_cpf_cnpj
 
 
@@ -34,7 +34,7 @@ class MaritalStatus(models.TextChoices):
     SEPARATED = 'separated', 'Separado(a)'
 
 
-class Client(TimeStampedModel):
+class Client(BrokerageScopedModel):
     client_type = models.CharField(
         'Tipo',
         max_length=2,
@@ -45,7 +45,6 @@ class Client(TimeStampedModel):
     cpf_cnpj = models.CharField(
         'CPF / CNPJ',
         max_length=18,
-        unique=True,
         validators=[validate_cpf_cnpj],
     )
     rg_ie = models.CharField('RG / IE', max_length=20, blank=True)
@@ -86,6 +85,12 @@ class Client(TimeStampedModel):
         verbose_name = 'Cliente'
         verbose_name_plural = 'Clientes'
         ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['brokerage', 'cpf_cnpj'],
+                name='unique_client_document_per_brokerage',
+            ),
+        ]
 
     def __str__(self):
         return self.name

@@ -1,15 +1,16 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 
+from utils.mixins import BrokerageFilterMixin, BrokerageFormMixin
+
 from .forms import InsurerForm, InsurerBranchForm
 from .models import Insurer, InsurerBranch
 
 
-class InsurerListView(LoginRequiredMixin, ListView):
+class InsurerListView(BrokerageFilterMixin, ListView):
     model = Insurer
     template_name = 'insurers/insurer_list.html'
     context_object_name = 'insurers'
@@ -31,7 +32,7 @@ class InsurerListView(LoginRequiredMixin, ListView):
         return qs
 
 
-class InsurerCreateView(LoginRequiredMixin, CreateView):
+class InsurerCreateView(BrokerageFormMixin, CreateView):
     model = Insurer
     form_class = InsurerForm
     template_name = 'insurers/insurer_form.html'
@@ -42,7 +43,7 @@ class InsurerCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class InsurerUpdateView(LoginRequiredMixin, UpdateView):
+class InsurerUpdateView(BrokerageFormMixin, BrokerageFilterMixin, UpdateView):
     model = Insurer
     form_class = InsurerForm
     template_name = 'insurers/insurer_form.html'
@@ -53,7 +54,7 @@ class InsurerUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class InsurerDetailView(LoginRequiredMixin, DetailView):
+class InsurerDetailView(BrokerageFilterMixin, DetailView):
     model = Insurer
     template_name = 'insurers/insurer_detail.html'
     context_object_name = 'insurer'
@@ -61,11 +62,11 @@ class InsurerDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['branches'] = self.object.branches.all()
-        ctx['branch_form'] = InsurerBranchForm()
+        ctx['branch_form'] = InsurerBranchForm(user=self.request.user)
         return ctx
 
 
-class InsurerDeleteView(LoginRequiredMixin, DeleteView):
+class InsurerDeleteView(BrokerageFilterMixin, DeleteView):
     model = Insurer
     template_name = 'partials/_confirm_delete.html'
     success_url = reverse_lazy('insurers:insurer_list')
@@ -75,12 +76,17 @@ class InsurerDeleteView(LoginRequiredMixin, DeleteView):
         return super().form_valid(form)
 
 
-class InsurerBranchCreateView(LoginRequiredMixin, CreateView):
+class InsurerBranchCreateView(BrokerageFormMixin, CreateView):
     model = InsurerBranch
     form_class = InsurerBranchForm
 
     def form_valid(self, form):
-        form.instance.insurer = get_object_or_404(Insurer, pk=self.kwargs['pk'])
+        form.instance.insurer = get_object_or_404(
+            Insurer,
+            pk=self.kwargs['pk'],
+            brokerage=self.request.user.brokerage,
+        )
+        form.instance.brokerage = form.instance.insurer.brokerage
         messages.success(self.request, 'Ramo adicionado com sucesso.')
         form.save()
         return redirect('insurers:insurer_detail', pk=self.kwargs['pk'])
@@ -90,7 +96,7 @@ class InsurerBranchCreateView(LoginRequiredMixin, CreateView):
         return redirect('insurers:insurer_detail', pk=self.kwargs['pk'])
 
 
-class InsurerBranchDeleteView(LoginRequiredMixin, DeleteView):
+class InsurerBranchDeleteView(BrokerageFilterMixin, DeleteView):
     model = InsurerBranch
 
     def get_success_url(self):

@@ -1,6 +1,5 @@
 import csv
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db.models import Q
 from django.http import HttpResponse
@@ -9,7 +8,7 @@ from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 
-from utils.mixins import BrokerFilterMixin
+from utils.mixins import BrokerageFilterMixin, BrokerageFormMixin, BrokerageRequiredMixin
 
 from .forms import ProposalForm, PolicyForm, PolicyCoverageForm, PolicyDocumentForm
 from .models import Proposal, Policy, PolicyCoverage, PolicyDocument
@@ -17,7 +16,7 @@ from .models import Proposal, Policy, PolicyCoverage, PolicyDocument
 
 # --- Proposals ---
 
-class ProposalListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
+class ProposalListView(BrokerageFilterMixin, ListView):
     model = Proposal
     template_name = 'policies/proposal_list.html'
     context_object_name = 'proposals'
@@ -37,7 +36,7 @@ class ProposalListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
         return qs
 
 
-class ProposalCreateView(LoginRequiredMixin, CreateView):
+class ProposalCreateView(BrokerageFormMixin, CreateView):
     model = Proposal
     form_class = ProposalForm
     template_name = 'policies/proposal_form.html'
@@ -57,7 +56,7 @@ class ProposalCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ProposalUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
+class ProposalUpdateView(BrokerageFormMixin, BrokerageFilterMixin, UpdateView):
     model = Proposal
     form_class = ProposalForm
     template_name = 'policies/proposal_form.html'
@@ -68,7 +67,7 @@ class ProposalUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
         return super().form_valid(form)
 
 
-class ProposalDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
+class ProposalDetailView(BrokerageFilterMixin, DetailView):
     model = Proposal
     template_name = 'policies/proposal_detail.html'
     context_object_name = 'proposal'
@@ -80,12 +79,13 @@ class ProposalDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         from ai_agent.models import EntitySummary
         ctx['ai_summary'] = EntitySummary.objects.filter(
+            brokerage=self.request.user.brokerage,
             entity_type='proposal', entity_id=self.object.pk,
         ).first()
         return ctx
 
 
-class ProposalDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
+class ProposalDeleteView(BrokerageFilterMixin, DeleteView):
     model = Proposal
     template_name = 'partials/_confirm_delete.html'
     success_url = reverse_lazy('policies:proposal_list')
@@ -95,17 +95,17 @@ class ProposalDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
         return super().form_valid(form)
 
 
-class ProposalConvertView(LoginRequiredMixin, BrokerFilterMixin, View):
+class ProposalConvertView(BrokerageFormMixin, BrokerageRequiredMixin, View):
     """Convert an approved proposal into a new policy."""
 
     def get(self, request, pk):
         proposal = get_object_or_404(Proposal.objects.select_related(
             'client', 'insurer', 'insurance_type', 'broker',
-        ), pk=pk)
+        ), pk=pk, brokerage=request.user.brokerage)
         if proposal.status != 'approved':
             messages.error(request, 'Apenas propostas aprovadas podem ser convertidas em apolice.')
             return redirect('policies:proposal_detail', pk=pk)
-        form = PolicyForm(initial={
+        form = PolicyForm(user=request.user, initial={
             'proposal': proposal,
             'client': proposal.client,
             'insurer': proposal.insurer,
@@ -118,10 +118,12 @@ class ProposalConvertView(LoginRequiredMixin, BrokerFilterMixin, View):
         return self.render(request, form, proposal)
 
     def post(self, request, pk):
-        proposal = get_object_or_404(Proposal, pk=pk)
-        form = PolicyForm(request.POST)
+        proposal = get_object_or_404(Proposal, pk=pk, brokerage=request.user.brokerage)
+        form = PolicyForm(request.POST, user=request.user)
         if form.is_valid():
-            policy = form.save()
+            policy = form.save(commit=False)
+            policy.brokerage = request.user.brokerage
+            policy.save()
             messages.success(request, f'Apolice {policy.policy_number} criada a partir da proposta {proposal.proposal_number}.')
             return redirect('policies:policy_detail', pk=policy.pk)
         return self.render(request, form, proposal)
@@ -137,7 +139,7 @@ class ProposalConvertView(LoginRequiredMixin, BrokerFilterMixin, View):
 
 # --- Policies ---
 
-class PolicyListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
+class PolicyListView(BrokerageFilterMixin, ListView):
     model = Policy
     template_name = 'policies/policy_list.html'
     context_object_name = 'policies'
@@ -157,7 +159,7 @@ class PolicyListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
         return qs
 
 
-class PolicyCreateView(LoginRequiredMixin, CreateView):
+class PolicyCreateView(BrokerageFormMixin, CreateView):
     model = Policy
     form_class = PolicyForm
     template_name = 'policies/policy_form.html'
@@ -177,7 +179,7 @@ class PolicyCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class PolicyUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
+class PolicyUpdateView(BrokerageFormMixin, BrokerageFilterMixin, UpdateView):
     model = Policy
     form_class = PolicyForm
     template_name = 'policies/policy_form.html'
@@ -188,7 +190,7 @@ class PolicyUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['coverages'] = self.object.coverages.select_related('coverage')
-        ctx['coverage_form'] = PolicyCoverageForm()
+        ctx['coverage_form'] = PolicyCoverageForm(user=self.request.user)
         return ctx
 
     def form_valid(self, form):
@@ -196,7 +198,7 @@ class PolicyUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
         return super().form_valid(form)
 
 
-class PolicyDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
+class PolicyDetailView(BrokerageFilterMixin, DetailView):
     model = Policy
     template_name = 'policies/policy_detail.html'
     context_object_name = 'policy'
@@ -208,16 +210,17 @@ class PolicyDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         ctx['coverages'] = self.object.coverages.select_related('coverage')
         ctx['documents'] = self.object.documents.select_related('uploaded_by')
-        ctx['document_form'] = PolicyDocumentForm()
-        ctx['coverage_form'] = PolicyCoverageForm()
+        ctx['document_form'] = PolicyDocumentForm(user=self.request.user)
+        ctx['coverage_form'] = PolicyCoverageForm(user=self.request.user)
         from ai_agent.models import EntitySummary
         ctx['ai_summary'] = EntitySummary.objects.filter(
+            brokerage=self.request.user.brokerage,
             entity_type='policy', entity_id=self.object.pk,
         ).first()
         return ctx
 
 
-class PolicyDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
+class PolicyDeleteView(BrokerageFilterMixin, DeleteView):
     model = Policy
     template_name = 'partials/_confirm_delete.html'
     success_url = reverse_lazy('policies:policy_list')
@@ -227,9 +230,11 @@ class PolicyDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
         return super().form_valid(form)
 
 
-class PolicyExportView(LoginRequiredMixin, View):
+class PolicyExportView(BrokerageRequiredMixin, View):
     def get(self, request):
-        qs = Policy.objects.select_related('client', 'insurer', 'broker').all()
+        qs = Policy.objects.select_related('client', 'insurer', 'broker').filter(
+            brokerage=request.user.brokerage,
+        )
         if request.user.role == 'broker':
             qs = qs.filter(broker=request.user)
         qs = qs.order_by('-start_date')
@@ -259,12 +264,17 @@ class PolicyExportView(LoginRequiredMixin, View):
 
 # --- Policy Coverages ---
 
-class PolicyCoverageCreateView(LoginRequiredMixin, CreateView):
+class PolicyCoverageCreateView(BrokerageFormMixin, CreateView):
     model = PolicyCoverage
     form_class = PolicyCoverageForm
 
     def form_valid(self, form):
-        form.instance.policy = get_object_or_404(Policy, pk=self.kwargs['pk'])
+        form.instance.policy = get_object_or_404(
+            Policy,
+            pk=self.kwargs['pk'],
+            brokerage=self.request.user.brokerage,
+        )
+        form.instance.brokerage = form.instance.policy.brokerage
         messages.success(self.request, 'Cobertura adicionada com sucesso.')
         form.save()
         return redirect('policies:policy_detail', pk=self.kwargs['pk'])
@@ -274,7 +284,7 @@ class PolicyCoverageCreateView(LoginRequiredMixin, CreateView):
         return redirect('policies:policy_detail', pk=self.kwargs['pk'])
 
 
-class PolicyCoverageDeleteView(LoginRequiredMixin, DeleteView):
+class PolicyCoverageDeleteView(BrokerageFilterMixin, DeleteView):
     model = PolicyCoverage
 
     def get_success_url(self):
@@ -287,12 +297,17 @@ class PolicyCoverageDeleteView(LoginRequiredMixin, DeleteView):
 
 # --- Policy Documents ---
 
-class PolicyDocumentCreateView(LoginRequiredMixin, CreateView):
+class PolicyDocumentCreateView(BrokerageFormMixin, CreateView):
     model = PolicyDocument
     form_class = PolicyDocumentForm
 
     def form_valid(self, form):
-        form.instance.policy = get_object_or_404(Policy, pk=self.kwargs['pk'])
+        form.instance.policy = get_object_or_404(
+            Policy,
+            pk=self.kwargs['pk'],
+            brokerage=self.request.user.brokerage,
+        )
+        form.instance.brokerage = form.instance.policy.brokerage
         form.instance.uploaded_by = self.request.user
         messages.success(self.request, 'Documento adicionado com sucesso.')
         form.save()
@@ -303,7 +318,7 @@ class PolicyDocumentCreateView(LoginRequiredMixin, CreateView):
         return redirect('policies:policy_detail', pk=self.kwargs['pk'])
 
 
-class PolicyDocumentDeleteView(LoginRequiredMixin, DeleteView):
+class PolicyDocumentDeleteView(BrokerageFilterMixin, DeleteView):
     model = PolicyDocument
 
     def get_success_url(self):

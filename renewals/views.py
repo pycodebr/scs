@@ -1,4 +1,3 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -6,17 +5,18 @@ from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, DetailView
 
-from utils.mixins import BrokerFilterMixin
+from utils.mixins import BrokerageFilterMixin, BrokerageFormMixin, BrokerageRequiredMixin, ModuleRequiredMixin
 
 from .forms import RenewalForm, RenewalRenewForm
 from .models import Renewal, RenewalStatus
 
 
-class RenewalListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
+class RenewalListView(ModuleRequiredMixin, BrokerageFilterMixin, ListView):
     model = Renewal
     template_name = 'renewals/renewal_list.html'
     context_object_name = 'renewals'
     paginate_by = 20
+    required_module = 'renewals'
 
     def get_queryset(self):
         qs = super().get_queryset().select_related(
@@ -45,11 +45,12 @@ class RenewalListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
         return qs
 
 
-class RenewalCreateView(LoginRequiredMixin, CreateView):
+class RenewalCreateView(ModuleRequiredMixin, BrokerageFormMixin, CreateView):
     model = Renewal
     form_class = RenewalForm
     template_name = 'renewals/renewal_form.html'
     success_url = reverse_lazy('renewals:renewal_list')
+    required_module = 'renewals'
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -65,10 +66,11 @@ class RenewalCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class RenewalUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
+class RenewalUpdateView(ModuleRequiredMixin, BrokerageFormMixin, BrokerageFilterMixin, UpdateView):
     model = Renewal
     form_class = RenewalForm
     template_name = 'renewals/renewal_form.html'
+    required_module = 'renewals'
 
     def get_success_url(self):
         return reverse('renewals:renewal_detail', kwargs={'pk': self.object.pk})
@@ -78,10 +80,11 @@ class RenewalUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
         return super().form_valid(form)
 
 
-class RenewalDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
+class RenewalDetailView(ModuleRequiredMixin, BrokerageFilterMixin, DetailView):
     model = Renewal
     template_name = 'renewals/renewal_detail.html'
     context_object_name = 'renewal'
+    required_module = 'renewals'
 
     def get_queryset(self):
         return super().get_queryset().select_related(
@@ -90,13 +93,14 @@ class RenewalDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
         )
 
 
-class RenewalRenewView(LoginRequiredMixin, View):
+class RenewalRenewView(ModuleRequiredMixin, BrokerageRequiredMixin, View):
     """Renew a policy — create a new Policy from the original, mark Renewal as renewed."""
+    required_module = 'renewals'
 
     def get(self, request, pk):
         renewal = get_object_or_404(Renewal.objects.select_related(
             'policy', 'policy__client', 'policy__insurer', 'policy__insurance_type',
-        ), pk=pk)
+        ), pk=pk, brokerage=request.user.brokerage)
         policy = renewal.policy
         from datetime import timedelta
         form = RenewalRenewForm(initial={
@@ -106,7 +110,7 @@ class RenewalRenewView(LoginRequiredMixin, View):
         })
         # Populate insurer choices
         from insurers.models import Insurer
-        insurers = Insurer.objects.filter(is_active=True)
+        insurers = Insurer.objects.filter(is_active=True, brokerage=request.user.brokerage)
         form.fields['insurer'].widget = forms_select_widget(insurers, policy.insurer_id)
         return render(request, 'renewals/renewal_renew.html', {
             'renewal': renewal,
@@ -117,10 +121,10 @@ class RenewalRenewView(LoginRequiredMixin, View):
     def post(self, request, pk):
         renewal = get_object_or_404(Renewal.objects.select_related(
             'policy', 'policy__client', 'policy__insurer', 'policy__insurance_type',
-        ), pk=pk)
+        ), pk=pk, brokerage=request.user.brokerage)
         form = RenewalRenewForm(request.POST)
         from insurers.models import Insurer
-        insurers = Insurer.objects.filter(is_active=True)
+        insurers = Insurer.objects.filter(is_active=True, brokerage=request.user.brokerage)
         form.fields['insurer'].widget = forms_select_widget(insurers, renewal.policy.insurer_id)
 
         if form.is_valid():
@@ -128,6 +132,7 @@ class RenewalRenewView(LoginRequiredMixin, View):
             policy = renewal.policy
             insurer_id = form.cleaned_data.get('insurer') or policy.insurer_id
             new_policy = Policy.objects.create(
+                brokerage=request.user.brokerage,
                 policy_number=form.cleaned_data['policy_number'],
                 proposal=None,
                 client=policy.client,

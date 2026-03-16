@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DetailView
 
-from utils.mixins import ManagerRequiredMixin
+from utils.mixins import ManagerRequiredMixin, BrokerageFormMixin, BrokerageRequiredMixin
 
 from .forms import LoginForm, UserCreateForm, UserUpdateForm, ProfileForm, CustomPasswordChangeForm
 
@@ -17,12 +17,19 @@ class LoginView(BaseLoginView):
     authentication_form = LoginForm
     redirect_authenticated_user = True
 
+    def form_valid(self, form):
+        user = form.get_user()
+        if not (user.is_platform_admin or user.is_superuser) and user.brokerage and not user.brokerage.is_active_for_login:
+            messages.error(self.request, 'Sua corretora está inativa.')
+            return self.form_invalid(form)
+        return super().form_valid(form)
+
 
 class LogoutView(BaseLogoutView):
     next_page = reverse_lazy('accounts:login')
 
 
-class UserListView(ManagerRequiredMixin, ListView):
+class UserListView(BrokerageRequiredMixin, ManagerRequiredMixin, ListView):
     model = User
     template_name = 'accounts/user_list.html'
     context_object_name = 'users'
@@ -30,7 +37,10 @@ class UserListView(ManagerRequiredMixin, ListView):
 
     def get_queryset(self):
         from django.db.models import Q
-        qs = super().get_queryset()
+        qs = super().get_queryset().filter(
+            brokerage=self.request.user.brokerage,
+            is_platform_admin=False,
+        )
         search = self.request.GET.get('q', '').strip()
         if search:
             qs = qs.filter(
@@ -44,7 +54,7 @@ class UserListView(ManagerRequiredMixin, ListView):
         return qs.order_by('first_name', 'last_name')
 
 
-class UserCreateView(ManagerRequiredMixin, CreateView):
+class UserCreateView(BrokerageFormMixin, ManagerRequiredMixin, CreateView):
     model = User
     form_class = UserCreateForm
     template_name = 'accounts/user_form.html'
@@ -55,21 +65,33 @@ class UserCreateView(ManagerRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class UserUpdateView(ManagerRequiredMixin, UpdateView):
+class UserUpdateView(BrokerageFormMixin, ManagerRequiredMixin, UpdateView):
     model = User
     form_class = UserUpdateForm
     template_name = 'accounts/user_form.html'
     success_url = reverse_lazy('accounts:user_list')
+
+    def get_queryset(self):
+        return User.objects.filter(
+            brokerage=self.request.user.brokerage,
+            is_platform_admin=False,
+        )
 
     def form_valid(self, form):
         messages.success(self.request, 'Usuário atualizado com sucesso.')
         return super().form_valid(form)
 
 
-class UserDetailView(ManagerRequiredMixin, DetailView):
+class UserDetailView(BrokerageRequiredMixin, ManagerRequiredMixin, DetailView):
     model = User
     template_name = 'accounts/user_detail.html'
     context_object_name = 'user_obj'
+
+    def get_queryset(self):
+        return User.objects.filter(
+            brokerage=self.request.user.brokerage,
+            is_platform_admin=False,
+        )
 
 
 class ProfileView(LoginRequiredMixin, UpdateView):

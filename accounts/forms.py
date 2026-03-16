@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm
 
+from utils.forms import BrokerageScopedFormMixin
+
 User = get_user_model()
 
 
@@ -23,7 +25,7 @@ class LoginForm(AuthenticationForm):
     )
 
 
-class UserCreateForm(forms.ModelForm):
+class UserCreateForm(BrokerageScopedFormMixin, forms.ModelForm):
     password1 = forms.CharField(
         label='Senha',
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
@@ -59,12 +61,14 @@ class UserCreateForm(forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data['password1'])
+        if self.user and self.user.brokerage_id and not user.brokerage_id:
+            user.brokerage = self.user.brokerage
         if commit:
             user.save()
         return user
 
 
-class UserUpdateForm(forms.ModelForm):
+class UserUpdateForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = User
         fields = [

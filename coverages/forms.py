@@ -1,9 +1,11 @@
 from django import forms
 
+from utils.forms import BrokerageScopedFormMixin
+
 from .models import InsuranceType, Coverage, CoverageItem
 
 
-class InsuranceTypeForm(forms.ModelForm):
+class InsuranceTypeForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = InsuranceType
         fields = ['name', 'description', 'is_active']
@@ -14,7 +16,7 @@ class InsuranceTypeForm(forms.ModelForm):
         }
 
 
-class CoverageForm(forms.ModelForm):
+class CoverageForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = Coverage
         fields = ['insurance_type', 'name', 'description', 'is_active']
@@ -26,7 +28,7 @@ class CoverageForm(forms.ModelForm):
         }
 
 
-class CoverageItemForm(forms.ModelForm):
+class CoverageItemForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = CoverageItem
         fields = ['name', 'description', 'is_active']

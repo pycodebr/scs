@@ -1,0 +1,25 @@
+{% extends 'public/base_public.html' %}
+
+{% block title %}Conta Criada{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 hero-panel rounded-4">
+                <div class="card-body p-5 text-center">
+                    <div class="avatar-text avatar-xxl bg-success text-white mx-auto mb-4">
+                        <i class="feather-check"></i>
+                    </div>
+                    <h1 class="fw-bolder mb-3">Sua corretora já está ativa no SCS</h1>
+                    <p class="text-muted fs-15 mb-4">A conta foi criada com sucesso. Agora você já pode acessar o dashboard, revisar o plano contratado e continuar configurando sua operação.</p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <a href="{% url 'dashboard:dashboard' %}" class="btn btn-primary">Ir para o dashboard</a>
+                        <a href="{% url 'billing:overview' %}" class="btn btn-light-brand">Ver plano e faturamento</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'public/base_public.html' %}
+
+{% block title %}Planos{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+    <div class="text-center mb-5">
+        <span class="badge gradient-chip rounded-pill px-3 py-2 mb-3">Planos SaaS</span>
+        <h1 class="fw-bolder">Preços por usuário para cada estágio da corretora</h1>
+        <p class="text-muted fs-15">Comece no free e evolua para automação, IA e gestão inteligente conforme a operação cresce.</p>
+    </div>
+    <div class="row g-4">
+        {% for plan in plans %}
+        <div class="col-lg-4">
+            <div class="card pricing-card stretch stretch-full border-0 section-surface {% if plan.highlight_label %}popular{% endif %}">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h3 class="fs-22 fw-bold mb-0">{{ plan.name }}</h3>
+                        {% if plan.highlight_label %}
+                        <span class="badge bg-soft-primary text-primary">{{ plan.highlight_label }}</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-muted">{{ plan.description }}</p>
+                    <div class="mb-3">
+                        <span class="fs-2 fw-bolder">R$ {{ plan.monthly_price_per_user }}</span>
+                        <span class="text-muted">/usuário/mês</span>
+                    </div>
+                    {% if plan.max_users %}
+                    <div class="alert alert-light border mb-3">Até {{ plan.max_users }} usuários incluídos no uso ideal deste plano.</div>
+                    {% endif %}
+                    <ul class="list-unstyled d-grid gap-2 mb-4">
+                        {% for module in plan.modules.all %}
+                        <li class="d-flex align-items-center gap-2"><i class="feather-check text-success"></i>{{ module.name }}</li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{% url 'public_pages:signup' %}?plan={{ plan.pk }}" class="btn btn-primary w-100">Criar conta com {{ plan.name }}</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

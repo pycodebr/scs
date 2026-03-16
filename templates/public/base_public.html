@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}SCS{% endblock %} | SaaS para corretoras</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/theme.min.css' %}">
+    <style>
+        :root {
+            --scs-hero-start: #f4efe6;
+            --scs-hero-end: #dbe7f0;
+            --scs-accent: #3454d1;
+            --scs-ink: #1f2937;
+            --scs-muted: #64748b;
+        }
+        body.public-body {
+            background:
+                radial-gradient(circle at top left, rgba(52, 84, 209, 0.12), transparent 34%),
+                linear-gradient(180deg, var(--scs-hero-start) 0%, #f8fafc 45%, #ffffff 100%);
+            color: var(--scs-ink);
+        }
+        .public-nav {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .hero-panel {
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: linear-gradient(145deg, rgba(255,255,255,0.94), rgba(255,255,255,0.76));
+            box-shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
+        }
+        .gradient-chip {
+            background: linear-gradient(135deg, rgba(52, 84, 209, 0.12), rgba(37, 184, 101, 0.14));
+            color: var(--scs-accent);
+            border: 1px solid rgba(52, 84, 209, 0.15);
+        }
+        .pricing-card.popular {
+            border: 1px solid rgba(52, 84, 209, 0.3);
+            transform: translateY(-6px);
+            box-shadow: 0 24px 70px rgba(52, 84, 209, 0.14);
+        }
+        .section-surface {
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="public-body">
+    <nav class="navbar navbar-expand-lg sticky-top public-nav">
+        <div class="container py-2">
+            <a class="navbar-brand d-flex align-items-center gap-3" href="{% url 'public_pages:landing' %}">
+                <img src="{% static 'images/logo-full.png' %}" alt="SCS" style="height: 38px;">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#publicNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="publicNavbar">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'public_pages:landing' %}#beneficios">Benefícios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'public_pages:pricing' %}">Planos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'public_pages:landing' %}#faq">FAQ</a></li>
+                    <li class="nav-item"><a class="btn btn-light-brand" href="{% url 'accounts:login' %}">Entrar</a></li>
+                    <li class="nav-item"><a class="btn btn-primary" href="{% url 'public_pages:signup' %}">Criar Conta</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% block content %}{% endblock %}
+    <script src="{% static 'js/vendors.min.js' %}"></script>
+    <script src="{% static 'js/common-init.min.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

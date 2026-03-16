@@ -1,9 +1,11 @@
 from django import forms
 
+from utils.forms import BrokerageScopedFormMixin
+
 from .models import Endorsement, EndorsementDocument
 
 
-class EndorsementForm(forms.ModelForm):
+class EndorsementForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = Endorsement
         fields = [
@@ -26,12 +28,9 @@ class EndorsementForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        self.fields['requested_by'].queryset = User.objects.filter(is_active=True)
 
 
-class EndorsementDocumentForm(forms.ModelForm):
+class EndorsementDocumentForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = EndorsementDocument
         fields = ['title', 'file']

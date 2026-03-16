@@ -1,21 +1,21 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 
-from utils.mixins import BrokerFilterMixin
+from utils.mixins import BrokerageFilterMixin, BrokerageFormMixin, ModuleRequiredMixin
 
 from .forms import ClaimForm, ClaimDocumentForm
 from .models import Claim, ClaimDocument
 
 
-class ClaimListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
+class ClaimListView(ModuleRequiredMixin, BrokerageFilterMixin, ListView):
     model = Claim
     template_name = 'claims/claim_list.html'
     context_object_name = 'claims'
     paginate_by = 20
+    required_module = 'claims'
 
     def get_queryset(self):
         qs = super().get_queryset().select_related('policy', 'client', 'broker')
@@ -32,11 +32,12 @@ class ClaimListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
         return qs
 
 
-class ClaimCreateView(LoginRequiredMixin, CreateView):
+class ClaimCreateView(ModuleRequiredMixin, BrokerageFormMixin, CreateView):
     model = Claim
     form_class = ClaimForm
     template_name = 'claims/claim_form.html'
     success_url = reverse_lazy('claims:claim_list')
+    required_module = 'claims'
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -52,10 +53,11 @@ class ClaimCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ClaimUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
+class ClaimUpdateView(ModuleRequiredMixin, BrokerageFormMixin, BrokerageFilterMixin, UpdateView):
     model = Claim
     form_class = ClaimForm
     template_name = 'claims/claim_form.html'
+    required_module = 'claims'
 
     def get_success_url(self):
         return reverse('claims:claim_detail', kwargs={'pk': self.object.pk})
@@ -65,10 +67,11 @@ class ClaimUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
         return super().form_valid(form)
 
 
-class ClaimDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
+class ClaimDetailView(ModuleRequiredMixin, BrokerageFilterMixin, DetailView):
     model = Claim
     template_name = 'claims/claim_detail.html'
     context_object_name = 'claim'
+    required_module = 'claims'
 
     def get_queryset(self):
         return super().get_queryset().select_related('policy', 'client', 'broker')
@@ -77,18 +80,20 @@ class ClaimDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         ctx['documents'] = self.object.documents.select_related('uploaded_by')
         ctx['timeline'] = self.object.timeline.select_related('performed_by')
-        ctx['document_form'] = ClaimDocumentForm()
+        ctx['document_form'] = ClaimDocumentForm(user=self.request.user)
         from ai_agent.models import EntitySummary
         ctx['ai_summary'] = EntitySummary.objects.filter(
+            brokerage=self.request.user.brokerage,
             entity_type='claim', entity_id=self.object.pk,
         ).first()
         return ctx
 
 
-class ClaimDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
+class ClaimDeleteView(ModuleRequiredMixin, BrokerageFilterMixin, DeleteView):
     model = Claim
     template_name = 'partials/_confirm_delete.html'
     success_url = reverse_lazy('claims:claim_list')
+    required_module = 'claims'
 
     def form_valid(self, form):
         messages.success(self.request, 'Sinistro excluido com sucesso.')
@@ -97,12 +102,18 @@ class ClaimDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
 
 # --- Claim Documents ---
 
-class ClaimDocumentCreateView(LoginRequiredMixin, CreateView):
+class ClaimDocumentCreateView(ModuleRequiredMixin, BrokerageFormMixin, CreateView):
     model = ClaimDocument
     form_class = ClaimDocumentForm
+    required_module = 'claims'
 
     def form_valid(self, form):
-        form.instance.claim = get_object_or_404(Claim, pk=self.kwargs['pk'])
+        form.instance.claim = get_object_or_404(
+            Claim,
+            pk=self.kwargs['pk'],
+            brokerage=self.request.user.brokerage,
+        )
+        form.instance.brokerage = form.instance.claim.brokerage
         form.instance.uploaded_by = self.request.user
         messages.success(self.request, 'Documento adicionado com sucesso.')
         form.save()
@@ -113,8 +124,9 @@ class ClaimDocumentCreateView(LoginRequiredMixin, CreateView):
         return redirect('claims:claim_detail', pk=self.kwargs['pk'])
 
 
-class ClaimDocumentDeleteView(LoginRequiredMixin, DeleteView):
+class ClaimDocumentDeleteView(ModuleRequiredMixin, BrokerageFilterMixin, DeleteView):
     model = ClaimDocument
+    required_module = 'claims'
 
     def get_success_url(self):
         return reverse('claims:claim_detail', kwargs={'pk': self.object.claim_id})

@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from utils.models import TimeStampedModel
+from utils.models import BrokerageScopedModel
 
 
 class RenewalStatus(models.TextChoices):
@@ -13,7 +13,7 @@ class RenewalStatus(models.TextChoices):
     CANCELLED = 'cancelled', 'Cancelada'
 
 
-class Renewal(TimeStampedModel):
+class Renewal(BrokerageScopedModel):
     policy = models.ForeignKey(
         'policies.Policy', on_delete=models.PROTECT,
         related_name='renewals', verbose_name='Apolice Original',
@@ -51,6 +51,11 @@ class Renewal(TimeStampedModel):
 
     def __str__(self):
         return f'Renovacao {self.policy.policy_number} - {self.get_status_display()}'
+
+    def save(self, *args, **kwargs):
+        if self.policy_id and not self.brokerage_id:
+            self.brokerage = self.policy.brokerage
+        super().save(*args, **kwargs)
 
     @property
     def is_urgent(self):

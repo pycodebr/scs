@@ -1,15 +1,16 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView
 
+from utils.mixins import BrokerageFilterMixin, BrokerageFormMixin
+
 from .forms import InsuranceTypeForm, CoverageForm, CoverageItemForm
 from .models import InsuranceType, Coverage, CoverageItem
 
 
-class InsuranceTypeListView(LoginRequiredMixin, ListView):
+class InsuranceTypeListView(BrokerageFilterMixin, ListView):
     model = InsuranceType
     template_name = 'coverages/insurance_type_list.html'
     context_object_name = 'types'
@@ -23,7 +24,7 @@ class InsuranceTypeListView(LoginRequiredMixin, ListView):
         return qs
 
 
-class InsuranceTypeCreateView(LoginRequiredMixin, CreateView):
+class InsuranceTypeCreateView(BrokerageFormMixin, CreateView):
     model = InsuranceType
     form_class = InsuranceTypeForm
     template_name = 'coverages/insurance_type_form.html'
@@ -34,7 +35,7 @@ class InsuranceTypeCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class InsuranceTypeUpdateView(LoginRequiredMixin, UpdateView):
+class InsuranceTypeUpdateView(BrokerageFormMixin, BrokerageFilterMixin, UpdateView):
     model = InsuranceType
     form_class = InsuranceTypeForm
     template_name = 'coverages/insurance_type_form.html'
@@ -45,7 +46,7 @@ class InsuranceTypeUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class CoverageListView(LoginRequiredMixin, ListView):
+class CoverageListView(BrokerageFilterMixin, ListView):
     model = Coverage
     template_name = 'coverages/coverage_list.html'
     context_object_name = 'coverages'
@@ -66,11 +67,14 @@ class CoverageListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['insurance_types'] = InsuranceType.objects.filter(is_active=True)
+        ctx['insurance_types'] = InsuranceType.objects.filter(
+            brokerage=self.request.user.brokerage,
+            is_active=True,
+        )
         return ctx
 
 
-class CoverageCreateView(LoginRequiredMixin, CreateView):
+class CoverageCreateView(BrokerageFormMixin, CreateView):
     model = Coverage
     form_class = CoverageForm
     template_name = 'coverages/coverage_form.html'
@@ -81,7 +85,7 @@ class CoverageCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class CoverageUpdateView(LoginRequiredMixin, UpdateView):
+class CoverageUpdateView(BrokerageFormMixin, BrokerageFilterMixin, UpdateView):
     model = Coverage
     form_class = CoverageForm
     template_name = 'coverages/coverage_form.html'
@@ -90,7 +94,7 @@ class CoverageUpdateView(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['items'] = self.object.items.all()
-        ctx['item_form'] = CoverageItemForm()
+        ctx['item_form'] = CoverageItemForm(user=self.request.user)
         return ctx
 
     def form_valid(self, form):
@@ -98,12 +102,17 @@ class CoverageUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class CoverageItemCreateView(LoginRequiredMixin, CreateView):
+class CoverageItemCreateView(BrokerageFormMixin, CreateView):
     model = CoverageItem
     form_class = CoverageItemForm
 
     def form_valid(self, form):
-        form.instance.coverage = get_object_or_404(Coverage, pk=self.kwargs['coverage_pk'])
+        form.instance.coverage = get_object_or_404(
+            Coverage,
+            pk=self.kwargs['coverage_pk'],
+            brokerage=self.request.user.brokerage,
+        )
+        form.instance.brokerage = form.instance.coverage.brokerage
         messages.success(self.request, 'Item adicionado com sucesso.')
         form.save()
         return redirect('coverages:coverage_update', pk=self.kwargs['coverage_pk'])
@@ -113,7 +122,7 @@ class CoverageItemCreateView(LoginRequiredMixin, CreateView):
         return redirect('coverages:coverage_update', pk=self.kwargs['coverage_pk'])
 
 
-class CoverageItemUpdateView(LoginRequiredMixin, UpdateView):
+class CoverageItemUpdateView(BrokerageFormMixin, BrokerageFilterMixin, UpdateView):
     model = CoverageItem
     form_class = CoverageItemForm
     template_name = 'coverages/coverage_item_form.html'

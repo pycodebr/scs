@@ -1,0 +1,197 @@
+{% extends 'public/base_public.html' %}
+
+{% block title %}SCS{% endblock %}
+
+{% block content %}
+<section class="container py-5 py-lg-6">
+    <div class="row align-items-center g-4 g-lg-5">
+        <div class="col-lg-7">
+            <span class="badge rounded-pill gradient-chip px-3 py-2 mb-3">SaaS para corretoras com IA integrada</span>
+            <h1 class="display-5 fw-bolder mb-3">Gestão inteligente para corretoras que querem crescer com previsibilidade.</h1>
+            <p class="fs-16 text-muted mb-4">CRM, clientes, apólices, sinistros, renovações, relatórios e assistente de IA em uma operação única, com onboarding self-service e planos por usuário.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'public_pages:signup' %}" class="btn btn-primary btn-lg">Começar no plano free</a>
+                <a href="{% url 'public_pages:pricing' %}" class="btn btn-light-brand btn-lg">Ver planos</a>
+            </div>
+            <div class="row g-3 mt-4">
+                <div class="col-sm-4">
+                    <div class="card border-0 section-surface h-100">
+                        <div class="card-body">
+                            <div class="fs-3 fw-bold text-primary">IA</div>
+                            <div class="fs-13 text-muted">resumos, insights e análise operacional</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card border-0 section-surface h-100">
+                        <div class="card-body">
+                            <div class="fs-3 fw-bold text-primary">SaaS</div>
+                            <div class="fs-13 text-muted">cadastro online, planos e ativação rápida</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card border-0 section-surface h-100">
+                        <div class="card-body">
+                            <div class="fs-3 fw-bold text-primary">Tenant</div>
+                            <div class="fs-13 text-muted">dados isolados por corretora</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="hero-panel rounded-4 p-4 p-lg-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <div class="fs-13 text-muted">Visão da corretora</div>
+                        <div class="fs-4 fw-bold">Operação unificada</div>
+                    </div>
+                    <span class="badge bg-soft-success text-success">IA ativa</span>
+                </div>
+                <div class="card border-0 bg-gray-100 mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fs-12 text-muted">Renovações críticas</div>
+                                <div class="fs-20 fw-bold">18</div>
+                            </div>
+                            <div class="avatar-text avatar-lg bg-primary text-white">
+                                <i class="feather-refresh-cw"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 bg-gray-100 mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fs-12 text-muted">Sinistros em análise</div>
+                                <div class="fs-20 fw-bold">9</div>
+                            </div>
+                            <div class="avatar-text avatar-lg bg-warning text-dark">
+                                <i class="feather-alert-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 bg-gray-100">
+                    <div class="card-body">
+                        <div class="fs-12 text-muted mb-2">Insight de IA</div>
+                        <p class="mb-0 fs-13">Sua corretora está com concentração de renovações nos próximos 15 dias. Priorize a carteira automóvel de alto prêmio.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="beneficios" class="container py-4 py-lg-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card stretch stretch-full section-surface border-0">
+                <div class="card-body">
+                    <div class="avatar-text avatar-lg bg-primary text-white mb-3"><i class="feather-target"></i></div>
+                    <h3 class="fs-18 fw-bold">CRM conectado à operação</h3>
+                    <p class="text-muted mb-0">Do pipeline até a emissão da apólice, sem perda de contexto entre comercial e atendimento.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stretch stretch-full section-surface border-0">
+                <div class="card-body">
+                    <div class="avatar-text avatar-lg bg-success text-white mb-3"><i class="feather-cpu"></i></div>
+                    <h3 class="fs-18 fw-bold">IA integrada de verdade</h3>
+                    <p class="text-muted mb-0">Resumos operacionais, insights de carteira e leitura rápida de contexto para decisões melhores.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stretch stretch-full section-surface border-0">
+                <div class="card-body">
+                    <div class="avatar-text avatar-lg bg-warning text-dark mb-3"><i class="feather-shield"></i></div>
+                    <h3 class="fs-18 fw-bold">Multi-tenant seguro</h3>
+                    <p class="text-muted mb-0">Cada corretora acessa apenas seus próprios dados, com separação por tenant e permissões por perfil.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container py-4 py-lg-5">
+    <div class="d-flex flex-column flex-lg-row align-items-lg-end justify-content-between gap-3 mb-4">
+        <div>
+            <span class="badge bg-soft-primary text-primary mb-2">Planos por usuário</span>
+            <h2 class="mb-0">Escolha a velocidade de crescimento da sua corretora</h2>
+        </div>
+        <a href="{% url 'public_pages:pricing' %}" class="btn btn-light-brand">Comparar planos</a>
+    </div>
+    <div class="row g-4">
+        {% for plan in plans %}
+        <div class="col-lg-4">
+            <div class="card pricing-card stretch stretch-full border-0 section-surface {% if plan.highlight_label %}popular{% endif %}">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h3 class="fs-22 fw-bold mb-1">{{ plan.name }}</h3>
+                            <p class="text-muted mb-0">{{ plan.description }}</p>
+                        </div>
+                        {% if plan.highlight_label %}
+                        <span class="badge bg-soft-primary text-primary">{{ plan.highlight_label }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <span class="fs-3 fw-bolder">R$ {{ plan.monthly_price_per_user }}</span>
+                        <span class="text-muted">/usuário/mês</span>
+                    </div>
+                    <ul class="list-unstyled d-grid gap-2 mb-4">
+                        {% for module in plan.modules.all %}
+                        <li class="d-flex gap-2 align-items-center"><i class="feather-check text-success"></i><span>{{ module.name }}</span></li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{% url 'public_pages:signup' %}?plan={{ plan.pk }}" class="btn {% if plan.highlight_label %}btn-primary{% else %}btn-light-brand{% endif %} w-100">Selecionar plano</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section id="faq" class="container py-4 py-lg-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card border-0 section-surface">
+                <div class="card-body p-4 p-lg-5">
+                    <h2 class="mb-4">Perguntas frequentes</h2>
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqOne">Posso começar sem cartão?</button>
+                            </h2>
+                            <div id="faqOne" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">Sim. O plano free ativa a corretora imediatamente, sem cartão de crédito.</div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqTwo">Como funciona a cobrança?</button>
+                            </h2>
+                            <div id="faqTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">Os planos são cobrados por usuário ativo. A assinatura da corretora e os pagamentos ficam visíveis na área administrativa da conta.</div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqThree">Os dados ficam separados por corretora?</button>
+                            </h2>
+                            <div id="faqThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">Sim. O SCS opera em arquitetura multi-tenant com isolamento por corretora, permissões e filtros por tenant.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,9 +1,11 @@
 from django import forms
 
+from utils.forms import BrokerageScopedFormMixin
+
 from .models import Claim, ClaimDocument
 
 
-class ClaimForm(forms.ModelForm):
+class ClaimForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = Claim
         fields = [
@@ -30,14 +32,11 @@ class ClaimForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from django.contrib.auth import get_user_model
         from policies.models import Policy
-        User = get_user_model()
-        self.fields['broker'].queryset = User.objects.filter(is_active=True)
         self.fields['policy'].queryset = Policy.objects.filter(status='active')
 
 
-class ClaimDocumentForm(forms.ModelForm):
+class ClaimDocumentForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = ClaimDocument
         fields = ['title', 'file', 'document_type']

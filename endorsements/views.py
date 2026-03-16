@@ -1,22 +1,22 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 
-from utils.mixins import BrokerFilterMixin
+from utils.mixins import BrokerageFilterMixin, BrokerageFormMixin, ModuleRequiredMixin
 
 from .forms import EndorsementForm, EndorsementDocumentForm
 from .models import Endorsement, EndorsementDocument
 
 
-class EndorsementListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
+class EndorsementListView(ModuleRequiredMixin, BrokerageFilterMixin, ListView):
     model = Endorsement
     template_name = 'endorsements/endorsement_list.html'
     context_object_name = 'endorsements'
     paginate_by = 20
     broker_field = 'requested_by'
+    required_module = 'endorsements'
 
     def get_queryset(self):
         qs = super().get_queryset().select_related('policy', 'policy__client', 'requested_by')
@@ -36,11 +36,12 @@ class EndorsementListView(LoginRequiredMixin, BrokerFilterMixin, ListView):
         return qs
 
 
-class EndorsementCreateView(LoginRequiredMixin, CreateView):
+class EndorsementCreateView(ModuleRequiredMixin, BrokerageFormMixin, CreateView):
     model = Endorsement
     form_class = EndorsementForm
     template_name = 'endorsements/endorsement_form.html'
     success_url = reverse_lazy('endorsements:endorsement_list')
+    required_module = 'endorsements'
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -56,11 +57,12 @@ class EndorsementCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class EndorsementUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
+class EndorsementUpdateView(ModuleRequiredMixin, BrokerageFormMixin, BrokerageFilterMixin, UpdateView):
     model = Endorsement
     form_class = EndorsementForm
     template_name = 'endorsements/endorsement_form.html'
     broker_field = 'requested_by'
+    required_module = 'endorsements'
 
     def get_success_url(self):
         return reverse('endorsements:endorsement_detail', kwargs={'pk': self.object.pk})
@@ -70,11 +72,12 @@ class EndorsementUpdateView(LoginRequiredMixin, BrokerFilterMixin, UpdateView):
         return super().form_valid(form)
 
 
-class EndorsementDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
+class EndorsementDetailView(ModuleRequiredMixin, BrokerageFilterMixin, DetailView):
     model = Endorsement
     template_name = 'endorsements/endorsement_detail.html'
     context_object_name = 'endorsement'
     broker_field = 'requested_by'
+    required_module = 'endorsements'
 
     def get_queryset(self):
         return super().get_queryset().select_related('policy', 'policy__client', 'requested_by')
@@ -82,15 +85,16 @@ class EndorsementDetailView(LoginRequiredMixin, BrokerFilterMixin, DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['documents'] = self.object.documents.select_related('uploaded_by')
-        ctx['document_form'] = EndorsementDocumentForm()
+        ctx['document_form'] = EndorsementDocumentForm(user=self.request.user)
         return ctx
 
 
-class EndorsementDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
+class EndorsementDeleteView(ModuleRequiredMixin, BrokerageFilterMixin, DeleteView):
     model = Endorsement
     template_name = 'partials/_confirm_delete.html'
     success_url = reverse_lazy('endorsements:endorsement_list')
     broker_field = 'requested_by'
+    required_module = 'endorsements'
 
     def form_valid(self, form):
         messages.success(self.request, 'Endosso excluido com sucesso.')
@@ -99,12 +103,18 @@ class EndorsementDeleteView(LoginRequiredMixin, BrokerFilterMixin, DeleteView):
 
 # --- Endorsement Documents ---
 
-class EndorsementDocumentCreateView(LoginRequiredMixin, CreateView):
+class EndorsementDocumentCreateView(ModuleRequiredMixin, BrokerageFormMixin, CreateView):
     model = EndorsementDocument
     form_class = EndorsementDocumentForm
+    required_module = 'endorsements'
 
     def form_valid(self, form):
-        form.instance.endorsement = get_object_or_404(Endorsement, pk=self.kwargs['pk'])
+        form.instance.endorsement = get_object_or_404(
+            Endorsement,
+            pk=self.kwargs['pk'],
+            brokerage=self.request.user.brokerage,
+        )
+        form.instance.brokerage = form.instance.endorsement.brokerage
         form.instance.uploaded_by = self.request.user
         messages.success(self.request, 'Documento adicionado com sucesso.')
         form.save()
@@ -115,8 +125,9 @@ class EndorsementDocumentCreateView(LoginRequiredMixin, CreateView):
         return redirect('endorsements:endorsement_detail', pk=self.kwargs['pk'])
 
 
-class EndorsementDocumentDeleteView(LoginRequiredMixin, DeleteView):
+class EndorsementDocumentDeleteView(ModuleRequiredMixin, BrokerageFilterMixin, DeleteView):
     model = EndorsementDocument
+    required_module = 'endorsements'
 
     def get_success_url(self):
         return reverse('endorsements:endorsement_detail', kwargs={'pk': self.object.endorsement_id})

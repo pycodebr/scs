@@ -1,9 +1,10 @@
 # PRD — SCS (Sistema de Corretora de Seguros)
 
-**Versão:** 1.0
-**Data:** 15/03/2026
-**Status:** Draft
-**Stack:** Python · Django 6.0 · SQLite · HTML/CSS/JS
+**Versão:** 1.1  
+**Data:** 15/03/2026  
+**Status:** Draft revisado para SaaS  
+**Stack atual:** Python · Django 6.0 · SQLite · HTML/CSS/JS  
+**Arquitetura alvo:** SaaS multi-tenant em banco compartilhado com isolamento por corretora
 
 ---
 
@@ -11,17 +12,37 @@
 
 ### 1.1 Objetivo
 
-O SCS é um sistema web de gestão completa para corretoras de seguros, permitindo o controle de todo o ciclo de vida das operações — desde a prospecção de clientes até a gestão de sinistros e renovações. O sistema centraliza informações de clientes, seguradoras, apólices, propostas, sinistros, endossos, coberturas e negociações em um único ambiente com dashboard analítico e painel CRM integrado.
+O SCS é um sistema web de gestão completa para corretoras de seguros, cobrindo CRM, clientes, seguradoras, propostas, apólices, sinistros, endossos, renovações, relatórios, dashboard e IA aplicada à operação.
+
+Nesta revisão, o produto passa a ser oficialmente definido como **SaaS multi-tenant**, permitindo que múltiplas corretoras utilizem a mesma aplicação, cada uma acessando exclusivamente seus próprios dados. Além da área autenticada, o produto deve contar com:
+
+- landing page pública com posicionamento comercial, copy de vendas e destaque para IA integrada
+- catálogo de planos com cobrança por usuário
+- jornada de criação de conta self-service
+- cadastro da corretora durante o onboarding
+- plano free com ativação imediata, sem cartão
+- administração sistêmica de corretoras, planos, pagamentos, módulos e ativações
 
 ### 1.2 Público-Alvo
 
-- Corretores de seguros (usuários operacionais)
-- Gerentes/supervisores de corretora (visão estratégica)
-- Administradores do sistema (gestão de acessos e configurações)
+- Donos e administradores de corretoras de seguros
+- Gerentes e supervisores de corretora
+- Corretores operacionais
+- Administradores internos da plataforma SCS
 
 ### 1.3 Problema que Resolve
 
-Corretoras de seguros frequentemente operam com processos fragmentados — planilhas, e-mails, sistemas isolados — gerando perda de informações, atrasos em renovações, falta de visibilidade sobre sinistros e dificuldade no acompanhamento de negociações. O SCS unifica todos esses processos em uma plataforma coesa.
+Corretoras de seguros frequentemente operam com processos fragmentados, planilhas, e-mails e controles desconectados, gerando perda de informação, atraso em renovações, baixa previsibilidade comercial e pouca inteligência operacional.
+
+Além disso, no contexto SaaS, há um segundo problema de negócio: aquisição, onboarding e ativação de novas corretoras. O SCS precisa resolver tanto a operação interna da corretora quanto a jornada comercial de adesão ao produto.
+
+### 1.4 Posicionamento do Produto
+
+O SCS deve ser apresentado como uma plataforma de gestão inteligente para corretoras, com três pilares claros:
+
+- operação centralizada de ponta a ponta
+- inteligência comercial e gerencial
+- IA integrada para acelerar análise, decisão e produtividade
 
 ---
 
@@ -29,41 +50,42 @@ Corretoras de seguros frequentemente operam com processos fragmentados — plani
 
 ### 2.1 Stack Tecnológica
 
-| Camada        | Tecnologia                              |
-|---------------|----------------------------------------|
-| Linguagem     | Python 3.13+                           |
-| Framework     | Django 6.0                             |
-| Banco de Dados| SQLite (padrão Django)                 |
-| Frontend      | Django Templates + HTML/CSS/JS         |
-| Design System | `@design_system/design-system.html`    |
-| Auth          | Sistema nativo do Django (customizado) |
-| Virtual Env   | .venv                                  |
+| Camada | Tecnologia |
+|---|---|
+| Linguagem | Python 3.13+ |
+| Framework | Django 6.0 |
+| Banco atual | SQLite |
+| Banco recomendado para produção SaaS | PostgreSQL |
+| Frontend | Django Templates + HTML/CSS/JS |
+| Design System | `design_system/design-system.html` |
+| Auth | Django nativo com `accounts.User` customizado |
+| Ambiente | `.venv` |
 
 ### 2.2 Convenções de Código
 
-- **Idioma do código:** Inglês (models, views, urls, variáveis, funções)
-- **Idioma da UI:** Português brasileiro (templates, labels, mensagens, verbose_name)
-- **Aspas:** Simples (`'`) sempre que possível
-- **Estilo:** PEP 8 rigoroso
-- **Views:** Class-Based Views (CBV) como padrão; Function-Based Views apenas quando CBV for contraproducente
-- **Signals:** Sempre em arquivo `signals.py` dentro da app correspondente
-- **Models:** Todo model deve conter `created_at` e `updated_at`
-- **Apps:** Cada domínio/entidade principal isolado em sua própria Django app
+- Idioma do código: inglês
+- Idioma da UI: português brasileiro
+- Aspas simples sempre que possível
+- Estilo: PEP 8
+- Views: CBV por padrão
+- Signals: em `signals.py` da app
+- Models: todo model concreto com `created_at` e `updated_at`
+- Cada domínio relevante deve continuar isolado em sua própria app
 
-### 2.3 Restrições
+### 2.3 Restrições e Decisões
 
-- **Sem Docker** — desenvolvimento e deploy simplificado
-- **Sem testes automatizados** — fora do escopo desta versão
-- **Sem APIs REST** — sistema server-rendered com Django Templates
-- **Banco único SQLite** — sem necessidade de PostgreSQL/MySQL
+- Sem Docker
+- Sem APIs REST nesta fase
+- Sistema server-rendered com Django Templates
+- Estratégia de multi-tenant: **shared schema / shared database**, com registros marcados por corretora
+- `SQLite` pode continuar no desenvolvimento local e transição inicial de modelagem
+- Antes de colocar o SaaS em produção, a meta técnica deve ser PostgreSQL
 
-### 2.4 Base Model Padrão
+### 2.4 Base Models
 
-Todos os models do projeto devem herdar de um abstract base model com timestamps:
+Todos os models do projeto devem partir de um modelo com timestamps. Para a nova arquitetura SaaS, os models do domínio da corretora também devem partir de um modelo abstrato com vínculo obrigatório à corretora.
 
 ```python
-# core/models.py
-
 from django.db import models
 
 
@@ -73,7 +95,26 @@ class TimeStampedModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class BrokerageScopedModel(TimeStampedModel):
+    brokerage = models.ForeignKey(
+        'brokerages.Brokerage',
+        on_delete=models.PROTECT,
+        related_name='%(app_label)s_%(class)s_set',
+    )
+
+    class Meta:
+        abstract = True
 ```
+
+### 2.5 Regras de Isolamento de Dados
+
+- Toda entidade operacional da corretora deve possuir `brokerage_id`
+- Toda queryset autenticada deve filtrar por `request.user.brokerage`
+- O filtro por corretor continua existindo, mas passa a ser secundário ao filtro por corretora
+- Apenas `is_platform_admin=True` ou `is_superuser=True` podem atravessar o isolamento de tenant
+- Qualquer exportação CSV/PDF, busca global, dashboard, relatórios, IA e comandos de gestão devem respeitar o escopo da corretora
 
 ---
 
@@ -81,1079 +122,548 @@ class TimeStampedModel(models.Model):
 
 ### 3.1 Estrutura de Apps Django
 
-```
+```text
 scs/
-├── core/                    # Projeto Django (settings, urls, wsgi)
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-├── utils/                  # App central: base models, mixins, utils, templatetags
-├── accounts/               # App de autenticação e gestão de usuários
-├── clients/                # App de cadastro e gestão de clientes
-├── insurers/               # App de cadastro de seguradoras
-├── policies/               # App de apólices e propostas de seguro
-├── claims/                 # App de gestão de sinistros
-├── endorsements/           # App de gestão de endossos
-├── coverages/              # App de coberturas e itens de cobertura
-├── renewals/               # App de gestão de renovações
-├── crm/                    # App de CRM — pipeline de negociações (grid + kanban)
-├── reports/                # App de relatórios
-├── dashboard/              # App de dashboard e métricas
-├── design_system/          # Design system de referência (design-system.html)
-├── static/                 # Arquivos estáticos globais (CSS, JS, imagens)
-├── templates/              # Templates globais (base.html, partials, includes)
-├── media/                  # Uploads de arquivos
+├── core/                      # settings, urls, wsgi, asgi
+├── utils/                     # base models, validators, mixins, helpers
+├── public_pages/              # landing page, planos, signup, onboarding público
+├── brokerages/                # corretoras, módulos, contexto de tenant
+├── billing/                   # planos, assinaturas, pagamentos
+├── accounts/                  # autenticação, usuários, perfil, permissões
+├── clients/                   # clientes
+├── insurers/                  # seguradoras
+├── coverages/                 # ramos, coberturas, itens
+├── policies/                  # propostas, apólices, documentos, coberturas
+├── claims/                    # sinistros
+├── endorsements/              # endossos
+├── renewals/                  # renovações
+├── crm/                       # negociações, pipeline, kanban
+├── dashboard/                 # dashboard operacional
+├── reports/                   # relatórios
+├── ai_agent/                  # chat e resumos com IA
+├── templates/
+├── static/
+├── media/
 ├── manage.py
 └── requirements.txt
 ```
 
-### 3.2 Mapa de Dependências entre Apps
+### 3.2 Áreas da Aplicação
 
+| Área | Público | Objetivo |
+|---|---|---|
+| Área pública | Visitantes | Landing page, planos, CTA, criação de conta |
+| Área autenticada da corretora | Usuários da corretora | Operação diária da corretora |
+| Área administrativa da plataforma | Admin do sistema | Gestão de corretoras, planos, pagamentos, módulos e ativações |
+
+### 3.3 Mapa de Dependências
+
+```text
+utils ← base compartilhada
+public_pages ← brokerages, billing, accounts
+brokerages ← accounts
+billing ← brokerages
+accounts ← brokerages
+clients ← accounts, brokerages
+insurers ← brokerages
+coverages ← brokerages
+policies ← clients, insurers, coverages, accounts, brokerages
+claims ← policies, clients, accounts, brokerages
+endorsements ← policies, accounts, brokerages
+renewals ← policies, insurers, accounts, brokerages
+crm ← clients, policies, coverages, insurers, accounts, brokerages
+dashboard ← policies, clients, claims, renewals, crm, ai_agent, brokerages
+reports ← policies, clients, claims, renewals, crm, brokerages
+ai_agent ← accounts, brokerages, policies, clients, claims, crm
 ```
-accounts ← (independente, base de auth)
-utils ← (independente, utilitários)
-clients ← accounts
-insurers ← (independente)
-coverages ← insurers
-policies ← clients, insurers, coverages, accounts
-endorsements ← policies
-claims ← policies, clients
-renewals ← policies
-crm ← clients, policies, accounts
-reports ← policies, clients, insurers, claims, renewals
-dashboard ← policies, clients, insurers, claims, renewals, crm
-```
+
+### 3.4 Estratégia de Multi-Tenant
+
+O modelo adotado deve ser o mais simples possível:
+
+- um único banco
+- um único schema
+- um `brokerage_id` em todos os registros de negócio
+- filtros, permissões e queries garantindo isolamento por corretora
+
+Não haverá banco por tenant nem schema por tenant nesta fase.
+
+### 3.5 Contexto Atual do Código
+
+O código atual é essencialmente single-tenant, com isolamento parcial apenas por `broker` em vários módulos. A Fase 7 deve elevar esse padrão para isolamento real por corretora.
+
+Principais sintomas atuais:
+
+- `User` ainda não possui vínculo obrigatório com corretora
+- várias querysets filtram apenas por `broker`
+- `DashboardView` agrega dados sem contexto de tenant
+- busca global percorre múltiplas apps sem filtro por corretora
+- não existem apps públicas de marketing, planos, billing ou administração sistêmica
 
 ---
 
-## 4. Módulos e Funcionalidades Detalhadas
+## 4. Módulos e Funcionalidades
+
+### 4.1 BROKERAGES — Núcleo SaaS e Cadastro de Corretoras
+
+**App:** `brokerages`
+
+#### 4.1.1 Model: `Brokerage`
+
+| Campo | Tipo | Regra |
+|---|---|---|
+| legal_name | CharField(255) | Obrigatório |
+| trade_name | CharField(255) | Opcional |
+| cnpj | CharField(18) | Obrigatório, único |
+| email | EmailField | Opcional |
+| phone | CharField(20) | Opcional |
+| zip_code | CharField(10) | Opcional |
+| street | CharField(255) | Opcional |
+| number | CharField(20) | Opcional |
+| complement | CharField(100) | Opcional |
+| neighborhood | CharField(100) | Opcional |
+| city | CharField(100) | Opcional |
+| state | CharField(2) | Opcional |
+| status | CharField(choices) | `active`, `inactive`, `overdue` |
+| notes | TextField | Opcional |
+| created_at | DateTimeField | Obrigatório |
+| updated_at | DateTimeField | Obrigatório |
+
+#### 4.1.2 Regras
+
+- `cnpj` e `legal_name` são obrigatórios no onboarding
+- somente o admin da plataforma pode criar, editar, ativar, inativar ou marcar pagamento em atraso
+- a corretora criada no onboarding nasce vinculada ao primeiro usuário administrador daquela conta
+- `status=inactive` bloqueia login operacional
+- `status=overdue` mantém acesso configurável, mas com alertas e limitação definida pela plataforma
+
+#### 4.1.3 Model: `SystemModule`
+
+Representa módulos comercializáveis ou liberáveis por corretora.
+
+Exemplos:
+
+- `dashboard`
+- `reports`
+- `crm`
+- `ai_agent`
+- `claims`
+- `endorsements`
+- `renewals`
+
+#### 4.1.4 Model: `BrokerageModule`
+
+Tabela de ativação por corretora.
+
+Campos mínimos:
+
+- `brokerage`
+- `module`
+- `is_enabled`
+- `granted_by`
+- `created_at`
+- `updated_at`
+
+#### 4.1.5 Funcionalidades
+
+- CRUD de corretoras via Django Admin
+- ativação e bloqueio da corretora
+- gestão de módulos liberados
+- visão consolidada de usuários ativos, assinatura atual e pagamentos
 
 ---
 
-### 4.1 ACCOUNTS — Autenticação e Gestão de Usuários
+### 4.2 BILLING — Planos, Assinaturas e Pagamentos
+
+**App:** `billing`
+
+#### 4.2.1 Model: `Plan`
+
+| Campo | Tipo | Regra |
+|---|---|---|
+| name | CharField(100) | Obrigatório |
+| slug | SlugField | Único |
+| description | TextField | Opcional |
+| is_free | BooleanField | Define plano gratuito |
+| monthly_price_per_user | DecimalField | Preço por usuário/mês |
+| yearly_price_per_user | DecimalField | Opcional |
+| trial_days | PositiveIntegerField | Opcional |
+| max_users | PositiveIntegerField | Opcional |
+| is_active | BooleanField | Controle comercial |
+| highlight_label | CharField(50) | Ex.: Mais popular |
+| sort_order | PositiveIntegerField | Ordenação |
+
+#### 4.2.2 Model: `PlanModule`
+
+Relaciona quais módulos fazem parte de cada plano.
+
+#### 4.2.3 Model: `Subscription`
+
+| Campo | Tipo | Regra |
+|---|---|---|
+| brokerage | FK | Obrigatório |
+| plan | FK | Obrigatório |
+| status | CharField(choices) | `trial`, `active`, `pending_payment`, `overdue`, `cancelled`, `inactive` |
+| billing_cycle | CharField(choices) | `monthly`, `yearly` |
+| price_per_user | DecimalField | Snapshot do preço contratado |
+| active_user_count | PositiveIntegerField | Total de usuários ativos da corretora |
+| started_at | DateField | Obrigatório |
+| trial_ends_at | DateField | Opcional |
+| next_billing_at | DateField | Opcional |
+| cancelled_at | DateField | Opcional |
+
+#### 4.2.4 Model: `PaymentRecord`
+
+| Campo | Tipo | Regra |
+|---|---|---|
+| subscription | FK | Obrigatório |
+| status | CharField(choices) | `pending`, `paid`, `failed`, `refunded`, `overdue` |
+| amount | DecimalField | Obrigatório |
+| payment_method | CharField(choices) | `credit_card`, `pix`, `boleto`, `manual` |
+| reference_code | CharField(100) | Opcional |
+| due_date | DateField | Obrigatório |
+| paid_at | DateTimeField | Opcional |
+| notes | TextField | Opcional |
+
+#### 4.2.5 Regras de Billing
+
+- os preços são exibidos por usuário
+- plano free pode ser ativado sem cartão
+- plano pago gera assinatura e processo de cobrança
+- pagamentos podem começar com registro manual ou checkout hospedado por gateway externo
+- o admin da plataforma gerencia status da assinatura e pagamentos
+- a corretora enxerga apenas seu próprio plano, histórico e situação atual
+
+---
+
+### 4.3 PUBLIC_PAGES — Landing Page, Planos e Onboarding
+
+**App:** `public_pages`
+
+#### 4.3.1 Landing Page Principal
+
+A landing page deve conter:
+
+- hero principal com proposta de valor
+- seções de benefícios do produto
+- destaque para IA integrada e gestão inteligente
+- visão dos módulos principais
+- prova de valor para corretoras
+- cards de planos com preço por usuário
+- comparativo entre plano free e planos pagos
+- FAQ
+- CTAs para criar conta e entrar
+
+#### 4.3.2 Jornada de Cadastro
+
+Fluxo mínimo:
+
+1. visitante acessa `/`
+2. clica em criar conta
+3. informa dados do usuário administrador inicial
+4. informa dados da corretora
+5. escolhe o plano
+6. se plano free, entra direto no sistema
+7. se plano pago, segue para etapa de assinatura/cobrança
+
+#### 4.3.3 Dados obrigatórios no onboarding
+
+- nome do usuário responsável
+- e-mail
+- senha
+- CNPJ da corretora
+- razão social da corretora
+- plano escolhido
+
+#### 4.3.4 Dados opcionais da corretora
+
+- nome fantasia
+- telefone
+- endereço
+- contato financeiro
+- observações
+
+#### 4.3.5 Views públicas previstas
+
+| View | Tipo | URL |
+|---|---|---|
+| LandingPageView | TemplateView | `/` |
+| PricingView | TemplateView | `/planos/` |
+| SignupView | FormView | `/criar-conta/` |
+| SignupSuccessView | TemplateView | `/criar-conta/sucesso/` |
+| PublicLoginRedirectView | RedirectView | `/entrar/` |
+
+---
+
+### 4.4 ACCOUNTS — Usuários, Autenticação e Papéis
 
 **App:** `accounts`
 
-#### 4.1.1 Custom User Model
+#### 4.4.1 Model: `User`
 
-O sistema usa um model de usuário customizado com login por **email** (não username).
+O model atual deve ser estendido para suportar SaaS multi-tenant.
 
-**Model: `User`**
+Campos adicionais obrigatórios:
 
-| Campo            | Tipo                    | Descrição                               |
-|------------------|------------------------|-----------------------------------------|
-| email            | EmailField (unique)    | Email do usuário — usado como login     |
-| first_name       | CharField(150)         | Nome                                    |
-| last_name        | CharField(150)         | Sobrenome                               |
-| cpf              | CharField(14), unique  | CPF do usuário (opcional para admin)    |
-| phone            | CharField(20)          | Telefone                                |
-| role             | CharField (choices)    | Papel: admin, manager, broker           |
-| is_active        | BooleanField           | Usuário ativo                           |
-| is_staff         | BooleanField           | Acesso ao admin                         |
-| date_joined      | DateTimeField          | Data de cadastro                        |
-| avatar           | ImageField (opcional)  | Foto do perfil                          |
-| created_at       | DateTimeField          | Timestamp criação                       |
-| updated_at       | DateTimeField          | Timestamp atualização                   |
+| Campo | Tipo | Regra |
+|---|---|---|
+| brokerage | FK -> `brokerages.Brokerage` | Obrigatório para usuários da corretora |
+| is_platform_admin | BooleanField | Apenas admin interno do SaaS |
 
-**Choices de Role:**
+Campos já existentes mantidos:
 
-```python
-class Role(models.TextChoices):
-    ADMIN = 'admin', 'Administrador'
-    MANAGER = 'manager', 'Gerente'
-    BROKER = 'broker', 'Corretor'
-```
+- `email`
+- `first_name`
+- `last_name`
+- `cpf`
+- `phone`
+- `role`
+- `is_active`
+- `is_staff`
+- `date_joined`
+- `avatar`
+- `created_at`
+- `updated_at`
 
-**Custom Manager: `UserManager`**
+#### 4.4.2 Papéis
 
-- `create_user(email, password, **extra_fields)` — normaliza email, valida, cria user
-- `create_superuser(email, password, **extra_fields)` — cria superuser com is_staff=True
+Papéis de tenant:
 
-**Custom Backend: `EmailBackend`**
+- `admin` = administrador da corretora
+- `manager` = gerente
+- `broker` = corretor operacional
 
-- Autenticação via email + password ao invés de username + password
+Papéis de plataforma:
 
-#### 4.1.2 Funcionalidades
+- `is_platform_admin=True` = administrador do SaaS
 
-- Login por email e senha
-- Logout
-- Registro de novos usuários (apenas por admin/manager)
-- Edição de perfil (dados pessoais, avatar)
-- Alteração de senha
-- Listagem de usuários (admin/manager)
-- Ativação/desativação de usuários
-- Controle de permissões baseado em role (admin, manager, broker)
+#### 4.4.3 Permissões
 
-#### 4.1.3 Permissões por Role
+| Capacidade | Platform Admin | Admin | Manager | Broker |
+|---|---|---|---|---|
+| Administrar corretoras | ✅ | ❌ | ❌ | ❌ |
+| Administrar planos e pagamentos | ✅ | ❌ | ❌ | ❌ |
+| Gerenciar módulos da corretora | ✅ | ❌ | ❌ | ❌ |
+| Gerenciar usuários da própria corretora | ❌ | ✅ | ✅ | ❌ |
+| Ver todos os dados da própria corretora | ❌ | ✅ | ✅ | ❌ |
+| Ver apenas próprios dados operacionais | ❌ | ✅ | ✅ | ✅ |
+| Acessar relatórios da corretora | ❌ | ✅ | ✅ | ❌ |
+| Acessar CRM completo da corretora | ❌ | ✅ | ✅ | ❌ |
+| Operar CRM próprio | ❌ | ✅ | ✅ | ✅ |
 
-| Funcionalidade              | Admin | Manager | Broker |
-|-----------------------------|-------|---------|--------|
-| CRUD de usuários            | ✅    | ✅      | ❌     |
-| Ver todos os dados          | ✅    | ✅      | ❌     |
-| Ver dados próprios          | ✅    | ✅      | ✅     |
-| Gerenciar configurações     | ✅    | ❌      | ❌     |
-| CRUD de clientes            | ✅    | ✅      | ✅     |
-| CRUD de apólices            | ✅    | ✅      | ✅     |
-| CRUD de sinistros           | ✅    | ✅      | ✅     |
-| Relatórios completos        | ✅    | ✅      | ❌     |
-| Dashboard completo          | ✅    | ✅      | Parcial|
-| CRM (próprias negociações)  | ✅    | ✅      | ✅     |
-| CRM (todas negociações)     | ✅    | ✅      | ❌     |
+#### 4.4.4 Funcionalidades
 
-#### 4.1.4 Views
-
-| View                 | Tipo              | URL                        |
-|----------------------|-------------------|----------------------------|
-| LoginView            | FormView          | `/accounts/login/`         |
-| LogoutView           | RedirectView      | `/accounts/logout/`        |
-| UserListView         | ListView          | `/accounts/users/`         |
-| UserCreateView       | CreateView        | `/accounts/users/create/`  |
-| UserUpdateView       | UpdateView        | `/accounts/users/<pk>/edit/` |
-| UserDetailView       | DetailView        | `/accounts/users/<pk>/`    |
-| ProfileView          | UpdateView        | `/accounts/profile/`       |
-| PasswordChangeView   | FormView          | `/accounts/password/`      |
+- login por e-mail e senha
+- logout
+- criação do primeiro usuário via onboarding público
+- gestão dos demais usuários por admin/manager da própria corretora
+- edição de perfil
+- alteração de senha
+- ativação e desativação de usuários
+- listagem limitada à corretora do usuário autenticado
 
 ---
 
-### 4.2 CLIENTS — Cadastro de Clientes
+### 4.5 CLIENTS, INSURERS E COVERAGES — Adequação Multi-Tenant
 
-**App:** `clients`
+**Apps:** `clients`, `insurers`, `coverages`
 
-#### 4.2.1 Models
+#### 4.5.1 Models impactados
 
-**Model: `Client`**
+| App | Models | Mudança obrigatória |
+|---|---|---|
+| `clients` | `Client` | adicionar `brokerage` |
+| `insurers` | `Insurer`, `InsurerBranch` | adicionar `brokerage` |
+| `coverages` | `InsuranceType`, `Coverage`, `CoverageItem` | adicionar `brokerage` |
 
-| Campo               | Tipo                  | Descrição                                |
-|---------------------|-----------------------|------------------------------------------|
-| client_type         | CharField (choices)   | PF ou PJ                                 |
-| name                | CharField(255)        | Nome completo / Razão social             |
-| cpf_cnpj            | CharField(18), unique | CPF ou CNPJ                              |
-| rg_ie               | CharField(20)         | RG ou Inscrição Estadual (opcional)      |
-| birth_date          | DateField (nullable)  | Data de nascimento (PF)                  |
-| gender              | CharField (choices)   | Gênero (PF, opcional)                    |
-| marital_status      | CharField (choices)   | Estado civil (PF, opcional)              |
-| occupation          | CharField(100)        | Profissão/atividade (opcional)           |
-| email               | EmailField            | Email principal                          |
-| phone               | CharField(20)         | Telefone principal                       |
-| secondary_phone     | CharField(20)         | Telefone secundário (opcional)           |
-| zip_code            | CharField(10)         | CEP                                      |
-| street              | CharField(255)        | Logradouro                               |
-| number              | CharField(10)         | Número                                   |
-| complement          | CharField(100)        | Complemento (opcional)                   |
-| neighborhood        | CharField(100)        | Bairro                                   |
-| city                | CharField(100)        | Cidade                                   |
-| state               | CharField(2)          | UF                                       |
-| notes               | TextField             | Observações (opcional)                   |
-| is_active           | BooleanField          | Cliente ativo                            |
-| broker              | FK → User             | Corretor responsável                     |
-| created_at          | DateTimeField         | Timestamp criação                        |
-| updated_at          | DateTimeField         | Timestamp atualização                    |
+#### 4.5.2 Regras
 
-**Choices de client_type:**
-
-```python
-class ClientType(models.TextChoices):
-    INDIVIDUAL = 'pf', 'Pessoa Física'
-    COMPANY = 'pj', 'Pessoa Jurídica'
-```
-
-#### 4.2.2 Funcionalidades
-
-- CRUD completo de clientes (PF e PJ)
-- Busca e filtros por nome, CPF/CNPJ, tipo, corretor, status
-- Visualização do histórico de apólices do cliente
-- Visualização de sinistros vinculados
-- Exportação da lista de clientes (CSV)
-- Integração com ViaCEP para preenchimento automático de endereço via JS
-
-#### 4.2.3 Views
-
-| View               | Tipo        | URL                          |
-|--------------------|-------------|------------------------------|
-| ClientListView     | ListView    | `/clients/`                  |
-| ClientCreateView   | CreateView  | `/clients/create/`           |
-| ClientUpdateView   | UpdateView  | `/clients/<pk>/edit/`        |
-| ClientDetailView   | DetailView  | `/clients/<pk>/`             |
-| ClientDeleteView   | DeleteView  | `/clients/<pk>/delete/`      |
-| ClientExportView   | View (CSV)  | `/clients/export/`           |
+- `Client.cpf_cnpj` deixa de ser único global e passa a ser único por corretora
+- `Insurer.cnpj` deixa de ser único global e passa a ser único por corretora
+- `InsuranceType.slug` e nomes sensíveis devem ser únicos por corretora, não globais
+- formulários devem exibir apenas FKs da mesma corretora
+- filtros por corretor devem acontecer somente dentro da corretora
 
 ---
 
-### 4.3 INSURERS — Cadastro de Seguradoras
+### 4.6 POLICIES, CLAIMS, ENDORSEMENTS E RENEWALS — Adequação Multi-Tenant
 
-**App:** `insurers`
+**Apps:** `policies`, `claims`, `endorsements`, `renewals`
 
-#### 4.3.1 Models
+#### 4.6.1 Models impactados
 
-**Model: `Insurer`**
+| App | Models | Mudança obrigatória |
+|---|---|---|
+| `policies` | `Proposal`, `Policy`, `PolicyCoverage`, `PolicyDocument` | adicionar `brokerage` |
+| `claims` | `Claim`, `ClaimDocument`, `ClaimTimeline` | adicionar `brokerage` |
+| `endorsements` | `Endorsement`, `EndorsementDocument` | adicionar `brokerage` |
+| `renewals` | `Renewal` | adicionar `brokerage` |
 
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| name               | CharField(255)      | Nome da seguradora                      |
-| cnpj               | CharField(18), unique| CNPJ                                   |
-| susep_code         | CharField(20)       | Código SUSEP (opcional)                 |
-| email              | EmailField          | Email de contato                        |
-| phone              | CharField(20)       | Telefone                                |
-| website            | URLField            | Site (opcional)                         |
-| contact_name       | CharField(150)      | Nome do contato principal (opcional)    |
-| contact_email      | EmailField          | Email do contato (opcional)             |
-| contact_phone      | CharField(20)       | Telefone do contato (opcional)          |
-| zip_code           | CharField(10)       | CEP                                     |
-| street             | CharField(255)      | Logradouro                              |
-| number             | CharField(10)       | Número                                  |
-| complement         | CharField(100)      | Complemento (opcional)                  |
-| neighborhood       | CharField(100)      | Bairro                                  |
-| city               | CharField(100)      | Cidade                                  |
-| state              | CharField(2)        | UF                                      |
-| logo               | ImageField          | Logo da seguradora (opcional)           |
-| is_active          | BooleanField        | Seguradora ativa                        |
-| notes              | TextField           | Observações (opcional)                  |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
+#### 4.6.2 Regras
 
-**Model: `InsurerBranch`** (Ramos de atuação da seguradora)
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| insurer            | FK → Insurer        | Seguradora                              |
-| name               | CharField(100)      | Nome do ramo (ex: Auto, Vida, Saúde)    |
-| susep_branch_code  | CharField(20)       | Código do ramo SUSEP (opcional)         |
-| is_active          | BooleanField        | Ramo ativo                              |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-#### 4.3.2 Funcionalidades
-
-- CRUD completo de seguradoras
-- Gestão de ramos por seguradora
-- Busca e filtros por nome, CNPJ, ramo
-- Visualização de apólices vinculadas por seguradora
-- Listagem de contatos da seguradora
-
-#### 4.3.3 Views
-
-| View                 | Tipo        | URL                             |
-|----------------------|-------------|---------------------------------|
-| InsurerListView      | ListView    | `/insurers/`                    |
-| InsurerCreateView    | CreateView  | `/insurers/create/`             |
-| InsurerUpdateView    | UpdateView  | `/insurers/<pk>/edit/`          |
-| InsurerDetailView    | DetailView  | `/insurers/<pk>/`               |
-| InsurerDeleteView    | DeleteView  | `/insurers/<pk>/delete/`        |
+- números de proposta, apólice e sinistro devem ser únicos por corretora
+- toda criação deve herdar `brokerage` do usuário autenticado
+- uploads de documentos continuam no storage atual, mas os registros devem ser tenant-scoped
+- relatórios, exportações e telas de detalhe precisam validar a corretora antes de carregar o objeto
 
 ---
 
-### 4.4 COVERAGES — Coberturas e Itens
-
-**App:** `coverages`
-
-#### 4.4.1 Models
-
-**Model: `InsuranceType`** (Tipos/ramos de seguro)
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| name               | CharField(100)      | Nome (Auto, Vida, Residencial, etc.)    |
-| slug               | SlugField (unique)  | Slug para URLs                          |
-| description        | TextField           | Descrição (opcional)                    |
-| is_active          | BooleanField        | Tipo ativo                              |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-**Model: `Coverage`** (Coberturas disponíveis)
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| insurance_type     | FK → InsuranceType  | Tipo de seguro                          |
-| name               | CharField(200)      | Nome da cobertura                       |
-| description        | TextField           | Descrição detalhada (opcional)          |
-| is_active          | BooleanField        | Cobertura ativa                         |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-**Model: `CoverageItem`** (Itens dentro de uma cobertura)
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| coverage           | FK → Coverage       | Cobertura pai                           |
-| name               | CharField(200)      | Nome do item                            |
-| description        | TextField           | Descrição (opcional)                    |
-| is_active          | BooleanField        | Item ativo                              |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-#### 4.4.2 Funcionalidades
-
-- CRUD de tipos de seguro
-- CRUD de coberturas por tipo de seguro
-- CRUD de itens de cobertura
-- Relação hierárquica: Tipo de Seguro → Coberturas → Itens
-- Filtros e busca
-
-#### 4.4.3 Views
-
-| View                     | Tipo        | URL                                  |
-|--------------------------|-------------|--------------------------------------|
-| InsuranceTypeListView    | ListView    | `/coverages/types/`                  |
-| InsuranceTypeCreateView  | CreateView  | `/coverages/types/create/`           |
-| InsuranceTypeUpdateView  | UpdateView  | `/coverages/types/<pk>/edit/`        |
-| CoverageListView         | ListView    | `/coverages/`                        |
-| CoverageCreateView       | CreateView  | `/coverages/create/`                 |
-| CoverageUpdateView       | UpdateView  | `/coverages/<pk>/edit/`              |
-| CoverageItemCreateView   | CreateView  | `/coverages/<coverage_pk>/items/create/` |
-| CoverageItemUpdateView   | UpdateView  | `/coverages/items/<pk>/edit/`        |
-
----
-
-### 4.5 POLICIES — Apólices e Propostas de Seguro
-
-**App:** `policies`
-
-#### 4.5.1 Models
-
-**Model: `Proposal`** (Proposta de seguro)
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| proposal_number    | CharField(50), unique| Número da proposta                      |
-| client             | FK → Client         | Cliente                                 |
-| insurer            | FK → Insurer        | Seguradora                              |
-| insurance_type     | FK → InsuranceType  | Tipo de seguro                          |
-| broker             | FK → User           | Corretor responsável                    |
-| status             | CharField (choices)  | Status da proposta                     |
-| submission_date    | DateField           | Data de envio da proposta               |
-| response_date      | DateField (nullable) | Data da resposta                       |
-| premium_amount     | DecimalField(12,2)  | Valor do prêmio proposto                |
-| notes              | TextField           | Observações (opcional)                  |
-| rejection_reason   | TextField           | Motivo da recusa (se recusada)          |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-**Choices de status (Proposal):**
-
-```python
-class ProposalStatus(models.TextChoices):
-    DRAFT = 'draft', 'Rascunho'
-    SUBMITTED = 'submitted', 'Enviada'
-    UNDER_ANALYSIS = 'under_analysis', 'Em Análise'
-    APPROVED = 'approved', 'Aprovada'
-    REJECTED = 'rejected', 'Recusada'
-    CANCELLED = 'cancelled', 'Cancelada'
-```
-
-**Model: `Policy`** (Apólice de seguro)
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| policy_number      | CharField(50), unique| Número da apólice                      |
-| proposal           | FK → Proposal (null) | Proposta de origem (opcional)          |
-| client             | FK → Client         | Cliente/segurado                        |
-| insurer            | FK → Insurer        | Seguradora                              |
-| insurance_type     | FK → InsuranceType  | Tipo de seguro                          |
-| broker             | FK → User           | Corretor responsável                    |
-| status             | CharField (choices)  | Status da apólice                      |
-| start_date         | DateField           | Início de vigência                      |
-| end_date           | DateField           | Fim de vigência                         |
-| premium_amount     | DecimalField(12,2)  | Valor do prêmio                         |
-| insured_amount     | DecimalField(14,2)  | Importância segurada total              |
-| commission_rate    | DecimalField(5,2)   | Percentual de comissão (%)              |
-| commission_amount  | DecimalField(12,2)  | Valor da comissão (R$)                  |
-| installments       | PositiveIntegerField | Número de parcelas                      |
-| payment_method     | CharField (choices)  | Forma de pagamento                     |
-| notes              | TextField           | Observações (opcional)                  |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-**Choices de status (Policy):**
-
-```python
-class PolicyStatus(models.TextChoices):
-    ACTIVE = 'active', 'Ativa'
-    EXPIRED = 'expired', 'Vencida'
-    CANCELLED = 'cancelled', 'Cancelada'
-    SUSPENDED = 'suspended', 'Suspensa'
-    PENDING = 'pending', 'Pendente'
-```
-
-**Choices de payment_method:**
-
-```python
-class PaymentMethod(models.TextChoices):
-    BANK_SLIP = 'bank_slip', 'Boleto Bancário'
-    CREDIT_CARD = 'credit_card', 'Cartão de Crédito'
-    DEBIT = 'debit', 'Débito em Conta'
-    PIX = 'pix', 'PIX'
-    INVOICE = 'invoice', 'Fatura'
-```
-
-**Model: `PolicyCoverage`** (Coberturas contratadas na apólice)
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| policy             | FK → Policy         | Apólice                                 |
-| coverage           | FK → Coverage       | Cobertura                               |
-| insured_amount     | DecimalField(14,2)  | Valor segurado desta cobertura          |
-| deductible         | DecimalField(12,2)  | Valor da franquia                       |
-| premium_amount     | DecimalField(12,2)  | Prêmio desta cobertura                  |
-| notes              | TextField           | Observações (opcional)                  |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-**Model: `PolicyDocument`** (Documentos anexados à apólice)
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| policy             | FK → Policy         | Apólice                                 |
-| title              | CharField(200)      | Título do documento                     |
-| file               | FileField           | Arquivo                                 |
-| document_type      | CharField (choices)  | Tipo (proposta, apólice, CI, outros)   |
-| uploaded_by        | FK → User           | Quem fez upload                         |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-#### 4.5.2 Funcionalidades
-
-- CRUD completo de propostas
-- CRUD completo de apólices
-- Conversão de proposta aprovada em apólice (com dados pré-preenchidos)
-- Vinculação de coberturas contratadas por apólice (inline formset)
-- Upload e gestão de documentos por apólice
-- Filtros por cliente, seguradora, tipo de seguro, status, corretor, vigência
-- Busca por número de apólice/proposta
-- Cálculo automático de comissão (rate × premium)
-- Indicadores visuais de vigência (ativa, vencendo em 30 dias, vencida)
-- Exportação de listagem (CSV)
-
-#### 4.5.3 Views
-
-| View                   | Tipo         | URL                                |
-|------------------------|--------------|-------------------------------------|
-| ProposalListView       | ListView     | `/policies/proposals/`              |
-| ProposalCreateView     | CreateView   | `/policies/proposals/create/`       |
-| ProposalUpdateView     | UpdateView   | `/policies/proposals/<pk>/edit/`    |
-| ProposalDetailView     | DetailView   | `/policies/proposals/<pk>/`         |
-| ProposalConvertView    | FormView     | `/policies/proposals/<pk>/convert/` |
-| PolicyListView         | ListView     | `/policies/`                        |
-| PolicyCreateView       | CreateView   | `/policies/create/`                 |
-| PolicyUpdateView       | UpdateView   | `/policies/<pk>/edit/`              |
-| PolicyDetailView       | DetailView   | `/policies/<pk>/`                   |
-| PolicyDeleteView       | DeleteView   | `/policies/<pk>/delete/`            |
-| PolicyExportView       | View (CSV)   | `/policies/export/`                 |
-
-#### 4.5.4 Signals
-
-```python
-# policies/signals.py
-
-# post_save em Proposal: quando status muda para 'approved', notificar/criar log
-# post_save em Policy: atualizar contadores no dashboard, verificar renovações
-```
-
----
-
-### 4.6 CLAIMS — Gestão de Sinistros
-
-**App:** `claims`
-
-#### 4.6.1 Models
-
-**Model: `Claim`**
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| claim_number       | CharField(50), unique| Número do sinistro                      |
-| policy             | FK → Policy         | Apólice vinculada                       |
-| client             | FK → Client         | Cliente (denormalized para facilitar)   |
-| status             | CharField (choices)  | Status do sinistro                      |
-| occurrence_date    | DateField           | Data da ocorrência                      |
-| notification_date  | DateField           | Data da notificação à seguradora        |
-| description        | TextField           | Descrição do sinistro                   |
-| location           | CharField(255)      | Local da ocorrência (opcional)          |
-| claimed_amount     | DecimalField(14,2)  | Valor reclamado                         |
-| approved_amount    | DecimalField(14,2)  | Valor aprovado/pago (nullable)          |
-| resolution_date    | DateField (nullable) | Data de resolução                      |
-| resolution_notes   | TextField           | Observações da resolução (opcional)     |
-| broker             | FK → User           | Corretor responsável                    |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-**Choices de status (Claim):**
-
-```python
-class ClaimStatus(models.TextChoices):
-    OPEN = 'open', 'Aberto'
-    UNDER_ANALYSIS = 'under_analysis', 'Em Análise'
-    DOCUMENTATION_PENDING = 'documentation_pending', 'Pendente de Documentação'
-    APPROVED = 'approved', 'Aprovado'
-    PARTIALLY_APPROVED = 'partially_approved', 'Parcialmente Aprovado'
-    DENIED = 'denied', 'Negado'
-    PAID = 'paid', 'Pago'
-    CLOSED = 'closed', 'Encerrado'
-```
-
-**Model: `ClaimDocument`**
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| claim              | FK → Claim          | Sinistro                                |
-| title              | CharField(200)      | Título                                  |
-| file               | FileField           | Arquivo                                 |
-| document_type      | CharField (choices)  | Tipo do documento                      |
-| uploaded_by        | FK → User           | Quem fez upload                         |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-**Model: `ClaimTimeline`** (Histórico de movimentações)
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| claim              | FK → Claim          | Sinistro                                |
-| action             | CharField(200)      | Descrição da ação                       |
-| performed_by       | FK → User           | Quem realizou                           |
-| old_status         | CharField(30)       | Status anterior (opcional)              |
-| new_status         | CharField(30)       | Novo status (opcional)                  |
-| notes              | TextField           | Observações (opcional)                  |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-#### 4.6.2 Funcionalidades
-
-- CRUD completo de sinistros
-- Timeline/histórico de movimentações por sinistro (automático via signal ao mudar status)
-- Upload de documentos por sinistro
-- Filtros por apólice, cliente, status, período, corretor
-- Busca por número de sinistro
-- Acompanhamento visual de status (progress bar ou stepper)
-- Resumo financeiro (valor reclamado vs aprovado vs pago)
-
-#### 4.6.3 Views
-
-| View                | Tipo        | URL                           |
-|---------------------|-------------|-------------------------------|
-| ClaimListView       | ListView    | `/claims/`                    |
-| ClaimCreateView     | CreateView  | `/claims/create/`             |
-| ClaimUpdateView     | UpdateView  | `/claims/<pk>/edit/`          |
-| ClaimDetailView     | DetailView  | `/claims/<pk>/`               |
-| ClaimDeleteView     | DeleteView  | `/claims/<pk>/delete/`        |
-
-#### 4.6.4 Signals
-
-```python
-# claims/signals.py
-
-# post_save em Claim: ao mudar status, criar entrada em ClaimTimeline automaticamente
-```
-
----
-
-### 4.7 ENDORSEMENTS — Gestão de Endossos
-
-**App:** `endorsements`
-
-#### 4.7.1 Models
-
-**Model: `Endorsement`**
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| endorsement_number | CharField(50), unique| Número do endosso                      |
-| policy             | FK → Policy         | Apólice vinculada                       |
-| endorsement_type   | CharField (choices)  | Tipo de endosso                        |
-| status             | CharField (choices)  | Status                                  |
-| request_date       | DateField           | Data da solicitação                     |
-| effective_date     | DateField           | Data de efeito                          |
-| description        | TextField           | Descrição das alterações                |
-| premium_difference | DecimalField(12,2)  | Diferença de prêmio (+/-)               |
-| requested_by       | FK → User           | Corretor que solicitou                  |
-| notes              | TextField           | Observações (opcional)                  |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-**Choices de endorsement_type:**
-
-```python
-class EndorsementType(models.TextChoices):
-    INCLUSION = 'inclusion', 'Inclusão'
-    EXCLUSION = 'exclusion', 'Exclusão'
-    MODIFICATION = 'modification', 'Alteração'
-    CANCELLATION = 'cancellation', 'Cancelamento'
-    TRANSFER = 'transfer', 'Transferência'
-```
-
-**Choices de status (Endorsement):**
-
-```python
-class EndorsementStatus(models.TextChoices):
-    DRAFT = 'draft', 'Rascunho'
-    REQUESTED = 'requested', 'Solicitado'
-    UNDER_ANALYSIS = 'under_analysis', 'Em Análise'
-    APPROVED = 'approved', 'Aprovado'
-    REJECTED = 'rejected', 'Rejeitado'
-    APPLIED = 'applied', 'Aplicado'
-```
-
-**Model: `EndorsementDocument`**
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| endorsement        | FK → Endorsement    | Endosso                                 |
-| title              | CharField(200)      | Título                                  |
-| file               | FileField           | Arquivo                                 |
-| uploaded_by        | FK → User           | Quem fez upload                         |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-#### 4.7.2 Funcionalidades
-
-- CRUD completo de endossos vinculados a apólices
-- Controle de tipos (inclusão, exclusão, alteração, cancelamento, transferência)
-- Upload de documentos do endosso
-- Ao aplicar endosso aprovado, atualizar dados da apólice correspondente (via signal)
-- Filtros por apólice, tipo, status, período
-- Histórico de endossos por apólice
-
-#### 4.7.3 Views
-
-| View                     | Tipo        | URL                                      |
-|--------------------------|-------------|------------------------------------------|
-| EndorsementListView      | ListView    | `/endorsements/`                         |
-| EndorsementCreateView    | CreateView  | `/endorsements/create/`                  |
-| EndorsementUpdateView    | UpdateView  | `/endorsements/<pk>/edit/`               |
-| EndorsementDetailView    | DetailView  | `/endorsements/<pk>/`                    |
-| EndorsementDeleteView    | DeleteView  | `/endorsements/<pk>/delete/`             |
-
-#### 4.7.4 Signals
-
-```python
-# endorsements/signals.py
-
-# post_save em Endorsement: quando status muda para 'applied',
-# atualizar apólice (premium, coberturas, vigência conforme tipo de endosso)
-```
-
----
-
-### 4.8 RENEWALS — Gestão de Renovações
-
-**App:** `renewals`
-
-#### 4.8.1 Models
-
-**Model: `Renewal`**
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| policy             | FK → Policy         | Apólice original                        |
-| renewed_policy     | FK → Policy (null)  | Nova apólice gerada (após renovar)      |
-| status             | CharField (choices)  | Status da renovação                     |
-| due_date           | DateField           | Data limite para renovação              |
-| contact_date       | DateField (nullable) | Data do contato com cliente             |
-| new_premium        | DecimalField(12,2)  | Novo valor de prêmio proposto (nullable)|
-| new_insurer        | FK → Insurer (null) | Nova seguradora (se trocar)             |
-| broker             | FK → User           | Corretor responsável                    |
-| notes              | TextField           | Observações (opcional)                  |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-**Choices de status (Renewal):**
-
-```python
-class RenewalStatus(models.TextChoices):
-    PENDING = 'pending', 'Pendente'
-    CONTACTED = 'contacted', 'Cliente Contatado'
-    QUOTE_SENT = 'quote_sent', 'Cotação Enviada'
-    RENEWED = 'renewed', 'Renovada'
-    NOT_RENEWED = 'not_renewed', 'Não Renovada'
-    CANCELLED = 'cancelled', 'Cancelada'
-```
-
-#### 4.8.2 Funcionalidades
-
-- Listagem de apólices próximas do vencimento (30, 60, 90 dias)
-- Criação automática de registros de renovação via management command ou signal (quando apólice entra nos últimos 60 dias de vigência)
-- Workflow de renovação: Pendente → Contatado → Cotação Enviada → Renovada/Não Renovada
-- Ao renovar, opção de gerar nova apólice com dados pré-preenchidos da anterior
-- Dashboard de renovações pendentes
-- Filtros por período, status, corretor, seguradora
-- Alertas visuais para renovações urgentes
-
-#### 4.8.3 Views
-
-| View                | Tipo        | URL                             |
-|---------------------|-------------|----------------------------------|
-| RenewalListView     | ListView    | `/renewals/`                     |
-| RenewalCreateView   | CreateView  | `/renewals/create/`              |
-| RenewalUpdateView   | UpdateView  | `/renewals/<pk>/edit/`           |
-| RenewalDetailView   | DetailView  | `/renewals/<pk>/`                |
-| RenewalRenewView    | FormView    | `/renewals/<pk>/renew/`          |
-
-#### 4.8.4 Management Command
-
-```python
-# renewals/management/commands/check_renewals.py
-
-# Comando para verificar apólices que entram na janela de renovação (60 dias)
-# e criar automaticamente registros de Renewal com status 'pending'
-# Uso: python manage.py check_renewals
-# Pode ser agendado via cron
-```
-
----
-
-### 4.9 CRM — Painel de Negociações
+### 4.7 CRM — Pipeline e Negociações por Corretora
 
 **App:** `crm`
 
-#### 4.9.1 Models
+#### 4.7.1 Models impactados
 
-**Model: `Pipeline`** (Funil de vendas)
+- `Pipeline`
+- `PipelineStage`
+- `Deal`
+- `DealActivity`
 
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| name               | CharField(100)      | Nome do pipeline                        |
-| is_default         | BooleanField        | Pipeline padrão                         |
-| is_active          | BooleanField        | Pipeline ativo                          |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
+#### 4.7.2 Regras
 
-**Model: `PipelineStage`** (Etapas do funil)
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| pipeline           | FK → Pipeline       | Pipeline                                |
-| name               | CharField(100)      | Nome da etapa                           |
-| order              | PositiveIntegerField | Ordem de exibição                       |
-| color              | CharField(7)        | Cor da etapa (hex)                      |
-| is_won             | BooleanField        | Etapa de ganho (fechamento positivo)    |
-| is_lost            | BooleanField        | Etapa de perda                          |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-**Etapas padrão sugeridas (seed):**
-
-1. Prospecção
-2. Primeiro Contato
-3. Cotação
-4. Proposta Enviada
-5. Negociação
-6. Fechamento (is_won=True)
-7. Perdido (is_lost=True)
-
-**Model: `Deal`** (Negociação/Oportunidade)
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| title              | CharField(200)      | Título da negociação                    |
-| client             | FK → Client         | Cliente                                 |
-| broker             | FK → User           | Corretor responsável                    |
-| pipeline           | FK → Pipeline       | Pipeline                                |
-| stage              | FK → PipelineStage  | Etapa atual                             |
-| insurance_type     | FK → InsuranceType  | Tipo de seguro (opcional)               |
-| insurer            | FK → Insurer (null) | Seguradora (opcional)                   |
-| expected_value     | DecimalField(12,2)  | Valor esperado                          |
-| expected_close_date| DateField (nullable) | Data prevista de fechamento            |
-| priority           | CharField (choices)  | Prioridade                             |
-| source             | CharField (choices)  | Origem da negociação                   |
-| proposal           | FK → Proposal (null)| Proposta vinculada (opcional)           |
-| policy             | FK → Policy (null)  | Apólice gerada (se fechou)             |
-| lost_reason        | TextField           | Motivo da perda (se perdido, opcional)  |
-| notes              | TextField           | Observações (opcional)                  |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-**Choices de priority:**
-
-```python
-class DealPriority(models.TextChoices):
-    LOW = 'low', 'Baixa'
-    MEDIUM = 'medium', 'Média'
-    HIGH = 'high', 'Alta'
-    URGENT = 'urgent', 'Urgente'
-```
-
-**Choices de source:**
-
-```python
-class DealSource(models.TextChoices):
-    REFERRAL = 'referral', 'Indicação'
-    WEBSITE = 'website', 'Site'
-    PHONE = 'phone', 'Telefone'
-    WALK_IN = 'walk_in', 'Presencial'
-    SOCIAL_MEDIA = 'social_media', 'Redes Sociais'
-    RENEWAL = 'renewal', 'Renovação'
-    OTHER = 'other', 'Outro'
-```
-
-**Model: `DealActivity`** (Atividades/interações da negociação)
-
-| Campo              | Tipo                 | Descrição                               |
-|--------------------|---------------------|-----------------------------------------|
-| deal               | FK → Deal           | Negociação                              |
-| activity_type      | CharField (choices)  | Tipo: note, call, email, meeting, task |
-| title              | CharField(200)      | Título/resumo                           |
-| description        | TextField           | Descrição (opcional)                    |
-| due_date           | DateTimeField (null) | Data/hora agendada (para tasks)        |
-| is_completed       | BooleanField        | Atividade concluída                     |
-| performed_by       | FK → User           | Quem registrou                          |
-| created_at         | DateTimeField       | Timestamp criação                       |
-| updated_at         | DateTimeField       | Timestamp atualização                   |
-
-#### 4.9.2 Funcionalidades
-
-**Visão Kanban:**
-- Board visual com colunas representando as etapas do pipeline
-- Drag-and-drop de cards entre etapas (via JS)
-- Cards exibem: título, cliente, valor, corretor, prioridade (badge colorido)
-- Filtros: corretor, prioridade, tipo de seguro, período
-- Contador de deals e soma de valores por coluna
-
-**Visão Grid (Tabela):**
-- Listagem tabulada de todas as negociações
-- Ordenação por colunas (data, valor, status, prioridade)
-- Filtros equivalentes ao kanban
-- Ações rápidas inline (mudar etapa, editar)
-
-**Detalhamento do Deal:**
-- Timeline de atividades
-- Registro de interações (notas, ligações, emails, reuniões)
-- Vinculação com proposta/apólice
-- Histórico de mudanças de etapa
-
-**Gestão do Pipeline:**
-- CRUD de pipelines (admin/manager)
-- CRUD de etapas (ordenáveis, com cores)
-- Múltiplos pipelines possíveis
-
-#### 4.9.3 Views
-
-| View                 | Tipo           | URL                             |
-|----------------------|----------------|----------------------------------|
-| DealKanbanView       | TemplateView   | `/crm/kanban/`                   |
-| DealListView         | ListView       | `/crm/deals/`                    |
-| DealCreateView       | CreateView     | `/crm/deals/create/`             |
-| DealUpdateView       | UpdateView     | `/crm/deals/<pk>/edit/`          |
-| DealDetailView       | DetailView     | `/crm/deals/<pk>/`               |
-| DealDeleteView       | DeleteView     | `/crm/deals/<pk>/delete/`        |
-| DealMoveStageView    | View (AJAX)    | `/crm/deals/<pk>/move/`          |
-| DealActivityCreateView| CreateView    | `/crm/deals/<pk>/activities/create/` |
-| PipelineManageView   | TemplateView   | `/crm/pipelines/`               |
-
-#### 4.9.4 JavaScript (Kanban)
-
-O kanban utiliza JavaScript vanilla (ou lib leve como SortableJS) para drag-and-drop. Ao mover um card, faz-se uma requisição AJAX (fetch) para `DealMoveStageView` atualizando a etapa no backend.
+- cada corretora possui seus próprios pipelines
+- `Pipeline.is_default` deve ser único por corretora
+- o kanban deve carregar apenas deals e estágios da corretora atual
+- o broker visualiza apenas seus negócios; admin/manager visualizam a corretora inteira
 
 ---
 
-### 4.10 REPORTS — Relatórios
+### 4.8 DASHBOARD, REPORTS E IA — Contexto Obrigatório de Tenant
 
-**App:** `reports`
+**Apps:** `dashboard`, `reports`, `ai_agent`
 
-#### 4.10.1 Relatórios Disponíveis
+#### 4.8.1 Dashboard
 
-| Relatório                        | Descrição                                                  | Filtros                                        |
-|----------------------------------|------------------------------------------------------------|-------------------------------------------------|
-| Produção por Período             | Total de apólices emitidas, prêmios, comissões por período | Data início/fim, corretor, seguradora, ramo    |
-| Comissões por Corretor           | Detalhamento de comissões por corretor                     | Período, corretor                               |
-| Carteira por Seguradora          | Distribuição de apólices e prêmios por seguradora          | Período, status                                 |
-| Carteira por Tipo de Seguro      | Distribuição por ramo/tipo de seguro                       | Período, seguradora                             |
-| Sinistros por Período            | Quantidade e valores de sinistros                          | Período, status, seguradora, ramo              |
-| Sinistralidade                   | Relação sinistros/prêmios (loss ratio)                     | Período, seguradora, ramo                      |
-| Renovações Pendentes             | Apólices a vencer com status de renovação                  | Período, corretor, seguradora                  |
-| Clientes por Corretor            | Distribuição de clientes ativos por corretor               | Corretor, status                                |
-| CRM — Funil de Vendas            | Análise do pipeline (conversão, tempo por etapa, valores)  | Pipeline, corretor, período                    |
-| Endossos por Período             | Endossos realizados por período e tipo                     | Período, tipo, seguradora                      |
+- todos os KPIs e gráficos devem partir de querysets filtradas por corretora
+- o filtro por corretor continua para brokers
+- atalhos e cards devem respeitar módulos ativos da corretora
 
-#### 4.10.2 Funcionalidades
+#### 4.8.2 Reports
 
-- Cada relatório possui formulário de filtros
-- Exibição em tabela na tela com totalizadores
-- Exportação para CSV
-- Exportação para PDF (usando ReportLab ou WeasyPrint)
-- Gráficos quando aplicável (Chart.js nos templates)
+- todos os relatórios CSV/PDF devem ser filtrados por corretora antes dos demais filtros
+- managers e admins enxergam a corretora inteira
+- brokers continuam sem acesso aos relatórios gerenciais
 
-#### 4.10.3 Views
+#### 4.8.3 IA
 
-| View                              | Tipo         | URL                                  |
-|-----------------------------------|-------------|--------------------------------------|
-| ReportIndexView                   | TemplateView| `/reports/`                          |
-| ProductionReportView              | FormView    | `/reports/production/`               |
-| CommissionReportView              | FormView    | `/reports/commissions/`              |
-| InsurerPortfolioReportView        | FormView    | `/reports/insurer-portfolio/`        |
-| InsuranceTypePortfolioReportView  | FormView    | `/reports/type-portfolio/`           |
-| ClaimsReportView                  | FormView    | `/reports/claims/`                   |
-| LossRatioReportView              | FormView    | `/reports/loss-ratio/`               |
-| RenewalReportView                 | FormView    | `/reports/renewals/`                 |
-| ClientsByBrokerReportView         | FormView    | `/reports/clients-by-broker/`        |
-| CRMFunnelReportView              | FormView    | `/reports/crm-funnel/`              |
-| EndorsementReportView             | FormView    | `/reports/endorsements/`             |
+Models impactados:
+
+- `ChatSession`
+- `ChatMessage`
+- `EntitySummary`
+- `DashboardInsight`
+
+Regras:
+
+- toda sessão, resumo e insight deve carregar `brokerage`
+- prompts e tools devem operar apenas em dados da corretora atual
+- a IA nunca deve cruzar dados entre corretoras
 
 ---
 
-### 4.11 DASHBOARD — Visão Geral e Métricas
+### 4.9 DJANGO ADMIN — Administração Sistêmica do SaaS
 
-**App:** `dashboard`
+#### 4.9.1 Funcionalidades
 
-#### 4.11.1 Métricas e Cards
+- dashboard do SaaS com visão consolidada
+- listagem e detalhe de corretoras
+- ativação, inativação e marcação de pagamento em atraso
+- gestão de planos
+- gestão de assinaturas
+- gestão de pagamentos
+- gestão de módulos por corretora
+- visão de uso por corretora: usuários, módulos ativos, plano, status
 
-**KPIs Principais (cards no topo):**
+#### 4.9.2 Diretriz de Implementação
 
-- Total de apólices ativas
-- Total de prêmios em carteira (R$)
-- Total de comissões do período (R$)
-- Total de clientes ativos
-- Sinistros abertos
-- Renovações pendentes (próximos 30 dias)
-- Negociações em andamento (CRM)
-- Taxa de conversão do funil CRM (%)
-
-**Gráficos:**
-
-- Produção mensal (barras) — prêmios e comissões nos últimos 12 meses
-- Distribuição por tipo de seguro (pizza/donut)
-- Distribuição por seguradora (pizza/donut)
-- Evolução de sinistros (linha) — últimos 12 meses
-- Funil CRM (funil visual) — deals por etapa
-- Renovações por mês (barras) — próximos 3 meses
-- Top 5 corretores por produção (barras horizontais)
-- Sinistralidade por ramo (barras agrupadas)
-
-**Tabelas Resumo:**
-
-- Últimas 10 apólices emitidas
-- Próximas 10 renovações
-- Últimos 5 sinistros abertos
-- Deals recentes do CRM
-
-#### 4.11.2 Funcionalidades
-
-- Filtro global por período (mês/trimestre/ano/custom)
-- Filtro por corretor (admin/manager veem todos; broker vê apenas seus dados)
-- Atualização dos dados ao aplicar filtros (form submit ou AJAX)
-- Todos os gráficos com Chart.js
-- Cards com indicadores de variação (↑↓) comparando com período anterior
-- Responsivo e aderente ao design system
-
-#### 4.11.3 Views
-
-| View              | Tipo         | URL            |
-|-------------------|-------------|----------------|
-| DashboardView     | TemplateView| `/dashboard/`  |
-
-A DashboardView agrega queries de múltiplas apps no `get_context_data()`, utilizando annotations e aggregations do Django ORM.
+- o admin do sistema deve usar o próprio Django Admin em `/admin/`
+- `Brokerage`, `SystemModule`, `BrokerageModule`, `Plan`, `PlanModule`, `Subscription` e `PaymentRecord` devem ser registrados no Django Admin
+- a configuração do admin deve incluir `list_display`, `list_filter`, `search_fields`, `autocomplete_fields` e actions para operação eficiente
+- status da corretora, assinatura e pagamento devem poder ser administrados diretamente no Django Admin
+- o Django Admin é a interface oficial do backoffice SaaS nesta fase
 
 ---
 
 ## 5. Design System e UI
 
-### 5.1 Referência
+### 5.1 Fonte de Verdade Visual
 
-O design system do projeto está definido no arquivo `design_system/design-system.html`. Todo o frontend deve respeitar rigorosamente:
+O arquivo `design_system/design-system.html` continua sendo a referência visual obrigatória.
 
-- Paleta de cores (primárias, secundárias, neutras, status)
-- Tipografia (font-family, sizes, weights)
-- Espaçamentos e grid
-- Componentes (botões, cards, inputs, tabelas, badges, modais, alertas)
-- Layout (sidebar, topbar, content area)
+As novas telas devem reutilizar especialmente os padrões já demonstrados nas seções:
 
-### 5.2 Layout Base
+- **Application Shell**
+- **Colors, Surfaces & Semantic States**
+- **Form Components**
+- **Tables & Data Display**
+- **UI Components**
+- **Layout & Spacing**
 
-```
-┌─────────────────────────────────────────────────┐
-│  TOPBAR (logo, busca global, notificações, user)│
-├──────────┬──────────────────────────────────────┤
-│          │                                      │
-│ SIDEBAR  │         CONTENT AREA                 │
-│ (menu)   │                                      │
-│          │  ┌──────────────────────────────┐    │
-│ Dashboard│  │  Page Header (título + ações) │    │
-│ Clientes │  ├──────────────────────────────┤    │
-│ Segurad. │  │                              │    │
-│ Apólices │  │  Page Content                │    │
-│ Propostas│  │  (tabelas, forms, cards...)  │    │
-│ Sinistros│  │                              │    │
-│ Endossos │  └──────────────────────────────┘    │
-│ Renov.   │                                      │
-│ CRM      │                                      │
-│ Relat.   │                                      │
-│ Usuários │                                      │
-│          │                                      │
-└──────────┴──────────────────────────────────────┘
-```
+### 5.2 Shells da Aplicação
 
-### 5.3 Templates Hierarchy
+O produto passa a ter três shells visuais:
 
-```
+| Shell | Uso |
+|---|---|
+| Public Shell | landing, planos, cadastro |
+| Tenant Shell | dashboard e módulos da corretora |
+| Django Admin | administração do SaaS |
+
+### 5.3 Diretrizes para a Landing Page
+
+- hero com CTA primário e secundário
+- cards de benefícios usando o padrão de cards do design system
+- badges semânticos para status de planos e recursos
+- seção de pricing em cards comparativos
+- FAQ em accordion
+- blocos com ênfase visual em IA, automação, insights e produtividade
+
+### 5.4 Hierarquia de Templates
+
+```text
 templates/
-├── base.html                    # Layout master (sidebar + topbar + content block)
-├── partials/
-│   ├── _sidebar.html            # Menu lateral
-│   ├── _topbar.html             # Barra superior
-│   ├── _pagination.html         # Paginação reutilizável
-│   ├── _messages.html           # Django messages (alerts)
-│   ├── _confirm_delete.html     # Modal de confirmação de exclusão
-│   └── _filters.html            # Componente de filtros genérico
+├── public/
+│   ├── base_public.html
+│   ├── landing.html
+│   ├── pricing.html
+│   ├── signup.html
+│   └── signup_success.html
 ├── accounts/
-│   ├── login.html
-│   ├── user_list.html
-│   ├── user_form.html
-│   ├── user_detail.html
-│   └── profile.html
 ├── clients/
-│   ├── client_list.html
-│   ├── client_form.html
-│   └── client_detail.html
 ├── insurers/
-│   ├── insurer_list.html
-│   ├── insurer_form.html
-│   └── insurer_detail.html
 ├── coverages/
-│   ├── insurance_type_list.html
-│   ├── coverage_list.html
-│   └── coverage_form.html
 ├── policies/
-│   ├── proposal_list.html
-│   ├── proposal_form.html
-│   ├── proposal_detail.html
-│   ├── policy_list.html
-│   ├── policy_form.html
-│   └── policy_detail.html
 ├── claims/
-│   ├── claim_list.html
-│   ├── claim_form.html
-│   └── claim_detail.html
 ├── endorsements/
-│   ├── endorsement_list.html
-│   ├── endorsement_form.html
-│   └── endorsement_detail.html
 ├── renewals/
-│   ├── renewal_list.html
-│   ├── renewal_form.html
-│   └── renewal_detail.html
 ├── crm/
-│   ├── deal_kanban.html
-│   ├── deal_list.html
-│   ├── deal_form.html
-│   ├── deal_detail.html
-│   └── pipeline_manage.html
 ├── reports/
-│   ├── report_index.html
-│   └── report_*.html           # Um template por relatório
 └── dashboard/
-    └── dashboard.html
 ```
+
+### 5.5 Navegação
+
+A navegação lateral da área autenticada deve passar a ser dinâmica:
+
+- mostrar apenas módulos liberados para a corretora
+- esconder relatórios, IA ou CRM se o plano não incluir esses módulos
+- manter a seção de usuários apenas para `admin` e `manager`
+- incluir acesso a assinatura e plano da corretora para `admin`
 
 ---
 
 ## 6. Integrações e Libs Externas
 
-| Lib/Recurso      | Propósito                                     | Versão        |
-|-------------------|----------------------------------------------|---------------|
-| Django            | Framework web                                | 6.0           |
-| Pillow            | Upload e processamento de imagens (avatares, logos) | latest  |
-| ReportLab ou WeasyPrint | Exportação de relatórios em PDF        | latest        |
-| ViaCEP            | Consulta de CEP para endereços (fetch JS)    | API pública   |
-| django-widget-tweaks | Customização de form widgets nos templates (opcional) | latest |
+| Recurso | Propósito |
+|---|---|
+| Django | Framework principal |
+| Pillow | Upload de avatares e logos |
+| xhtml2pdf / ReportLab | Exportação de relatórios |
+| ViaCEP | Consulta de endereço |
+| django-widget-tweaks | Ajustes de widgets |
+| Gateway de pagamento hospedado | Cobrança dos planos pagos |
 
-**TEMPLATES/FRONTEND:** Os templates e componentes do frontend devem respeitar rigorasamente o design system em @design_system/design-system.html.
+Observação: o gateway pode começar como integração futura plugável, mas o domínio de billing e os fluxos de assinatura devem nascer prontos para isso.
 
 ---
 
@@ -1161,43 +671,59 @@ templates/
 
 ### 7.1 Autenticação
 
-- Login obrigatório para todas as páginas (exceto login)
-- `LoginRequiredMixin` em todas as CBVs
-- Sessão com timeout configurável no settings
-- Proteção CSRF em todos os formulários (nativo Django)
+- login obrigatório para toda área autenticada
+- área pública acessível sem login
+- usuários inativos não acessam
+- corretoras inativas não acessam
+- corretoras em atraso seguem política definida pela plataforma
 
 ### 7.2 Autorização
 
-- Mixins customizados para controle de role:
+Os mixins atuais precisam evoluir para uma camada explícita de tenant.
 
 ```python
-# core/mixins.py
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.exceptions import PermissionDenied
 
-class AdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+
+class PlatformAdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.role == 'admin'
+        return self.request.user.is_platform_admin or self.request.user.is_superuser
 
 
-class ManagerRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
-    def test_func(self):
-        return self.request.user.role in ('admin', 'manager')
+class BrokerageRequiredMixin(LoginRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.brokerage_id:
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
 
 
-class BrokerFilterMixin:
-    """Filtra queryset para mostrar apenas dados do corretor logado (se broker)."""
+class BrokerageFilterMixin(BrokerageRequiredMixin):
+    brokerage_field = 'brokerage'
+
     def get_queryset(self):
-        qs = super().get_queryset()
-        if self.request.user.role == 'broker':
-            return qs.filter(broker=self.request.user)
+        qs = super().get_queryset().filter(**{
+            self.brokerage_field: self.request.user.brokerage
+        })
+        if getattr(self.request.user, 'role', None) == 'broker':
+            qs = qs.filter(broker=self.request.user)
         return qs
 ```
 
-### 7.3 Validações
+### 7.3 Regras Obrigatórias
 
-- CPF/CNPJ com validação de formato e dígitos verificadores (utils em `core/validators.py`)
-- Campos monetários com DecimalField (nunca FloatField)
-- Sanitização de inputs nos formulários
-- Proteção contra mass assignment via ModelForm `fields` explícitos
+- nenhum `get_object()` pode carregar objeto sem validar `brokerage`
+- nenhum formulário pode listar FKs de outra corretora
+- nenhuma exportação pode atravessar tenant
+- buscas globais devem filtrar primeiro por corretora
+- dashboards e IA devem respeitar módulos ativos e escopo do tenant
+
+### 7.4 Validações
+
+- CPF/CNPJ com validação de formato e dígitos
+- monetário sempre com `DecimalField`
+- `ModelForm.fields` explícitos
+- constraints compostas por corretora quando houver unicidade de negócio
 
 ---
 
@@ -1206,91 +732,195 @@ class BrokerFilterMixin:
 ### Fase 1 — Fundação (Semana 1-2)
 
 - [x] Setup do projeto Django
-- [x] Configuração de settings (static, media, templates, auth)
-- [x] App `utils` (TimeStampedModel, mixins, validators, templatetags)
-- [x] App `accounts` (Custom User, login por email, CRUD de usuários, permissões)
-- [x] Template base (`base.html`, sidebar, topbar, partials)
-- [x] Página de login funcional
+- [x] Configuração de settings
+- [x] App `utils`
+- [x] App `accounts`
+- [x] Layout base e login
 
 ### Fase 2 — Cadastros Base (Semana 3-4)
 
-- [x] App `clients` (CRUD completo, filtros, busca, integração ViaCEP)
-- [x] App `insurers` (CRUD completo, ramos)
-- [x] App `coverages` (tipos de seguro, coberturas, itens)
+- [x] App `clients`
+- [x] App `insurers`
+- [x] App `coverages`
 
 ### Fase 3 — Core do Negócio (Semana 5-7)
 
-- [x] App `policies` (propostas + apólices + coberturas contratadas + documentos)
+- [x] App `policies`
 - [x] Conversão de proposta em apólice
-- [x] App `claims` (sinistros + timeline + documentos)
-- [x] App `endorsements` (endossos + documentos + aplicação na apólice)
+- [x] App `claims`
+- [x] App `endorsements`
 
 ### Fase 4 — Operações Avançadas (Semana 8-9)
 
-- [x] App `renewals` (gestão de renovações + management command)
-- [x] App `crm` (pipeline, etapas, deals, atividades, kanban + grid)
-- [x] JavaScript do kanban (drag-and-drop, AJAX)
+- [x] App `renewals`
+- [x] App `crm`
+- [x] Kanban com drag-and-drop
 
 ### Fase 5 — Inteligência e Relatórios (Semana 10-11)
 
-- [x] App `dashboard` (KPIs, gráficos Chart.js, tabelas resumo)
-- [x] App `reports` (todos os 10 relatórios, filtros, exportação CSV/PDF)
+- [x] App `dashboard`
+- [x] App `reports`
 
 ### Fase 6 — Polish e Refinamento (Semana 12)
 
-- [x] Revisão geral de UI/UX conforme design system
-- [x] Ajustes de responsividade
-- [x] Seed data para demonstração
-- [x] Validações finais de permissões
+- [x] Revisão geral de UI/UX
+- [x] Responsividade
+- [x] Seed demo
+- [x] Validações finais das permissões atuais
+
+### Fase 7 — SaaS Multi-Tenant, Landing Page e Billing
+
+- [ ] Criar apps `public_pages`, `brokerages` e `billing`
+- [ ] Adicionar modelagem de corretora, módulos, planos, assinaturas e pagamentos
+- [ ] Adaptar `accounts.User` para vínculo com corretora e papel de admin da plataforma
+- [ ] Migrar todas as apps operacionais para `brokerage_id`
+- [ ] Trocar o isolamento atual por corretor para isolamento primário por corretora
+- [ ] Implementar landing page, pricing e signup público
+- [ ] Implementar criação de conta com cadastro da corretora e escolha de plano
+- [ ] Ativar plano free sem cartão
+- [ ] Implementar administração sistêmica de corretoras, planos, pagamentos e módulos no Django Admin
+- [ ] Atualizar navegação e templates para módulos por plano/corretora
+- [ ] Revisar dashboard, relatórios, IA, exportações e busca global para escopo multi-tenant
+
+### Plano de Ação — Fase 7
+
+#### 8.1 Modelagem e Banco
+
+- criar `brokerages.Brokerage`
+- criar `brokerages.SystemModule`
+- criar `brokerages.BrokerageModule`
+- criar `billing.Plan`
+- criar `billing.PlanModule`
+- criar `billing.Subscription`
+- criar `billing.PaymentRecord`
+- adicionar `brokerage` e `is_platform_admin` em `accounts.User`
+- adicionar `brokerage` em todos os models operacionais
+- trocar unicidades globais por unicidades compostas com `brokerage`
+
+#### 8.2 Apps Novas
+
+- `public_pages`: landing, planos, cadastro e ativação
+- `brokerages`: corretoras, módulos, contexto do tenant
+- `billing`: planos, assinaturas, pagamentos
+
+#### 8.3 Apps Existentes a Alterar
+
+- `accounts`: onboarding, papéis, filtro por corretora, gestão de usuários da própria corretora
+- `clients`: `brokerage`, filtros, exportação, `broker` limitado à corretora
+- `insurers`: `brokerage`, unicidade por corretora
+- `coverages`: catálogo por corretora
+- `policies`: `brokerage` em propostas, apólices, coberturas e documentos
+- `claims`: `brokerage` em sinistros, documentos e timeline
+- `endorsements`: `brokerage` em endossos e documentos
+- `renewals`: `brokerage` e filtros completos por tenant
+- `crm`: pipelines, etapas, negociações e atividades por corretora
+- `dashboard`: KPIs e gráficos filtrados por corretora
+- `reports`: CSV/PDF filtrados por corretora
+- `ai_agent`: sessões, mensagens e insights com escopo de corretora
+- `utils`: novos mixins, helpers e validators de tenant
+- `core`: middleware, context processors, settings e urls
+- `admin.py` das apps novas e existentes: registro e configuração do Django Admin para gestão sistêmica
+
+#### 8.4 Permissões e Middleware
+
+- criar `PlatformAdminRequiredMixin`
+- criar `BrokerageRequiredMixin`
+- substituir `BrokerFilterMixin` por mixin que filtra primeiro por corretora
+- adicionar middleware ou helper central para contexto da corretora
+- bloquear acesso quando corretora estiver inativa
+- controlar disponibilidade por módulo habilitado
+
+#### 8.5 UI e Templates
+
+- criar `base_public.html`
+- revisar `base.html`, `_sidebar.html` e `_topbar.html`
+- incluir menu de assinatura/plano para admin da corretora
+- esconder itens da sidebar por módulo ativo
+- implementar landing page e pricing no padrão do design system
+- não criar backoffice customizado para a plataforma nesta fase; usar Django Admin
+
+#### 8.6 Billing e Operação SaaS
+
+- exibir planos por preço por usuário
+- calcular usuários ativos da corretora para cobrança
+- permitir free plan sem cartão
+- registrar pagamentos e refletir em `Subscription.status`
+- permitir ao admin da plataforma ativar, bloquear ou marcar inadimplência
+
+#### 8.7 Estratégia de Migração
+
+- como o banco atual e as migrations refletem uma modelagem single-tenant, a estratégia recomendada para a Fase 7 é reinicializar a base estrutural se ainda não houver dados de produção
+- opção recomendada: remover migrations antigas das apps de domínio, preservar apenas `__init__.py`, apagar `db.sqlite3`, gerar novas migrations com a modelagem multi-tenant e reaplicar seed
+- se houver dados relevantes a preservar, criar scripts de migração assistida antes de resetar
+
+#### 8.8 Critérios de Aceite
+
+- uma corretora não consegue visualizar ou exportar dados de outra
+- o plano free ativa acesso sem cartão
+- a landing page converte para signup
+- o admin da plataforma consegue administrar corretoras, planos, pagamentos e módulos
+- relatórios, dashboard e IA retornam apenas dados da corretora atual
 
 ---
 
 ## 9. Configurações do Projeto
 
-### 9.1 settings.py — Pontos Relevantes
+### 9.1 `settings.py` — Pontos Relevantes
 
 ```python
-# scs/settings.py
-
 AUTH_USER_MODEL = 'accounts.User'
 
 AUTHENTICATION_BACKENDS = [
     'accounts.backends.EmailBackend',
 ]
 
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+INSTALLED_APPS = [
+    # Django
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    # third-party
+    'widget_tweaks',
+    # local
+    'utils',
+    'public_pages',
+    'brokerages',
+    'billing',
+    'accounts',
+    'clients',
+    'insurers',
+    'coverages',
+    'policies',
+    'claims',
+    'endorsements',
+    'renewals',
+    'crm',
+    'dashboard',
+    'reports',
+    'ai_agent',
+]
 
-LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/Sao_Paulo'
-USE_I18N = True
-USE_TZ = True
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'brokerages.middleware.BrokerageContextMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
 ```
 
 ### 9.2 URLs Raiz
 
 ```python
-# scs/urls.py
-
-from django.contrib import admin
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('', include('public_pages.urls')),
     path('accounts/', include('accounts.urls')),
-    path('dashboard/', include('dashboard.urls')),
     path('clients/', include('clients.urls')),
     path('insurers/', include('insurers.urls')),
     path('coverages/', include('coverages.urls')),
@@ -1299,50 +929,49 @@ urlpatterns = [
     path('endorsements/', include('endorsements.urls')),
     path('renewals/', include('renewals.urls')),
     path('crm/', include('crm.urls')),
+    path('dashboard/', include('dashboard.urls')),
     path('reports/', include('reports.urls')),
+    path('ai/', include('ai_agent.urls')),
+    path('admin/', admin.site.urls),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
 
-### 9.3 requirements.txt
+### 9.3 Dependências
 
-```
+```text
 Django==6.0
 Pillow>=10.0
 django-widget-tweaks>=1.5
 reportlab>=4.0
+xhtml2pdf>=0.2
 ```
 
 ---
 
-## 10. Glossário do Domínio
+## 10. Glossário
 
-| Termo              | Definição                                                                 |
-|--------------------|---------------------------------------------------------------------------|
-| **Apólice**        | Contrato de seguro emitido pela seguradora ao segurado                    |
-| **Proposta**       | Documento de solicitação de seguro enviado à seguradora para análise      |
-| **Prêmio**         | Valor pago pelo segurado à seguradora pela cobertura do risco             |
-| **Sinistro**       | Evento coberto pelo seguro que gera direito à indenização                 |
-| **Endosso**        | Documento que altera as condições da apólice durante sua vigência         |
-| **Franquia**       | Valor que o segurado paga em caso de sinistro antes da indenização        |
-| **Importância Segurada** | Valor máximo de cobertura contratado na apólice                     |
-| **Comissão**       | Percentual/valor que o corretor recebe pela intermediação do seguro       |
-| **Vigência**       | Período de validade da apólice (data início a data fim)                   |
-| **Cobertura**      | Risco específico coberto pelo seguro                                      |
-| **Renovação**      | Processo de emissão de nova apólice ao término da vigência da anterior    |
-| **SUSEP**          | Superintendência de Seguros Privados — órgão regulador                    |
-| **Sinistralidade** | Relação entre sinistros pagos e prêmios recebidos (loss ratio)            |
-| **Corretor**       | Profissional habilitado pela SUSEP para intermediar seguros               |
+| Termo | Definição |
+|---|---|
+| Tenant | Corretora cliente do SaaS |
+| Corretora | Organização usuária do sistema |
+| Plano | Oferta comercial do SaaS |
+| Assinatura | Contratação ativa de um plano por uma corretora |
+| Módulo | Parte funcional habilitável do produto |
+| Admin da Plataforma | Usuário interno que administra o SaaS |
+| Admin da Corretora | Usuário administrador dentro do tenant |
+| Apólice | Contrato de seguro emitido |
+| Proposta | Solicitação enviada à seguradora |
+| Sinistro | Evento coberto com pedido de indenização |
+| Endosso | Alteração contratual na apólice |
+| Renovação | Nova emissão ao fim da vigência |
 
 ---
 
 ## 11. Observações Finais
 
-- O projeto prioriza simplicidade e pragmatismo — usar o máximo possível dos recursos nativos do Django antes de recorrer a libs externas.
-- O SQLite é suficiente para operações de uma corretora de pequeno a médio porte. Caso o volume cresça significativamente, a migração para PostgreSQL é trivial com Django.
-- O design system é a fonte de verdade para toda decisão visual — nenhum componente deve ser criado sem referência ao `design-system.html`.
-- Signals devem ser usados com parcimônia e sempre documentados, mantidos em `signals.py` da app correspondente e registrados no `apps.py` via `ready()`.
-- Todo model registrado no Django Admin para facilitar debug e gestão emergencial.
-- O ambiente virtual do projeto é .venv e deve ser sempre utilizado.
+- O estado atual do código é funcional para uma corretora por vez, mas ainda não atende SaaS multi-tenant real.
+- A Fase 7 deve ser tratada como uma refatoração estrutural, não como ajuste cosmético.
+- O caminho mais pragmático é shared database com `brokerage_id` obrigatório em todo o domínio.
+- Para evitar conflito de migrations e inconsistência da modelagem antiga, é aceitável resetar migrations e `db.sqlite3` durante a transição, desde que ainda não existam dados de produção.
+- Para produção SaaS, PostgreSQL é a meta técnica recomendada, mesmo que o projeto continue com SQLite no ciclo local e na refatoração inicial.
+- O design system continua sendo a fonte de verdade visual, inclusive para landing page, pricing e área administrativa da plataforma.

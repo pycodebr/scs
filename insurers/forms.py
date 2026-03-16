@@ -1,9 +1,11 @@
 from django import forms
 
+from utils.forms import BrokerageScopedFormMixin
+
 from .models import Insurer, InsurerBranch
 
 
-class InsurerForm(forms.ModelForm):
+class InsurerForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = Insurer
         fields = [
@@ -37,7 +39,7 @@ class InsurerForm(forms.ModelForm):
         }
 
 
-class InsurerBranchForm(forms.ModelForm):
+class InsurerBranchForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = InsurerBranch
         fields = ['name', 'susep_branch_code', 'is_active']

@@ -1,9 +1,11 @@
 from django import forms
 
+from utils.forms import BrokerageScopedFormMixin
+
 from .models import Renewal
 
 
-class RenewalForm(forms.ModelForm):
+class RenewalForm(BrokerageScopedFormMixin, forms.ModelForm):
     class Meta:
         model = Renewal
         fields = [
@@ -23,9 +25,6 @@ class RenewalForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        self.fields['broker'].queryset = User.objects.filter(is_active=True)
 
 
 class RenewalRenewForm(forms.Form):

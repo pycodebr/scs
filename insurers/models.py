@@ -1,16 +1,15 @@
 from django.db import models
 
-from utils.models import TimeStampedModel
+from utils.models import BrokerageScopedModel
 from utils.validators import validate_cnpj
 from clients.models import UF_CHOICES
 
 
-class Insurer(TimeStampedModel):
+class Insurer(BrokerageScopedModel):
     name = models.CharField('Nome', max_length=255)
     cnpj = models.CharField(
         'CNPJ',
         max_length=18,
-        unique=True,
         validators=[validate_cnpj],
     )
     susep_code = models.CharField('Codigo SUSEP', max_length=20, blank=True)
@@ -35,6 +34,12 @@ class Insurer(TimeStampedModel):
         verbose_name = 'Seguradora'
         verbose_name_plural = 'Seguradoras'
         ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['brokerage', 'cnpj'],
+                name='unique_insurer_cnpj_per_brokerage',
+            ),
+        ]
 
     def __str__(self):
         return self.name
@@ -46,7 +51,7 @@ class Insurer(TimeStampedModel):
         return self.name[:2].upper()
 
 
-class InsurerBranch(TimeStampedModel):
+class InsurerBranch(BrokerageScopedModel):
     insurer = models.ForeignKey(
         Insurer,
         on_delete=models.CASCADE,
@@ -61,7 +66,17 @@ class InsurerBranch(TimeStampedModel):
         verbose_name = 'Ramo'
         verbose_name_plural = 'Ramos'
         ordering = ['name']
-        unique_together = ['insurer', 'name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['brokerage', 'insurer', 'name'],
+                name='unique_branch_per_brokerage',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.insurer.name} - {self.name}'
+
+    def save(self, *args, **kwargs):
+        if self.insurer_id and not self.brokerage_id:
+            self.brokerage = self.insurer.brokerage
+        super().save(*args, **kwargs)

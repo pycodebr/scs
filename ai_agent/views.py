@@ -9,26 +9,37 @@ from django.views import View
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic import TemplateView
 
+from utils.mixins import ModuleRequiredMixin
+
 from .models import ChatSession, ChatMessage, EntitySummary
 
 logger = logging.getLogger(__name__)
 
 
-class ChatView(LoginRequiredMixin, TemplateView):
+class ChatView(ModuleRequiredMixin, TemplateView):
     """Tela principal do chat com o agente de IA."""
     template_name = 'ai_agent/chat.html'
+    required_module = 'ai_agent'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         user = self.request.user
 
         # Listar sessoes do usuario
-        ctx['sessions'] = ChatSession.objects.filter(user=user)[:30]
+        ctx['sessions'] = ChatSession.objects.filter(
+            user=user,
+            brokerage=user.brokerage,
+        )[:30]
 
         # Sessao ativa (se passada via URL)
         session_id = self.kwargs.get('session_id')
         if session_id:
-            session = get_object_or_404(ChatSession, pk=session_id, user=user)
+            session = get_object_or_404(
+                ChatSession,
+                pk=session_id,
+                user=user,
+                brokerage=user.brokerage,
+            )
             ctx['active_session'] = session
             ctx['chat_messages'] = session.messages.all()
         else:
@@ -38,12 +49,14 @@ class ChatView(LoginRequiredMixin, TemplateView):
         return ctx
 
 
-class ChatCreateSessionView(LoginRequiredMixin, View):
+class ChatCreateSessionView(ModuleRequiredMixin, View):
     """Cria nova sessao de chat."""
+    required_module = 'ai_agent'
 
     def post(self, request):
         session = ChatSession.objects.create(
             user=request.user,
+            brokerage=request.user.brokerage,
             title='Novo Chat',
         )
         return JsonResponse({
@@ -52,8 +65,9 @@ class ChatCreateSessionView(LoginRequiredMixin, View):
         })
 
 
-class ChatSendMessageView(LoginRequiredMixin, View):
+class ChatSendMessageView(ModuleRequiredMixin, View):
     """Recebe mensagem do usuario e retorna resposta do agente."""
+    required_module = 'ai_agent'
 
     def post(self, request):
         try:
@@ -71,10 +85,16 @@ class ChatSendMessageView(LoginRequiredMixin, View):
 
         # Obter ou criar sessao
         if session_id:
-            session = get_object_or_404(ChatSession, pk=session_id, user=user)
+            session = get_object_or_404(
+                ChatSession,
+                pk=session_id,
+                user=user,
+                brokerage=user.brokerage,
+            )
         else:
             session = ChatSession.objects.create(
                 user=user,
+                brokerage=user.brokerage,
                 title=message[:60] + ('...' if len(message) > 60 else ''),
             )
 
@@ -86,6 +106,7 @@ class ChatSendMessageView(LoginRequiredMixin, View):
         # Salvar mensagem do usuario
         ChatMessage.objects.create(
             session=session,
+            brokerage=user.brokerage,
             role=ChatMessage.Role.USER,
             content=message,
         )
@@ -108,6 +129,7 @@ class ChatSendMessageView(LoginRequiredMixin, View):
         # Salvar resposta do agente
         ChatMessage.objects.create(
             session=session,
+            brokerage=user.brokerage,
             role=ChatMessage.Role.ASSISTANT,
             content=response_text,
         )
@@ -119,17 +141,24 @@ class ChatSendMessageView(LoginRequiredMixin, View):
         })
 
 
-class ChatDeleteSessionView(LoginRequiredMixin, View):
+class ChatDeleteSessionView(ModuleRequiredMixin, View):
     """Exclui uma sessao de chat."""
+    required_module = 'ai_agent'
 
     def post(self, request, session_id):
-        session = get_object_or_404(ChatSession, pk=session_id, user=request.user)
+        session = get_object_or_404(
+            ChatSession,
+            pk=session_id,
+            user=request.user,
+            brokerage=request.user.brokerage,
+        )
         session.delete()
         return JsonResponse({'ok': True})
 
 
-class AISummaryView(LoginRequiredMixin, View):
+class AISummaryView(ModuleRequiredMixin, View):
     """Gera resumo de uma entidade com IA."""
+    required_module = 'ai_agent'
 
     def post(self, request):
         try:
@@ -149,6 +178,7 @@ class AISummaryView(LoginRequiredMixin, View):
         summary = generate_entity_summary(request.user, entity_type, int(entity_id))
 
         EntitySummary.objects.create(
+            brokerage=request.user.brokerage,
             entity_type=entity_type,
             entity_id=int(entity_id),
             user=request.user,

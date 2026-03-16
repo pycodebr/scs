@@ -1,6 +1,22 @@
 from django import forms
 
 
+def get_broker_choices_for_user(user):
+    from django.contrib.auth import get_user_model
+
+    if user.role == 'admin':
+        User = get_user_model()
+        return [('', 'Todos')] + [
+            (u.pk, u.get_full_name()) for u in User.objects.filter(
+                is_active=True,
+                is_platform_admin=False,
+                brokerage=user.brokerage,
+            )
+        ]
+
+    return [(user.pk, user.get_full_name() or user.email)]
+
+
 class DateRangeForm(forms.Form):
     start_date = forms.DateField(
         label='Data Inicio',
@@ -23,15 +39,17 @@ class ProductionFilterForm(DateRangeForm):
     )
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
-        from django.contrib.auth import get_user_model
         from insurers.models import Insurer
-        User = get_user_model()
-        self.fields['broker'].choices = [('', 'Todos')] + [
-            (u.pk, u.get_full_name()) for u in User.objects.filter(is_active=True)
-        ]
+        self.fields['broker'].choices = get_broker_choices_for_user(user)
+        if user.role != 'admin':
+            self.fields['broker'].initial = user.pk
         self.fields['insurer'].choices = [('', 'Todas')] + [
-            (i.pk, i.name) for i in Insurer.objects.filter(is_active=True)
+            (i.pk, i.name) for i in Insurer.objects.filter(
+                is_active=True,
+                brokerage=user.brokerage,
+            )
         ]
 
 
@@ -42,12 +60,11 @@ class CommissionFilterForm(DateRangeForm):
     )
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        self.fields['broker'].choices = [('', 'Todos')] + [
-            (u.pk, u.get_full_name()) for u in User.objects.filter(is_active=True)
-        ]
+        self.fields['broker'].choices = get_broker_choices_for_user(user)
+        if user.role != 'admin':
+            self.fields['broker'].initial = user.pk
 
 
 class InsurerPortfolioFilterForm(DateRangeForm):
@@ -57,6 +74,7 @@ class InsurerPortfolioFilterForm(DateRangeForm):
     )
 
     def __init__(self, *args, **kwargs):
+        kwargs.pop('user')
         super().__init__(*args, **kwargs)
         from policies.models import PolicyStatus
         self.fields['status'].choices = [('', 'Todos')] + list(PolicyStatus.choices)
@@ -69,10 +87,14 @@ class InsuranceTypePortfolioFilterForm(DateRangeForm):
     )
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
         from insurers.models import Insurer
         self.fields['insurer'].choices = [('', 'Todas')] + [
-            (i.pk, i.name) for i in Insurer.objects.filter(is_active=True)
+            (i.pk, i.name) for i in Insurer.objects.filter(
+                is_active=True,
+                brokerage=user.brokerage,
+            )
         ]
 
 
@@ -87,12 +109,16 @@ class ClaimsFilterForm(DateRangeForm):
     )
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
         from claims.models import ClaimStatus
         from insurers.models import Insurer
         self.fields['status'].choices = [('', 'Todos')] + list(ClaimStatus.choices)
         self.fields['insurer'].choices = [('', 'Todas')] + [
-            (i.pk, i.name) for i in Insurer.objects.filter(is_active=True)
+            (i.pk, i.name) for i in Insurer.objects.filter(
+                is_active=True,
+                brokerage=user.brokerage,
+            )
         ]
 
 
@@ -103,10 +129,14 @@ class LossRatioFilterForm(DateRangeForm):
     )
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
         from insurers.models import Insurer
         self.fields['insurer'].choices = [('', 'Todas')] + [
-            (i.pk, i.name) for i in Insurer.objects.filter(is_active=True)
+            (i.pk, i.name) for i in Insurer.objects.filter(
+                is_active=True,
+                brokerage=user.brokerage,
+            )
         ]
 
 
@@ -117,12 +147,11 @@ class RenewalFilterForm(DateRangeForm):
     )
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        self.fields['broker'].choices = [('', 'Todos')] + [
-            (u.pk, u.get_full_name()) for u in User.objects.filter(is_active=True)
-        ]
+        self.fields['broker'].choices = get_broker_choices_for_user(user)
+        if user.role != 'admin':
+            self.fields['broker'].initial = user.pk
 
 
 class ClientsByBrokerFilterForm(forms.Form):
@@ -137,12 +166,11 @@ class ClientsByBrokerFilterForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        self.fields['broker'].choices = [('', 'Todos')] + [
-            (u.pk, u.get_full_name()) for u in User.objects.filter(is_active=True)
-        ]
+        self.fields['broker'].choices = get_broker_choices_for_user(user)
+        if user.role != 'admin':
+            self.fields['broker'].initial = user.pk
 
 
 class CRMFunnelFilterForm(DateRangeForm):
@@ -156,15 +184,17 @@ class CRMFunnelFilterForm(DateRangeForm):
     )
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
-        from django.contrib.auth import get_user_model
         from crm.models import Pipeline
-        User = get_user_model()
-        self.fields['broker'].choices = [('', 'Todos')] + [
-            (u.pk, u.get_full_name()) for u in User.objects.filter(is_active=True)
-        ]
+        self.fields['broker'].choices = get_broker_choices_for_user(user)
+        if user.role != 'admin':
+            self.fields['broker'].initial = user.pk
         self.fields['pipeline'].choices = [('', 'Todos')] + [
-            (p.pk, p.name) for p in Pipeline.objects.filter(is_active=True)
+            (p.pk, p.name) for p in Pipeline.objects.filter(
+                is_active=True,
+                brokerage=user.brokerage,
+            )
         ]
 
 
@@ -175,6 +205,7 @@ class EndorsementFilterForm(DateRangeForm):
     )
 
     def __init__(self, *args, **kwargs):
+        kwargs.pop('user')
         super().__init__(*args, **kwargs)
         from endorsements.models import EndorsementType
         self.fields['endorsement_type'].choices = [('', 'Todos')] + list(EndorsementType.choices)

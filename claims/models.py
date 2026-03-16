@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from utils.models import TimeStampedModel
+from utils.models import BrokerageScopedModel
 
 
 class ClaimStatus(models.TextChoices):
@@ -23,8 +23,8 @@ class ClaimDocumentType(models.TextChoices):
     OTHER = 'other', 'Outros'
 
 
-class Claim(TimeStampedModel):
-    claim_number = models.CharField('Numero do Sinistro', max_length=50, unique=True)
+class Claim(BrokerageScopedModel):
+    claim_number = models.CharField('Numero do Sinistro', max_length=50)
     policy = models.ForeignKey(
         'policies.Policy', on_delete=models.PROTECT,
         related_name='claims', verbose_name='Apolice',
@@ -58,12 +58,23 @@ class Claim(TimeStampedModel):
         verbose_name = 'Sinistro'
         verbose_name_plural = 'Sinistros'
         ordering = ['-occurrence_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['brokerage', 'claim_number'],
+                name='unique_claim_number_per_brokerage',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.claim_number} - {self.client.name}'
 
+    def save(self, *args, **kwargs):
+        if self.policy_id and not self.brokerage_id:
+            self.brokerage = self.policy.brokerage
+        super().save(*args, **kwargs)
 
-class ClaimDocument(TimeStampedModel):
+
+class ClaimDocument(BrokerageScopedModel):
     claim = models.ForeignKey(
         Claim, on_delete=models.CASCADE,
         related_name='documents', verbose_name='Sinistro',
@@ -87,8 +98,13 @@ class ClaimDocument(TimeStampedModel):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        if self.claim_id and not self.brokerage_id:
+            self.brokerage = self.claim.brokerage
+        super().save(*args, **kwargs)
 
-class ClaimTimeline(TimeStampedModel):
+
+class ClaimTimeline(BrokerageScopedModel):
     claim = models.ForeignKey(
         Claim, on_delete=models.CASCADE,
         related_name='timeline', verbose_name='Sinistro',
@@ -109,3 +125,8 @@ class ClaimTimeline(TimeStampedModel):
 
     def __str__(self):
         return f'{self.claim.claim_number} - {self.action}'
+
+    def save(self, *args, **kwargs):
+        if self.claim_id and not self.brokerage_id:
+            self.brokerage = self.claim.brokerage
+        super().save(*args, **kwargs)

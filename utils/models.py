@@ -7,3 +7,14 @@ class TimeStampedModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class BrokerageScopedModel(TimeStampedModel):
+    brokerage = models.ForeignKey(
+        'brokerages.Brokerage',
+        on_delete=models.PROTECT,
+        verbose_name='Corretora',
+    )
+
+    class Meta:
+        abstract = True

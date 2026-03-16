@@ -24,6 +24,9 @@ INSTALLED_APPS = [
     'widget_tweaks',
     # Local apps
     'utils',
+    'brokerages',
+    'billing',
+    'public_pages',
     'accounts',
     'clients',
     'insurers',
@@ -44,6 +47,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'brokerages.middleware.BrokerageContextMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -60,6 +64,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'brokerages.context_processors.brokerage_context',
             ],
         },
     },
@@ -90,7 +95,7 @@ AUTHENTICATION_BACKENDS = [
 
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+LOGOUT_REDIRECT_URL = '/'
 
 # i18n
 LANGUAGE_CODE = 'pt-br'

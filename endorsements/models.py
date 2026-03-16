@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from utils.models import TimeStampedModel
+from utils.models import BrokerageScopedModel
 
 
 class EndorsementType(models.TextChoices):
@@ -21,8 +21,8 @@ class EndorsementStatus(models.TextChoices):
     APPLIED = 'applied', 'Aplicado'
 
 
-class Endorsement(TimeStampedModel):
-    endorsement_number = models.CharField('Numero do Endosso', max_length=50, unique=True)
+class Endorsement(BrokerageScopedModel):
+    endorsement_number = models.CharField('Numero do Endosso', max_length=50)
     policy = models.ForeignKey(
         'policies.Policy', on_delete=models.PROTECT,
         related_name='endorsements', verbose_name='Apolice',
@@ -51,12 +51,23 @@ class Endorsement(TimeStampedModel):
         verbose_name = 'Endosso'
         verbose_name_plural = 'Endossos'
         ordering = ['-request_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['brokerage', 'endorsement_number'],
+                name='unique_endorsement_number_per_brokerage',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.endorsement_number} - {self.policy.policy_number}'
 
+    def save(self, *args, **kwargs):
+        if self.policy_id and not self.brokerage_id:
+            self.brokerage = self.policy.brokerage
+        super().save(*args, **kwargs)
 
-class EndorsementDocument(TimeStampedModel):
+
+class EndorsementDocument(BrokerageScopedModel):
     endorsement = models.ForeignKey(
         Endorsement, on_delete=models.CASCADE,
         related_name='documents', verbose_name='Endosso',
@@ -75,3 +86,8 @@ class EndorsementDocument(TimeStampedModel):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.endorsement_id and not self.brokerage_id:
+            self.brokerage = self.endorsement.brokerage
+        super().save(*args, **kwargs)

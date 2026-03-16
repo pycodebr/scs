@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.db import models
 
-from utils.models import TimeStampedModel
+from utils.models import BrokerageScopedModel
 
 
-class Pipeline(TimeStampedModel):
+class Pipeline(BrokerageScopedModel):
     name = models.CharField('Nome', max_length=100)
     is_default = models.BooleanField('Pipeline Padrao', default=False)
     is_active = models.BooleanField('Ativo', default=True)
@@ -13,17 +13,26 @@ class Pipeline(TimeStampedModel):
         verbose_name = 'Pipeline'
         verbose_name_plural = 'Pipelines'
         ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['brokerage', 'name'],
+                name='unique_pipeline_name_per_brokerage',
+            ),
+        ]
 
     def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
         if self.is_default:
-            Pipeline.objects.filter(is_default=True).exclude(pk=self.pk).update(is_default=False)
+            Pipeline.objects.filter(
+                brokerage=self.brokerage,
+                is_default=True,
+            ).exclude(pk=self.pk).update(is_default=False)
         super().save(*args, **kwargs)
 
 
-class PipelineStage(TimeStampedModel):
+class PipelineStage(BrokerageScopedModel):
     pipeline = models.ForeignKey(
         Pipeline, on_delete=models.CASCADE,
         related_name='stages', verbose_name='Pipeline',
@@ -38,9 +47,20 @@ class PipelineStage(TimeStampedModel):
         verbose_name = 'Etapa do Pipeline'
         verbose_name_plural = 'Etapas do Pipeline'
         ordering = ['pipeline', 'order']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['brokerage', 'pipeline', 'name'],
+                name='unique_pipeline_stage_per_brokerage',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.pipeline.name} - {self.name}'
+
+    def save(self, *args, **kwargs):
+        if self.pipeline_id and not self.brokerage_id:
+            self.brokerage = self.pipeline.brokerage
+        super().save(*args, **kwargs)
 
 
 class DealPriority(models.TextChoices):
@@ -60,7 +80,7 @@ class DealSource(models.TextChoices):
     OTHER = 'other', 'Outro'
 
 
-class Deal(TimeStampedModel):
+class Deal(BrokerageScopedModel):
     title = models.CharField('Titulo', max_length=200)
     client = models.ForeignKey(
         'clients.Client', on_delete=models.PROTECT,
@@ -123,6 +143,13 @@ class Deal(TimeStampedModel):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        if self.client_id and not self.brokerage_id:
+            self.brokerage = self.client.brokerage
+        if self.pipeline_id and not self.brokerage_id:
+            self.brokerage = self.pipeline.brokerage
+        super().save(*args, **kwargs)
+
 
 class ActivityType(models.TextChoices):
     NOTE = 'note', 'Nota'
@@ -132,7 +159,7 @@ class ActivityType(models.TextChoices):
     TASK = 'task', 'Tarefa'
 
 
-class DealActivity(TimeStampedModel):
+class DealActivity(BrokerageScopedModel):
     deal = models.ForeignKey(
         Deal, on_delete=models.CASCADE,
         related_name='activities', verbose_name='Negociacao',
@@ -157,3 +184,8 @@ class DealActivity(TimeStampedModel):
 
     def __str__(self):
         return f'{self.get_activity_type_display()}: {self.title}'
+
+    def save(self, *args, **kwargs):
+        if self.deal_id and not self.brokerage_id:
+            self.brokerage = self.deal.brokerage
+        super().save(*args, **kwargs)
